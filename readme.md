@@ -21,11 +21,12 @@ A Vulkan games engine by Sckzor
 ### 2nd Priority
 
 - [ ] Networking support
+- [ ] Video support for cut scenes and similar
 
 ### 3rd Priority
 
 - [ ] DLSS support, if I can convince NVidia to give me the development materials
-- [ ] Video support for cut scenes and similar
+- [ ] Support for other platorms
 
 ## Image of the Engine in action
 
