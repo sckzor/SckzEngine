@@ -127,6 +127,10 @@ namespace sckz {
         void CreateDescriptorPool  ();
         void CreateSyncObjects     ();
 
+    private:
+        void RebuildSwapChain      ();
+        void DestroySwapResources  ();
+
     private: // Private destruction functions
         void DestroyInstance             ();
         void DestroyDebugMessenger       ();
