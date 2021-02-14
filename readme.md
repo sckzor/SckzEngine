@@ -2,7 +2,9 @@
 
 A Vulkan games engine by Sckzor
 
-## Required
+## Progress on the engine
+
+### Required
 
 - [x] Basic Vulkan creation and initialization
 - [x] Proper makefile
@@ -16,14 +18,15 @@ A Vulkan games engine by Sckzor
 - [ ] Ray Tracing
 - [ ] Animation
 
-## 2nd Priority
+### 2nd Priority
 
 - [ ] Networking support
 
-## 3rd Priority
+### 3rd Priority
 
-- [ ] 
+- [ ] DLSS support, if I can convince NVidia to give me the development materials
+- [ ] Video support for cut scenes and similar
 
-## Dumb, but I might add it eventually
+## Image of the Engine in action
 
-- [ ] 
+![Screenshot](Screenshot.png)
