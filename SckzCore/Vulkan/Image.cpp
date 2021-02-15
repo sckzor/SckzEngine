@@ -12,6 +12,7 @@ namespace sckz {
         this->queue     = &queue;
         this->mipLevels = mipLevels;
         this->sampler   = VK_NULL_HANDLE;
+        holdsRealImage  = true;
         
         VkImageCreateInfo imageInfo{};
         imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -52,7 +53,8 @@ namespace sckz {
         this->image     =   image;
         this->format    =   format;
         this->mipLevels =   mipLevels;
-        this->sampler   = VK_NULL_HANDLE;
+        this->sampler   =   VK_NULL_HANDLE;
+        holdsRealImage  =   false;
     }
 
     void Image::CreateImageView(VkImageAspectFlags aspectFlags) {
@@ -105,12 +107,10 @@ namespace sckz {
     void Image::DestroyImage() {
         vkDestroyImageView(*device, imageView, nullptr);
         vkDestroySampler(*device, sampler, nullptr);
-        vkDestroyImage(*device, image, nullptr);
-        vkFreeMemory(*device, imageMemory, nullptr);
-    }
-
-    void Image::DestroyImage2() {
-        vkDestroyImageView(*device, imageView, nullptr);
+        if(holdsRealImage){
+            vkDestroyImage(*device, image, nullptr);
+            vkFreeMemory(*device, imageMemory, nullptr);
+        }
     }
 
 

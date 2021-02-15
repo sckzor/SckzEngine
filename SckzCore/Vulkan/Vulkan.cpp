@@ -613,7 +613,7 @@ namespace sckz {
 
     void Vulkan::DestroyImageViews() {
         for (auto image : swapChainImages) {
-            image.DestroyImage2();
+            image.DestroyImage();
         }
     }
 
@@ -696,7 +696,7 @@ namespace sckz {
         CreateCommandBuffers();
     }
 
-    void Vulkan::DestroySwapResources() { // Destroy
+    void Vulkan::DestroySwapResources() {
         vkDeviceWaitIdle(device);
 
         depthImage.DestroyImage();
