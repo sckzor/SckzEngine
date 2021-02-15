@@ -54,6 +54,11 @@ namespace sckz {
 
         void Update                 (uint32_t                     currentImage);
 
+        void DestroySwapResources   ();
+        void CreateSwapResources    (Pipeline                   & pipeline,
+                                     VkDescriptorPool           & descriptorPool,
+                                     VkExtent2D                   swapChainExtent);
+
     public:
         void LoadModel              ();
         void CreateVertexBuffer     ();

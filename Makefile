@@ -3,7 +3,10 @@ LDFLAGS = -lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
 VK_PATH = SckzCore/Vulkan
 INCLUDE = SckzCore/Include.hpp
 
-all: SckzEngine
+all:
+	make real_all -j16
+
+real_all: SckzEngine
 
 SckzEngine: SckzCore/SckzEngine.cpp build/SckzCore.a SckzCore/Window/Window.hpp $(VK_PATH)/Vulkan.hpp $(INCLUDE)
 	g++ $(CFLAGS) SckzCore/SckzEngine.cpp build/SckzCore.a -o SckzEngine $(LDFLAGS)
@@ -37,6 +40,9 @@ build/Window.o:SckzCore/Window/Window.cpp SckzCore/Window/Window.hpp $(INCLUDE)
 
 test: SckzEngine
 	./SckzEngine
+
+debug: SckzEngine
+	gdb SckzEngine
 
 clean:
 	rm -f build/*.o

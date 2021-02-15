@@ -35,6 +35,8 @@ namespace sckz {
                                                        VkImage          &     image,
                                                        VkFormat         &     imageFormat,
                                                        uint32_t               mipLevels);
+
+        void DestroyImage                             ();
         
         void CreateImageView                          (VkImageAspectFlags     aspectFlags);
 

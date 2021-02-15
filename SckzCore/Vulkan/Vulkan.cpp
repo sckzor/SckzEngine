@@ -277,10 +277,6 @@ namespace sckz {
         }
     }
 
-    void Vulkan::DestroyInstance() {
-        vkDestroyDevice(device, nullptr);
-    }
-
     void Vulkan::SetupDebugMessenger() {
         if (!enableValidationLayers) return;
 
@@ -291,20 +287,10 @@ namespace sckz {
         }
     }
 
-    void Vulkan::DestroyDebugMessenger() {
-        if (enableValidationLayers) {
-            DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
-        }
-    }
-
     void Vulkan::CreateSurface() {
         if (glfwCreateWindowSurface(instance, window->GetWindow(), nullptr, &surface) != VK_SUCCESS) {
             throw std::runtime_error("failed to create window surface!");
         }
-    }
-
-    void Vulkan::DestroySurface() {
-        vkDestroySurfaceKHR(instance, surface, nullptr);
     }
 
     void Vulkan::PickPhysicalDevice() {
@@ -377,10 +363,6 @@ namespace sckz {
         vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
     }
 
-    void Vulkan::DestroyLogicalDevice() {
-        vkDestroyDevice(device, nullptr);
-    }
-
     void Vulkan::CreateSwapChain() {
         SwapChainSupportDetails swapChainSupport = QuerySwapChainSupport(physicalDevice);
 
@@ -435,10 +417,6 @@ namespace sckz {
         }
 
         swapChainExtent = extent;
-    }
-
-    void Vulkan::DestroySwapChain() {
-        vkDestroySwapchainKHR(device, swapChain, nullptr);
     }
 
     void Vulkan::CreateImageViews() {
@@ -611,6 +589,64 @@ namespace sckz {
         }
     }
 
+    void Vulkan::DestroyInstance() {
+        vkDestroyInstance(instance, nullptr);
+    }
+
+    void Vulkan::DestroyDebugMessenger() {
+        if (enableValidationLayers) {
+            DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
+        }
+    }
+
+    void Vulkan::DestroySurface() {
+        vkDestroySurfaceKHR(instance, surface, nullptr);
+    }
+
+    void Vulkan::DestroyLogicalDevice() {
+        vkDestroyDevice(device, nullptr);
+    }
+
+    void Vulkan::DestroySwapChain() {
+        vkDestroySwapchainKHR(device, swapChain, nullptr);
+    }
+
+    void Vulkan::DestroyImageViews() {
+        for (auto image : swapChainImages) {
+            image.DestroyImage();
+        }
+    }
+
+    void Vulkan::DestroyRenderPass() {
+        vkDestroyRenderPass(device, renderPass, nullptr);
+    }
+
+    void Vulkan::DestroyCommandPool() {
+        vkDestroyCommandPool(device, commandPool, nullptr);
+    }
+
+    void Vulkan::DestroyCommandBuffers() {
+        vkFreeCommandBuffers(device, commandPool, static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
+    }
+
+    void Vulkan::DestroyFramebuffers() {
+        for (auto framebuffer : swapChainFramebuffers) {
+            vkDestroyFramebuffer(device, framebuffer, nullptr);
+        }
+    }
+
+    void Vulkan::DestroyDescriptorPool() {
+        vkDestroyDescriptorPool(device, descriptorPool, nullptr);
+    }
+
+    void Vulkan::DestroySyncObjects() {
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+            vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
+            vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
+            vkDestroyFence(device, inFlightFences[i], nullptr);
+        }
+    }
+
     void Vulkan::CreateVulkan(Window & window){
         this->window = &window;
         CreateInstance();
@@ -630,14 +666,49 @@ namespace sckz {
     }
 
     void Vulkan::DestroyVulkan(){
-        vkDeviceWaitIdle(device);
-
-        DestroySwapChain();
+        DestroySwapResources();
+        for(Model model : models){
+            model.DestroyModel();
+        }
+        DestroySyncObjects();
+        DestroyCommandPool();
         DestroyLogicalDevice();
-        // Physical Device is implicitly destroyed
         DestroyDebugMessenger();
         DestroySurface();
         DestroyInstance();
+
+    }
+
+    void Vulkan::RebuildSwapChain() {
+        DestroySwapResources();
+
+        CreateSwapChain();
+        CreateImageViews();
+        CreateRenderPass();
+        pipeline.CreatePipeline(device, swapChainExtent, renderPass, msaaSamples);
+        CreateColorResources();
+        CreateDepthResources();
+        CreateFramebuffers();
+        CreateDescriptorPool();
+        for(Model model : models){
+            model.CreateSwapResources(pipeline, descriptorPool, swapChainExtent);
+        }
+        CreateCommandBuffers();
+    }
+
+    void Vulkan::DestroySwapResources() { // Destroy
+        vkDeviceWaitIdle(device);
+
+        depthImage.DestroyImage();
+        colorImage.DestroyImage();
+        DestroyFramebuffers();
+        DestroyCommandBuffers();
+        pipeline.DestroyPipeline();
+        DestroySwapChain();
+        for(Model model : models){
+            model.DestroySwapResources();
+        }
+        DestroyDescriptorPool();
     }
 
     void Vulkan::CreatePipeline(const char * vertexFile, const char * fragmentFile) {
@@ -724,7 +795,7 @@ namespace sckz {
         VkResult result = vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
         if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-            //recreateSwapChain();
+            RebuildSwapChain();
             return;
         } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
             throw std::runtime_error("failed to acquire swap chain image!");
@@ -777,7 +848,7 @@ namespace sckz {
 
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized) {
             framebufferResized = false;
-            //recreateSwapChain();
+            RebuildSwapChain();
         } else if (result != VK_SUCCESS) {
             throw std::runtime_error("failed to present swap chain image!");
         }

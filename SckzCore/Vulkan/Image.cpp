@@ -97,9 +97,13 @@ namespace sckz {
 
         stagingBuffer.DestroyBuffer();
 
-        
-
         GenerateMipmaps(VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight, pool);
+    }
+
+    void Image::DestroyImage() {
+        vkDestroyImageView(*device, imageView, nullptr);
+        vkDestroyImage(*device, image, nullptr);
+        vkFreeMemory(*device, imageMemory, nullptr);
     }
 
     void Image::TransitionImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout, VkCommandPool & pool) {

@@ -32,12 +32,26 @@ namespace sckz {
         CreateUniformBuffers();
 
         CreateDescriptorSets();
-        // CreateCommandBuffers();
     }
 
     void Model::DestroyModel() {
 
     }
+
+    void Model::CreateSwapResources(Pipeline & pipeline, VkDescriptorPool & descriptorPool, VkExtent2D swapChainExtent) {
+        this->descriptorPool = &descriptorPool;
+        this->pipeline = &pipeline;
+        this->swapChainExtent = swapChainExtent;
+
+        CreateUniformBuffers();
+        CreateDescriptorSets();
+    }
+
+    void Model::DestroySwapResources() {
+        for (size_t i = 0; i < numSwapChainImages; i++) {
+            uniformBuffers[i].DestroyBuffer();
+        }
+    }  
 
     void Model::Update(uint32_t currentImage) {
         static auto startTime = std::chrono::high_resolution_clock::now();

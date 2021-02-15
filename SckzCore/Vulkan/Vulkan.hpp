@@ -111,44 +111,51 @@ namespace sckz {
                                                                            VkFormatFeatureFlags features);
 
     private: // Private creation functions
-        void CreateInstance        ();
-        void SetupDebugMessenger   ();
-        void CreateSurface         ();
-        void PickPhysicalDevice    ();
-        void CreateLogicalDevice   ();
-        void CreateSwapChain       ();
-        void CreateImageViews      ();
-        void CreateRenderPass      ();
-        void CreateCommandPool     ();
-        void CreateCommandBuffers  (); // HERE
-        void CreateColorResources  ();
-        void CreateDepthResources  ();
-        void CreateFramebuffers    ();
-        void CreateDescriptorPool  ();
-        void CreateSyncObjects     ();
+        void CreateInstance         ();
+        void SetupDebugMessenger    ();
+        void CreateSurface          ();
+        void PickPhysicalDevice     ();
+        void CreateLogicalDevice    ();
+        void CreateSwapChain        ();
+        void CreateImageViews       ();
+        void CreateRenderPass       ();
+        void CreateCommandPool      ();
+        void CreateCommandBuffers   ();
+        void CreateColorResources   ();
+        void CreateDepthResources   ();
+        void CreateFramebuffers     ();
+        void CreateDescriptorPool   ();
+        void CreateSyncObjects      ();
 
     private:
-        void RebuildSwapChain      ();
-        void DestroySwapResources  ();
+        void RebuildSwapChain       ();
+        void DestroySwapResources   ();
 
     private: // Private destruction functions
-        void DestroyInstance             ();
-        void DestroyDebugMessenger       ();
-        void DestroySurface              ();
-        void DestroyLogicalDevice        ();
-        void DestroySwapChain            ();
+        void DestroyInstance        ();
+        void DestroyDebugMessenger  ();
+        void DestroySurface         ();
+        void DestroyLogicalDevice   ();
+        void DestroySwapChain       ();
+        void DestroyImageViews      ();
+        void DestroyRenderPass      ();
+        void DestroyCommandPool     ();
+        void DestroyCommandBuffers  ();
+        void DestroyFramebuffers    ();
+        void DestroyDescriptorPool  ();
+        void DestroySyncObjects     ();
 
     public: // Public member functions
-        void CreateVulkan  (Window & window);
-        void DestroyVulkan ();
-        void Update        ();
+        void CreateVulkan           (Window & window);
+        void DestroyVulkan          ();
+        void Update                 ();
 
     public:
-        void CreatePipeline (const char * vertexFile,
-                             const char * fragmentFile);
+        void CreatePipeline         (const char * vertexFile,
+                                     const char * fragmentFile);
 
-        void CreateModel    (const char * model1File, 
-                             const char * model2File, 
-                             const char * textureFile);
+        void CreateModel            (const char * model1File, 
+                                     const char * model2File, 
+                                     const char * textureFile);
     };
 }

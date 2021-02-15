@@ -13,8 +13,22 @@ namespace sckz {
         CreateGraphicsPipeline();
     }
 
+    void Pipeline::CreatePipeline(VkDevice device, VkExtent2D extent, VkRenderPass & renderPass, VkSampleCountFlagBits msaaSamples) {
+        this->device       = &device;
+        this->extent       = extent;
+        this->renderPass   = &renderPass;
+        this->msaaSamples  = msaaSamples;
+        if(vertexFile == nullptr || fragmentFile == nullptr) {
+            throw std::runtime_error("failed to fragment or vertex file was not deffined, use the other overload of this method first");
+        }
+        CreateDescriptorSetLayout();
+        CreateGraphicsPipeline();
+    }
+
     void Pipeline::DestroyPipeline() {
-        
+        vkDestroyDescriptorSetLayout(*this->device, this->descriptorSetLayout, nullptr);
+        vkDestroyPipeline(*this->device, this->pipeline, nullptr);
+        vkDestroyPipelineLayout(*this->device, this->pipelineLayout, nullptr);
     }
 
     std::vector<char> Pipeline::ReadFile (const std::string& filename) {
