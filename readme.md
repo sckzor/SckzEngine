@@ -8,7 +8,7 @@ A Vulkan games engine by Sckzor
 
 - [x] Basic Vulkan creation and initialization.
 - [x] Proper makefile.
-- [ ] Basic destruction and memory leak prevention.
+- [x] Basic destruction and memory leak prevention.
 - [ ] Make the pipeline a "pipeline" class rather than a "graphics pipeline" class.
 - [ ] Multiple Object Rendering.
 - [ ] Memory management.
