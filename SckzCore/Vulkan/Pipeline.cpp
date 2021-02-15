@@ -1,7 +1,7 @@
 #include "Pipeline.hpp"
 
 namespace sckz {
-    void Pipeline::CreatePipeline(VkDevice device, VkExtent2D extent, VkRenderPass & renderPass, 
+    void Pipeline::CreatePipeline(VkDevice & device, VkExtent2D extent, VkRenderPass & renderPass, 
                                   VkSampleCountFlagBits msaaSamples, const char * vertexFile, const char * fragmentFile) {
         this->device       = &device;
         this->extent       = extent;
@@ -13,7 +13,7 @@ namespace sckz {
         CreateGraphicsPipeline();
     }
 
-    void Pipeline::CreatePipeline(VkDevice device, VkExtent2D extent, VkRenderPass & renderPass, VkSampleCountFlagBits msaaSamples) {
+    void Pipeline::CreatePipeline(VkDevice & device, VkExtent2D extent, VkRenderPass & renderPass, VkSampleCountFlagBits msaaSamples) {
         this->device       = &device;
         this->extent       = extent;
         this->renderPass   = &renderPass;

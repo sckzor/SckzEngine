@@ -25,13 +25,13 @@ namespace sckz {
         void CreateGraphicsPipeline     ();
 
     public:
-        void CreatePipeline   (VkDevice                device, 
+        void CreatePipeline   (VkDevice              & device, 
                                VkExtent2D              extent, 
                                VkRenderPass          & renderPass, 
                                VkSampleCountFlagBits   msaaSamples,
                                const char            * vertexFile,
                                const char            * fragmentFile);
-        void CreatePipeline   (VkDevice                device, 
+        void CreatePipeline   (VkDevice              & device, 
                                VkExtent2D              extent, 
                                VkRenderPass          & renderPass, 
                                VkSampleCountFlagBits   msaaSamples);

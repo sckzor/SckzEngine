@@ -613,7 +613,7 @@ namespace sckz {
 
     void Vulkan::DestroyImageViews() {
         for (auto image : swapChainImages) {
-            image.DestroyImage();
+            image.DestroyImage2();
         }
     }
 
@@ -667,9 +667,10 @@ namespace sckz {
 
     void Vulkan::DestroyVulkan(){
         DestroySwapResources();
-        for(Model model : models){
-            model.DestroyModel();
-        }
+
+        models[0].DestroyModel();
+        models[1].DestroyModel();
+        
         DestroySyncObjects();
         DestroyCommandPool();
         DestroyLogicalDevice();
@@ -690,9 +691,8 @@ namespace sckz {
         CreateDepthResources();
         CreateFramebuffers();
         CreateDescriptorPool();
-        for(Model model : models){
-            model.CreateSwapResources(pipeline, descriptorPool, swapChainExtent);
-        }
+        models[0].CreateSwapResources(pipeline, descriptorPool, swapChainExtent);
+        models[1].CreateSwapResources(pipeline, descriptorPool, swapChainExtent);
         CreateCommandBuffers();
     }
 
@@ -704,6 +704,8 @@ namespace sckz {
         DestroyFramebuffers();
         DestroyCommandBuffers();
         pipeline.DestroyPipeline();
+        DestroyRenderPass();
+        DestroyImageViews();
         DestroySwapChain();
         for(Model model : models){
             model.DestroySwapResources();

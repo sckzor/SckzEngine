@@ -7,10 +7,11 @@ namespace sckz {
     void Image::CreateImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, 
                             VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, 
                             VkDevice & device, VkPhysicalDevice & physicalDevice, VkQueue & queue) {
-        this->device = &device;
-        this->format = format;
-        this->queue  = &queue;
+        this->device    = &device;
+        this->format    = format;
+        this->queue     = &queue;
         this->mipLevels = mipLevels;
+        this->sampler   = VK_NULL_HANDLE;
         
         VkImageCreateInfo imageInfo{};
         imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -51,6 +52,7 @@ namespace sckz {
         this->image     =   image;
         this->format    =   format;
         this->mipLevels =   mipLevels;
+        this->sampler   = VK_NULL_HANDLE;
     }
 
     void Image::CreateImageView(VkImageAspectFlags aspectFlags) {
@@ -102,9 +104,15 @@ namespace sckz {
 
     void Image::DestroyImage() {
         vkDestroyImageView(*device, imageView, nullptr);
+        vkDestroySampler(*device, sampler, nullptr);
         vkDestroyImage(*device, image, nullptr);
         vkFreeMemory(*device, imageMemory, nullptr);
     }
+
+    void Image::DestroyImage2() {
+        vkDestroyImageView(*device, imageView, nullptr);
+    }
+
 
     void Image::TransitionImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout, VkCommandPool & pool) {
         CommandBuffer cmdBuffer;
