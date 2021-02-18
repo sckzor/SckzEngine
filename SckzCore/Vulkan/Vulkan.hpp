@@ -54,6 +54,8 @@ namespace sckz {
         std::vector<std::vector
         <VkCommandBuffer>>           commandBuffers;
 
+        std::vector<VkCommandBuffer> primaryCmdBuffers;
+
         VkRenderPass                 renderPass;
 
         VkDescriptorPool             descriptorPool;
@@ -122,6 +124,7 @@ namespace sckz {
         void CreateRenderPass       ();
         void CreateCommandPool      ();
         void CreateCommandBuffers   (size_t buffer);
+        void CreatePrimaryCmdBuffers();
         void CreateColorResources   ();
         void CreateDepthResources   ();
         void CreateFramebuffers     ();
@@ -155,7 +158,8 @@ namespace sckz {
         void CreatePipeline         (const char * vertexFile,
                                      const char * fragmentFile);
 
-        void CreateModel            (const char * modelFile, 
+        void CreateModel            (const char * modelFile,
+                                     const char * modelFile2, 
                                      const char * textureFile);
     };
 }

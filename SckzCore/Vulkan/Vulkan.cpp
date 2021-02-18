@@ -698,7 +698,7 @@ namespace sckz {
             models[i]->CreateSwapResources(pipeline, descriptorPool, swapChainExtent);
         }
         for(size_t i = 0; i< commandBuffers.size(); i++){
-            CreateCommandBuffers(i);
+            CreatePrimaryCmdBuffers();
         }
     }
 
@@ -723,11 +723,13 @@ namespace sckz {
         pipeline.CreatePipeline(device, swapChainExtent, renderPass, msaaSamples, vertexFile, fragmentFile);
     }
 
-    void Vulkan::CreateModel(const char * modelFile, const char * textureFile) {
+    void Vulkan::CreateModel(const char * modelFile, const char * modelFile2, const char * textureFile) {
         models.push_back(new Model());
-        models[models.size() - 1]->CreateModel(textureFile, modelFile, commandPool, device, physicalDevice, swapChainFramebuffers, pipeline, descriptorPool, swapChainExtent, swapChainImages.size(), graphicsQueue);
+        models.push_back(new Model());
+        models[0]->CreateModel(textureFile, modelFile, commandPool, device, physicalDevice, swapChainFramebuffers, pipeline, descriptorPool, swapChainExtent, swapChainImages.size(), graphicsQueue);
+        models[1]->CreateModel(textureFile, modelFile2, commandPool, device, physicalDevice, swapChainFramebuffers, pipeline, descriptorPool, swapChainExtent, swapChainImages.size(), graphicsQueue);
         commandBuffers.resize(models.size());
-        CreateCommandBuffers(models.size() - 1);
+        CreatePrimaryCmdBuffers();
     }
 
     void Vulkan::CreateCommandBuffers(size_t j) {
@@ -736,7 +738,7 @@ namespace sckz {
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.commandPool = commandPool;
-        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
         allocInfo.commandBufferCount = (uint32_t) commandBuffers[j].size();
 
         if (vkAllocateCommandBuffers(device, &allocInfo, commandBuffers[j].data()) != VK_SUCCESS) {
@@ -746,6 +748,15 @@ namespace sckz {
         for (size_t i = 0; i < commandBuffers[j].size(); i++) {
             VkCommandBufferBeginInfo beginInfo{};
             beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+            beginInfo.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
+
+            VkCommandBufferInheritanceInfo inheritanceInfo {};
+			inheritanceInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
+            inheritanceInfo.renderPass = renderPass;
+            // Secondary command buffer also use the currently active framebuffer
+            inheritanceInfo.framebuffer = (swapChainFramebuffers)[i];
+
+            beginInfo.pInheritanceInfo = & inheritanceInfo;
 
             if (vkBeginCommandBuffer(commandBuffers[j][i], &beginInfo) != VK_SUCCESS) {
                 throw std::runtime_error("failed to begin recording command buffer!");
@@ -765,7 +776,7 @@ namespace sckz {
             renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
             renderPassInfo.pClearValues = clearValues.data();
 
-            vkCmdBeginRenderPass(commandBuffers[j][i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+            //vkCmdBeginRenderPass(commandBuffers[j][i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
                 vkCmdBindPipeline(commandBuffers[j][i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.GetPipeline());
 
@@ -783,9 +794,65 @@ namespace sckz {
                 vkCmdDrawIndexed(commandBuffers[j][i], static_cast<uint32_t>(models[j]->GetNumIndices()), 1, 0, 0, 0);
             
 
-            vkCmdEndRenderPass(commandBuffers[j][i]);
+            //vkCmdEndRenderPass(commandBuffers[j][i]);
 
             if (vkEndCommandBuffer(commandBuffers[j][i]) != VK_SUCCESS) {
+                throw std::runtime_error("failed to record command buffer!");
+            }
+        }
+    }
+
+    void Vulkan::CreatePrimaryCmdBuffers() {
+        primaryCmdBuffers.resize(swapChainFramebuffers.size());
+
+        VkCommandBufferAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocInfo.commandPool = commandPool;
+        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        allocInfo.commandBufferCount = (uint32_t) primaryCmdBuffers.size();
+
+        if (vkAllocateCommandBuffers(device, &allocInfo, primaryCmdBuffers.data()) != VK_SUCCESS) {
+            throw std::runtime_error("failed to allocate command buffers!");
+        }
+
+        for (size_t i = 0; i < primaryCmdBuffers.size(); i++) {
+            VkCommandBufferBeginInfo beginInfo{};
+            beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+            if (vkBeginCommandBuffer(primaryCmdBuffers[i], &beginInfo) != VK_SUCCESS) {
+                throw std::runtime_error("failed to begin recording command buffer!");
+            }
+
+            VkRenderPassBeginInfo renderPassInfo{};
+            renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+            renderPassInfo.renderPass = pipeline.GetRenderPass();
+            renderPassInfo.framebuffer = (swapChainFramebuffers)[i];
+            renderPassInfo.renderArea.offset = {0, 0};
+            renderPassInfo.renderArea.extent = swapChainExtent;
+
+            std::array<VkClearValue, 2> clearValues{};
+            clearValues[0].color = {0.0f, 0.0f, 0.0f, 1.0f};
+            clearValues[1].depthStencil = {1.0f, 0};
+
+            renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+            renderPassInfo.pClearValues = clearValues.data();
+
+            vkCmdBeginRenderPass(primaryCmdBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
+
+                for(uint32_t j = 0; j < models.size(); j++){
+                    CreateCommandBuffers(j);
+                }
+
+                std::vector<VkCommandBuffer> correctBuffers;
+                for(size_t j = 0; j < commandBuffers.size(); j++){
+                    correctBuffers.push_back(commandBuffers[j][i]);
+                }
+
+                vkCmdExecuteCommands(primaryCmdBuffers[i], correctBuffers.size(), correctBuffers.data());
+
+            vkCmdEndRenderPass(primaryCmdBuffers[i]);
+
+            if (vkEndCommandBuffer(primaryCmdBuffers[i]) != VK_SUCCESS) {
                 throw std::runtime_error("failed to record command buffer!");
             }
         }
@@ -823,13 +890,8 @@ namespace sckz {
         submitInfo.pWaitSemaphores = waitSemaphores;
         submitInfo.pWaitDstStageMask = waitStages;
         
-        std::vector<VkCommandBuffer> correctBuffers;
-        for(size_t i = 0; i < commandBuffers.size(); i++){
-            correctBuffers.push_back(commandBuffers[i][imageIndex]);
-        }
-
-        submitInfo.commandBufferCount = correctBuffers.size();
-        submitInfo.pCommandBuffers = correctBuffers.data();
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &primaryCmdBuffers[imageIndex];
 
         VkSemaphore signalSemaphores[] = {renderFinishedSemaphores[currentFrame]};
         submitInfo.signalSemaphoreCount = 1;
