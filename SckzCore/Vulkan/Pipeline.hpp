@@ -42,5 +42,8 @@ namespace sckz {
         VkRenderPass          GetRenderPass          ();
         VkPipeline            GetPipeline            ();
         VkPipelineLayout      GetPieplineLayout      ();
+
+    public:
+        bool operator == (Pipeline & otherObject);
     };
 }

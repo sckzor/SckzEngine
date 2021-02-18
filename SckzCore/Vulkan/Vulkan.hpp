@@ -51,7 +51,8 @@ namespace sckz {
         VkExtent2D                   swapChainExtent;
         std::vector<VkFramebuffer>   swapChainFramebuffers;
 
-        std::vector<VkCommandBuffer> commandBuffers; //HERE
+        std::vector<std::vector
+        <VkCommandBuffer>>           commandBuffers;
 
         VkRenderPass                 renderPass;
 
@@ -62,7 +63,7 @@ namespace sckz {
         Image                        depthImage;
 
         Pipeline                     pipeline;
-        Model                        models[2];
+        std::vector<Model *>           models;
 
         std::vector<VkSemaphore>     imageAvailableSemaphores;
         std::vector<VkSemaphore>     renderFinishedSemaphores;
@@ -120,7 +121,7 @@ namespace sckz {
         void CreateImageViews       ();
         void CreateRenderPass       ();
         void CreateCommandPool      ();
-        void CreateCommandBuffers   ();
+        void CreateCommandBuffers   (size_t buffer);
         void CreateColorResources   ();
         void CreateDepthResources   ();
         void CreateFramebuffers     ();
@@ -154,8 +155,7 @@ namespace sckz {
         void CreatePipeline         (const char * vertexFile,
                                      const char * fragmentFile);
 
-        void CreateModel            (const char * model1File, 
-                                     const char * model2File, 
+        void CreateModel            (const char * modelFile, 
                                      const char * textureFile);
     };
 }

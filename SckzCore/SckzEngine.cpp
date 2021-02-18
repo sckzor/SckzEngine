@@ -6,7 +6,8 @@ int main() {
     sckz::Vulkan vkan;
     vkan.CreateVulkan(win);
     vkan.CreatePipeline("vertex.spv", "fragment.spv");
-    vkan.CreateModel("flare.obj", "viking_room.obj", "placeholder.png");
+    vkan.CreateModel("flare.obj", "placeholder.png");
+    vkan.CreateModel("viking_room.obj", "placeholder.png");
     
     while(!win.QueryClose()) {
         win.Update();

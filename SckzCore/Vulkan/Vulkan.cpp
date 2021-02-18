@@ -626,7 +626,9 @@ namespace sckz {
     }
 
     void Vulkan::DestroyCommandBuffers() {
-        vkFreeCommandBuffers(device, commandPool, static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
+        for(size_t i = 0; i < commandBuffers.size(); i++){
+            vkFreeCommandBuffers(device, commandPool, static_cast<uint32_t>(commandBuffers.size()), commandBuffers[i].data());
+        }
     }
 
     void Vulkan::DestroyFramebuffers() {
@@ -668,8 +670,9 @@ namespace sckz {
     void Vulkan::DestroyVulkan(){
         DestroySwapResources();
 
-        models[0].DestroyModel();
-        models[1].DestroyModel();
+        for (int i = 0; i < models.size(); i++) {
+            models[i]->DestroyModel();
+        }
         
         DestroySyncObjects();
         DestroyCommandPool();
@@ -691,9 +694,12 @@ namespace sckz {
         CreateDepthResources();
         CreateFramebuffers();
         CreateDescriptorPool();
-        models[0].CreateSwapResources(pipeline, descriptorPool, swapChainExtent);
-        models[1].CreateSwapResources(pipeline, descriptorPool, swapChainExtent);
-        CreateCommandBuffers();
+        for (int i = 0; i < models.size(); i++) {
+            models[i]->CreateSwapResources(pipeline, descriptorPool, swapChainExtent);
+        }
+        for(size_t i = 0; i< commandBuffers.size(); i++){
+            CreateCommandBuffers(i);
+        }
     }
 
     void Vulkan::DestroySwapResources() {
@@ -707,8 +713,8 @@ namespace sckz {
         DestroyRenderPass();
         DestroyImageViews();
         DestroySwapChain();
-        for(Model model : models){
-            model.DestroySwapResources();
+        for (int i = 0; i < models.size(); i++) {
+            models[i]->DestroySwapResources();
         }
         DestroyDescriptorPool();
     }
@@ -717,30 +723,31 @@ namespace sckz {
         pipeline.CreatePipeline(device, swapChainExtent, renderPass, msaaSamples, vertexFile, fragmentFile);
     }
 
-    void Vulkan::CreateModel(const char * model1File, const char * model2File, const char * textureFile) {
-        models[0].CreateModel(textureFile, model1File, commandPool, device, physicalDevice, swapChainFramebuffers, pipeline, descriptorPool, swapChainExtent, swapChainImages.size(), graphicsQueue);
-        models[1].CreateModel(textureFile, model2File, commandPool, device, physicalDevice, swapChainFramebuffers, pipeline, descriptorPool, swapChainExtent, swapChainImages.size(), graphicsQueue);
-        CreateCommandBuffers();
+    void Vulkan::CreateModel(const char * modelFile, const char * textureFile) {
+        models.push_back(new Model());
+        models[models.size() - 1]->CreateModel(textureFile, modelFile, commandPool, device, physicalDevice, swapChainFramebuffers, pipeline, descriptorPool, swapChainExtent, swapChainImages.size(), graphicsQueue);
+        commandBuffers.resize(models.size());
+        CreateCommandBuffers(models.size() - 1);
     }
 
-    void Vulkan::CreateCommandBuffers() {
-        commandBuffers.resize(swapChainFramebuffers.size());
+    void Vulkan::CreateCommandBuffers(size_t j) {
+        commandBuffers[j].resize(swapChainFramebuffers.size());
 
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.commandPool = commandPool;
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandBufferCount = (uint32_t) commandBuffers.size();
+        allocInfo.commandBufferCount = (uint32_t) commandBuffers[j].size();
 
-        if (vkAllocateCommandBuffers(device, &allocInfo, commandBuffers.data()) != VK_SUCCESS) {
+        if (vkAllocateCommandBuffers(device, &allocInfo, commandBuffers[j].data()) != VK_SUCCESS) {
             throw std::runtime_error("failed to allocate command buffers!");
         }
 
-        for (size_t i = 0; i < commandBuffers.size(); i++) {
+        for (size_t i = 0; i < commandBuffers[j].size(); i++) {
             VkCommandBufferBeginInfo beginInfo{};
             beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-            if (vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS) {
+            if (vkBeginCommandBuffer(commandBuffers[j][i], &beginInfo) != VK_SUCCESS) {
                 throw std::runtime_error("failed to begin recording command buffer!");
             }
 
@@ -758,33 +765,27 @@ namespace sckz {
             renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
             renderPassInfo.pClearValues = clearValues.data();
 
-            vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+            vkCmdBeginRenderPass(commandBuffers[j][i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-                vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.GetPipeline());
+                vkCmdBindPipeline(commandBuffers[j][i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.GetPipeline());
 
-                VkBuffer vertexBuffers1[] = {models[0].GetVertexBuffer().GetBuffer()};
+                VkBuffer vertexBuffer[1];
                 VkDeviceSize offsets[] = {0};
-                vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, vertexBuffers1, offsets);
 
-                vkCmdBindIndexBuffer(commandBuffers[i], models[0].GetIndexBuffer().GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
+                vertexBuffer[0] = models[j]->GetVertexBuffer().GetBuffer();
 
-                vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.GetPieplineLayout(), 0, 1, &models[0].GetDescriptorSets()[i], 0, nullptr);
+                vkCmdBindVertexBuffers(commandBuffers[j][i], 0, 1, vertexBuffer, offsets);
 
-                vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(models[0].GetNumIndices()), 1, 0, 0, 0);
+                vkCmdBindIndexBuffer(commandBuffers[j][i], models[j]->GetIndexBuffer().GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
-                 ////////////////////////////////
-                VkBuffer vertexBuffers2[] = {models[1].GetVertexBuffer().GetBuffer()};
-                vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, vertexBuffers2, offsets);
+                vkCmdBindDescriptorSets(commandBuffers[j][i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.GetPieplineLayout(), 0, 1, &models[j]->GetDescriptorSets()[i], 0, nullptr);
 
-                vkCmdBindIndexBuffer(commandBuffers[i], models[1].GetIndexBuffer().GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
+                vkCmdDrawIndexed(commandBuffers[j][i], static_cast<uint32_t>(models[j]->GetNumIndices()), 1, 0, 0, 0);
+            
 
-                vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.GetPieplineLayout(), 0, 1, &models[1].GetDescriptorSets()[i], 0, nullptr);
+            vkCmdEndRenderPass(commandBuffers[j][i]);
 
-                vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(models[1].GetNumIndices()), 1, 0, 0, 0);
-
-            vkCmdEndRenderPass(commandBuffers[i]);
-
-            if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
+            if (vkEndCommandBuffer(commandBuffers[j][i]) != VK_SUCCESS) {
                 throw std::runtime_error("failed to record command buffer!");
             }
         }
@@ -803,8 +804,9 @@ namespace sckz {
             throw std::runtime_error("failed to acquire swap chain image!");
         }
 
-        models[0].Update(imageIndex);
-        models[1].Update(imageIndex);
+        for (int i = 0; i < models.size(); i++) {
+            models[i]->Update(imageIndex);
+        }
         
 
         if (imagesInFlight[imageIndex] != VK_NULL_HANDLE) {
@@ -820,9 +822,14 @@ namespace sckz {
         submitInfo.waitSemaphoreCount = 1;
         submitInfo.pWaitSemaphores = waitSemaphores;
         submitInfo.pWaitDstStageMask = waitStages;
+        
+        std::vector<VkCommandBuffer> correctBuffers;
+        for(size_t i = 0; i < commandBuffers.size(); i++){
+            correctBuffers.push_back(commandBuffers[i][imageIndex]);
+        }
 
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &commandBuffers[imageIndex];
+        submitInfo.commandBufferCount = correctBuffers.size();
+        submitInfo.pCommandBuffers = correctBuffers.data();
 
         VkSemaphore signalSemaphores[] = {renderFinishedSemaphores[currentFrame]};
         submitInfo.signalSemaphoreCount = 1;

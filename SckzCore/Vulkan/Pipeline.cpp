@@ -232,4 +232,8 @@ namespace sckz {
         return pipelineLayout;
     }
 
+
+    bool Pipeline::operator == (Pipeline & otherObject) {
+        return (this->vertexFile == otherObject.vertexFile && this->fragmentFile == otherObject.fragmentFile);
+    }
 }
