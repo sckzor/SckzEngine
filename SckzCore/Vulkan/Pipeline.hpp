@@ -39,7 +39,6 @@ namespace sckz {
 
     public:
         VkDescriptorSetLayout GetDescriptorSetLayout ();
-        VkRenderPass          GetRenderPass          ();
         VkPipeline            GetPipeline            ();
         VkPipelineLayout      GetPieplineLayout      ();
 

@@ -764,7 +764,7 @@ namespace sckz {
 
             VkRenderPassBeginInfo renderPassInfo{};
             renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            renderPassInfo.renderPass = pipeline.GetRenderPass();
+            renderPassInfo.renderPass = renderPass;
             renderPassInfo.framebuffer = (swapChainFramebuffers)[i];
             renderPassInfo.renderArea.offset = {0, 0};
             renderPassInfo.renderArea.extent = swapChainExtent;
@@ -775,8 +775,6 @@ namespace sckz {
 
             renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
             renderPassInfo.pClearValues = clearValues.data();
-
-            //vkCmdBeginRenderPass(commandBuffers[j][i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
                 vkCmdBindPipeline(commandBuffers[j][i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.GetPipeline());
 
@@ -793,9 +791,6 @@ namespace sckz {
 
                 vkCmdDrawIndexed(commandBuffers[j][i], static_cast<uint32_t>(models[j]->GetNumIndices()), 1, 0, 0, 0);
             
-
-            //vkCmdEndRenderPass(commandBuffers[j][i]);
-
             if (vkEndCommandBuffer(commandBuffers[j][i]) != VK_SUCCESS) {
                 throw std::runtime_error("failed to record command buffer!");
             }
@@ -825,7 +820,7 @@ namespace sckz {
 
             VkRenderPassBeginInfo renderPassInfo{};
             renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            renderPassInfo.renderPass = pipeline.GetRenderPass();
+            renderPassInfo.renderPass = renderPass;
             renderPassInfo.framebuffer = (swapChainFramebuffers)[i];
             renderPassInfo.renderArea.offset = {0, 0};
             renderPassInfo.renderArea.extent = swapChainExtent;

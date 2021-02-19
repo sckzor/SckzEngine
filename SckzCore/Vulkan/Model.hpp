@@ -66,12 +66,13 @@ namespace sckz {
         void CreateUniformBuffers   ();
 
         void CreateDescriptorSets   ();
+        void CreateCommandBuffers   ();
 
     public:
         std::vector<VkCommandBuffer> & GetCommandBuffers ();
-        Buffer GetIndexBuffer                            ();
-        Buffer GetVertexBuffer                           ();
+        Buffer                         GetIndexBuffer    ();
+        Buffer                         GetVertexBuffer   ();
         std::vector<VkDescriptorSet> & GetDescriptorSets ();
-        uint32_t GetNumIndices                           ();
+        uint32_t                       GetNumIndices     ();
     };
 }

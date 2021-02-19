@@ -4,7 +4,8 @@
 #include "../Loaders/tiny_obj_loader.h"
 
 namespace sckz {
-    void Model::CreateModel(const char * textureFileName, const char * modelFileName, VkCommandPool & commandPool, 
+    void Model::CreateModel(const char * textureFileName, const char * modelFileName, 
+                            VkCommandPool & commandPool, 
                             VkDevice & device, VkPhysicalDevice & physicalDevice, 
                             std::vector<VkFramebuffer> & swapChainFramebuffers, 
                             Pipeline & pipeline, VkDescriptorPool & descriptorPool, 
@@ -192,6 +193,71 @@ namespace sckz {
             descriptorWrites[1].pImageInfo = &imageInfo;
 
             vkUpdateDescriptorSets(*device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+        }
+    }
+
+    void Model::CreateCommandBuffers () {
+        commandBuffers.resize(swapChainFramebuffers->size());
+
+        VkCommandBufferAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocInfo.commandPool = * commandPool;
+        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
+        allocInfo.commandBufferCount = (uint32_t) commandBuffers.size();
+
+        if (vkAllocateCommandBuffers(* device, & allocInfo, commandBuffers.data()) != VK_SUCCESS) {
+            throw std::runtime_error("failed to allocate command buffers!");
+        }
+
+        for (size_t i = 0; i < commandBuffers.size(); i++) {
+            VkCommandBufferBeginInfo beginInfo{};
+            beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+            beginInfo.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
+
+            VkCommandBufferInheritanceInfo inheritanceInfo {};
+			inheritanceInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
+            inheritanceInfo.renderPass = renderPass;
+            // Secondary command buffer also use the currently active framebuffer
+            inheritanceInfo.framebuffer = (* swapChainFramebuffers)[i];
+
+            beginInfo.pInheritanceInfo = & inheritanceInfo;
+
+            if (vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS) {
+                throw std::runtime_error("failed to begin recording command buffer!");
+            }
+
+            VkRenderPassBeginInfo renderPassInfo{};
+            renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+            renderPassInfo.renderPass = renderPass;
+            renderPassInfo.framebuffer = (* swapChainFramebuffers)[i];
+            renderPassInfo.renderArea.offset = {0, 0};
+            renderPassInfo.renderArea.extent = swapChainExtent;
+
+            std::array<VkClearValue, 2> clearValues{};
+            clearValues[0].color = {0.0f, 0.0f, 0.0f, 1.0f};
+            clearValues[1].depthStencil = {1.0f, 0};
+
+            renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+            renderPassInfo.pClearValues = clearValues.data();
+
+                vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetPipeline());
+
+                VkBuffer rawVertexBuffer[1];
+                VkDeviceSize offsets[] = {0};
+
+                rawVertexBuffer[0] = vertexBuffer.GetBuffer();
+
+                vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, rawVertexBuffer, offsets);
+
+                vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer.GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
+
+                vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetPieplineLayout(), 0, 1, &descriptorSets[i], 0, nullptr);
+
+                vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+            
+            if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
+                throw std::runtime_error("failed to record command buffer!");
+            }
         }
     }
 
