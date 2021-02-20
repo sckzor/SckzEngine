@@ -5,7 +5,7 @@
 
 namespace sckz {
     void Model::CreateModel(const char * textureFileName, const char * modelFileName, 
-                            VkCommandPool & commandPool, 
+                            VkCommandPool & commandPool, VkRenderPass & renderPass,
                             VkDevice & device, VkPhysicalDevice & physicalDevice, 
                             std::vector<VkFramebuffer> & swapChainFramebuffers, 
                             Pipeline & pipeline, VkDescriptorPool & descriptorPool, 
@@ -13,6 +13,7 @@ namespace sckz {
                             VkQueue & queue) {
         this->textureFileName = textureFileName;
         this->modelFileName   = modelFileName;
+        this->renderPass      = & renderPass;
         this->device = &device;
         this->physicalDevice = &physicalDevice;
         this->commandPool = &commandPool;
@@ -22,6 +23,8 @@ namespace sckz {
         this->swapChainExtent = swapChainExtent;
         this->numSwapChainImages = numSwapChainImages;
         this->queue = & queue;
+
+        this->hasCommandBuffer = false;
 
         texture.CreateTextureImage(textureFileName, *this->device, *this->physicalDevice, commandPool, queue);
         texture.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
@@ -48,12 +51,15 @@ namespace sckz {
 
         CreateUniformBuffers();
         CreateDescriptorSets();
+        CreateCommandBuffers();
     }
 
     void Model::DestroySwapResources() {
         for (size_t i = 0; i < numSwapChainImages; i++) {
             uniformBuffers[i].DestroyBuffer();
         }
+
+        vkFreeCommandBuffers(* device, * commandPool, static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
     }  
 
     void Model::Update(uint32_t currentImage) {
@@ -216,7 +222,7 @@ namespace sckz {
 
             VkCommandBufferInheritanceInfo inheritanceInfo {};
 			inheritanceInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
-            inheritanceInfo.renderPass = renderPass;
+            inheritanceInfo.renderPass = * renderPass;
             // Secondary command buffer also use the currently active framebuffer
             inheritanceInfo.framebuffer = (* swapChainFramebuffers)[i];
 
@@ -228,7 +234,7 @@ namespace sckz {
 
             VkRenderPassBeginInfo renderPassInfo{};
             renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            renderPassInfo.renderPass = renderPass;
+            renderPassInfo.renderPass = * renderPass;
             renderPassInfo.framebuffer = (* swapChainFramebuffers)[i];
             renderPassInfo.renderArea.offset = {0, 0};
             renderPassInfo.renderArea.extent = swapChainExtent;
@@ -262,6 +268,11 @@ namespace sckz {
     }
 
     std::vector<VkCommandBuffer> & Model::GetCommandBuffers() {
+        if(!hasCommandBuffer) {
+            CreateCommandBuffers();
+        }
+
+        hasCommandBuffer = true;
         return commandBuffers;
     }
 

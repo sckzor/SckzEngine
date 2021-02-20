@@ -220,10 +220,6 @@ namespace sckz {
         return descriptorSetLayout;
     }
 
-    VkRenderPass Pipeline::GetRenderPass() {
-        return *renderPass;
-    }
-
     VkPipeline Pipeline::GetPipeline() {
         return pipeline;
     }

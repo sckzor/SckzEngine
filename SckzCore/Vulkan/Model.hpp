@@ -34,6 +34,8 @@ namespace sckz {
         VkExtent2D                     swapChainExtent;
         uint32_t                       numSwapChainImages;
         VkQueue                      * queue;
+        VkRenderPass                 * renderPass;
+        bool                           hasCommandBuffer;
 
         const char                   * textureFileName;
         const char                   * modelFileName;
@@ -42,6 +44,7 @@ namespace sckz {
         void CreateModel            (const char                 * textureFileName, 
                                      const char                 * modelFileName, 
                                      VkCommandPool              & commandPool, 
+                                     VkRenderPass               & renderPass,
                                      VkDevice                   & device, 
                                      VkPhysicalDevice           & physicalDevice, 
                                      std::vector<VkFramebuffer> & swapChainFramebuffers,
@@ -58,6 +61,7 @@ namespace sckz {
         void CreateSwapResources    (Pipeline                   & pipeline,
                                      VkDescriptorPool           & descriptorPool,
                                      VkExtent2D                   swapChainExtent);
+        void CreateCommandBuffers   ();
 
     public:
         void LoadModel              ();
@@ -66,7 +70,6 @@ namespace sckz {
         void CreateUniformBuffers   ();
 
         void CreateDescriptorSets   ();
-        void CreateCommandBuffers   ();
 
     public:
         std::vector<VkCommandBuffer> & GetCommandBuffers ();

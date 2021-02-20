@@ -549,18 +549,18 @@ namespace sckz {
         }
     }
 
-    void Vulkan::CreateDescriptorPool() {
+    void Vulkan::CreateDescriptorPool(uint32_t size) {
         std::array<VkDescriptorPoolSize, 2> poolSizes{};
         poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        poolSizes[0].descriptorCount = static_cast<uint32_t>(swapChainImages.size() * 2);
+        poolSizes[0].descriptorCount = static_cast<uint32_t>(swapChainImages.size() * size);
         poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        poolSizes[1].descriptorCount = static_cast<uint32_t>(swapChainImages.size() * 2);
+        poolSizes[1].descriptorCount = static_cast<uint32_t>(swapChainImages.size() * size);
 
         VkDescriptorPoolCreateInfo poolInfo{};
         poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
         poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
         poolInfo.pPoolSizes = poolSizes.data();
-        poolInfo.maxSets = static_cast<uint32_t>(swapChainImages.size() * 2);
+        poolInfo.maxSets = static_cast<uint32_t>(swapChainImages.size() * size);
 
         if (vkCreateDescriptorPool(device, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
             throw std::runtime_error("failed to create descriptor pool!");
@@ -625,12 +625,6 @@ namespace sckz {
         vkDestroyCommandPool(device, commandPool, nullptr);
     }
 
-    void Vulkan::DestroyCommandBuffers() {
-        for(size_t i = 0; i < commandBuffers.size(); i++){
-            vkFreeCommandBuffers(device, commandPool, static_cast<uint32_t>(commandBuffers.size()), commandBuffers[i].data());
-        }
-    }
-
     void Vulkan::DestroyFramebuffers() {
         for (auto framebuffer : swapChainFramebuffers) {
             vkDestroyFramebuffer(device, framebuffer, nullptr);
@@ -663,7 +657,7 @@ namespace sckz {
         CreateColorResources();
         CreateDepthResources();
         CreateFramebuffers();
-        CreateDescriptorPool();
+        CreateDescriptorPool(2);
         CreateSyncObjects();
     }
 
@@ -693,13 +687,11 @@ namespace sckz {
         CreateColorResources();
         CreateDepthResources();
         CreateFramebuffers();
-        CreateDescriptorPool();
+        CreateDescriptorPool(2);
         for (int i = 0; i < models.size(); i++) {
             models[i]->CreateSwapResources(pipeline, descriptorPool, swapChainExtent);
         }
-        for(size_t i = 0; i< commandBuffers.size(); i++){
-            CreatePrimaryCmdBuffers();
-        }
+        CreatePrimaryCmdBuffers();
     }
 
     void Vulkan::DestroySwapResources() {
@@ -708,14 +700,13 @@ namespace sckz {
         depthImage.DestroyImage();
         colorImage.DestroyImage();
         DestroyFramebuffers();
-        DestroyCommandBuffers();
+        for (int i = 0; i < models.size(); i++) {
+            models[i]->DestroySwapResources();
+        }
         pipeline.DestroyPipeline();
         DestroyRenderPass();
         DestroyImageViews();
         DestroySwapChain();
-        for (int i = 0; i < models.size(); i++) {
-            models[i]->DestroySwapResources();
-        }
         DestroyDescriptorPool();
     }
 
@@ -723,78 +714,11 @@ namespace sckz {
         pipeline.CreatePipeline(device, swapChainExtent, renderPass, msaaSamples, vertexFile, fragmentFile);
     }
 
-    void Vulkan::CreateModel(const char * modelFile, const char * modelFile2, const char * textureFile) {
+    Model & Vulkan::CreateModel(const char * modelFile, const char * textureFile) {
         models.push_back(new Model());
-        models.push_back(new Model());
-        models[0]->CreateModel(textureFile, modelFile, commandPool, device, physicalDevice, swapChainFramebuffers, pipeline, descriptorPool, swapChainExtent, swapChainImages.size(), graphicsQueue);
-        models[1]->CreateModel(textureFile, modelFile2, commandPool, device, physicalDevice, swapChainFramebuffers, pipeline, descriptorPool, swapChainExtent, swapChainImages.size(), graphicsQueue);
-        commandBuffers.resize(models.size());
+        models[models.size() - 1]->CreateModel(textureFile, modelFile, commandPool, renderPass, device, physicalDevice, swapChainFramebuffers, pipeline, descriptorPool, swapChainExtent, swapChainImages.size(), graphicsQueue);
         CreatePrimaryCmdBuffers();
-    }
-
-    void Vulkan::CreateCommandBuffers(size_t j) {
-        commandBuffers[j].resize(swapChainFramebuffers.size());
-
-        VkCommandBufferAllocateInfo allocInfo{};
-        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        allocInfo.commandPool = commandPool;
-        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
-        allocInfo.commandBufferCount = (uint32_t) commandBuffers[j].size();
-
-        if (vkAllocateCommandBuffers(device, &allocInfo, commandBuffers[j].data()) != VK_SUCCESS) {
-            throw std::runtime_error("failed to allocate command buffers!");
-        }
-
-        for (size_t i = 0; i < commandBuffers[j].size(); i++) {
-            VkCommandBufferBeginInfo beginInfo{};
-            beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-            beginInfo.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
-
-            VkCommandBufferInheritanceInfo inheritanceInfo {};
-			inheritanceInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
-            inheritanceInfo.renderPass = renderPass;
-            // Secondary command buffer also use the currently active framebuffer
-            inheritanceInfo.framebuffer = (swapChainFramebuffers)[i];
-
-            beginInfo.pInheritanceInfo = & inheritanceInfo;
-
-            if (vkBeginCommandBuffer(commandBuffers[j][i], &beginInfo) != VK_SUCCESS) {
-                throw std::runtime_error("failed to begin recording command buffer!");
-            }
-
-            VkRenderPassBeginInfo renderPassInfo{};
-            renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            renderPassInfo.renderPass = renderPass;
-            renderPassInfo.framebuffer = (swapChainFramebuffers)[i];
-            renderPassInfo.renderArea.offset = {0, 0};
-            renderPassInfo.renderArea.extent = swapChainExtent;
-
-            std::array<VkClearValue, 2> clearValues{};
-            clearValues[0].color = {0.0f, 0.0f, 0.0f, 1.0f};
-            clearValues[1].depthStencil = {1.0f, 0};
-
-            renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-            renderPassInfo.pClearValues = clearValues.data();
-
-                vkCmdBindPipeline(commandBuffers[j][i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.GetPipeline());
-
-                VkBuffer vertexBuffer[1];
-                VkDeviceSize offsets[] = {0};
-
-                vertexBuffer[0] = models[j]->GetVertexBuffer().GetBuffer();
-
-                vkCmdBindVertexBuffers(commandBuffers[j][i], 0, 1, vertexBuffer, offsets);
-
-                vkCmdBindIndexBuffer(commandBuffers[j][i], models[j]->GetIndexBuffer().GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
-
-                vkCmdBindDescriptorSets(commandBuffers[j][i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.GetPieplineLayout(), 0, 1, &models[j]->GetDescriptorSets()[i], 0, nullptr);
-
-                vkCmdDrawIndexed(commandBuffers[j][i], static_cast<uint32_t>(models[j]->GetNumIndices()), 1, 0, 0, 0);
-            
-            if (vkEndCommandBuffer(commandBuffers[j][i]) != VK_SUCCESS) {
-                throw std::runtime_error("failed to record command buffer!");
-            }
-        }
+        return * models[models.size() - 1];
     }
 
     void Vulkan::CreatePrimaryCmdBuffers() {
@@ -833,14 +757,9 @@ namespace sckz {
             renderPassInfo.pClearValues = clearValues.data();
 
             vkCmdBeginRenderPass(primaryCmdBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
-
-                for(uint32_t j = 0; j < models.size(); j++){
-                    CreateCommandBuffers(j);
-                }
-
                 std::vector<VkCommandBuffer> correctBuffers;
-                for(size_t j = 0; j < commandBuffers.size(); j++){
-                    correctBuffers.push_back(commandBuffers[j][i]);
+                for(size_t j = 0; j < models.size(); j++){
+                    correctBuffers.push_back((models[j]->GetCommandBuffers())[i]);
                 }
 
                 vkCmdExecuteCommands(primaryCmdBuffers[i], correctBuffers.size(), correctBuffers.data());

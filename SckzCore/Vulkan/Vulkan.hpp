@@ -51,8 +51,8 @@ namespace sckz {
         VkExtent2D                   swapChainExtent;
         std::vector<VkFramebuffer>   swapChainFramebuffers;
 
-        std::vector<std::vector
-        <VkCommandBuffer>>           commandBuffers;
+        //std::vector<std::vector
+        //<VkCommandBuffer>>           commandBuffers;
 
         std::vector<VkCommandBuffer> primaryCmdBuffers;
 
@@ -65,7 +65,7 @@ namespace sckz {
         Image                        depthImage;
 
         Pipeline                     pipeline;
-        std::vector<Model *>           models;
+        std::vector<Model *>         models;
 
         std::vector<VkSemaphore>     imageAvailableSemaphores;
         std::vector<VkSemaphore>     renderFinishedSemaphores;
@@ -123,12 +123,11 @@ namespace sckz {
         void CreateImageViews       ();
         void CreateRenderPass       ();
         void CreateCommandPool      ();
-        void CreateCommandBuffers   (size_t buffer);
         void CreatePrimaryCmdBuffers();
         void CreateColorResources   ();
         void CreateDepthResources   ();
         void CreateFramebuffers     ();
-        void CreateDescriptorPool   ();
+        void CreateDescriptorPool   (uint32_t size);
         void CreateSyncObjects      ();
 
     private:
@@ -144,7 +143,6 @@ namespace sckz {
         void DestroyImageViews      ();
         void DestroyRenderPass      ();
         void DestroyCommandPool     ();
-        void DestroyCommandBuffers  ();
         void DestroyFramebuffers    ();
         void DestroyDescriptorPool  ();
         void DestroySyncObjects     ();
@@ -158,8 +156,7 @@ namespace sckz {
         void CreatePipeline         (const char * vertexFile,
                                      const char * fragmentFile);
 
-        void CreateModel            (const char * modelFile,
-                                     const char * modelFile2, 
+        Model & CreateModel         (const char * modelFile,
                                      const char * textureFile);
     };
 }
