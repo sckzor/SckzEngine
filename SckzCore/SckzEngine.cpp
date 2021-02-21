@@ -8,7 +8,7 @@ int main() {
     vkan.CreatePipeline("vertex.spv", "fragment.spv");
     sckz::Model m1 = vkan.CreateModel("flare.obj", "placeholder.png");
     sckz::Model m2 = vkan.CreateModel("viking_room.obj", "placeholder.png");
-    //sckz::Model m3 = vkan.CreateModel("viking_room.obj", "placeholder.png");
+    sckz::Model m3 = vkan.CreateModel("untitled.obj", "placeholder.png");
     
     while(!win.QueryClose()) {
         win.Update();

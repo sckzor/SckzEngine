@@ -548,7 +548,7 @@ namespace sckz {
             }
         }
     }
-
+    /*
     void Vulkan::CreateDescriptorPool(uint32_t size) {
         std::array<VkDescriptorPoolSize, 2> poolSizes{};
         poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -566,7 +566,7 @@ namespace sckz {
             throw std::runtime_error("failed to create descriptor pool!");
         }
     }
-
+    */
     void Vulkan::CreateSyncObjects() {
         imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
@@ -630,11 +630,11 @@ namespace sckz {
             vkDestroyFramebuffer(device, framebuffer, nullptr);
         }
     }
-
+    /*
     void Vulkan::DestroyDescriptorPool() {
         vkDestroyDescriptorPool(device, descriptorPool, nullptr);
     }
-
+    */
     void Vulkan::DestroySyncObjects() {
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
             vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
@@ -657,7 +657,7 @@ namespace sckz {
         CreateColorResources();
         CreateDepthResources();
         CreateFramebuffers();
-        CreateDescriptorPool(2);
+        descriptorPool.CreateDescriptorPool(device, swapChainImages.size());
         CreateSyncObjects();
     }
 
@@ -687,7 +687,7 @@ namespace sckz {
         CreateColorResources();
         CreateDepthResources();
         CreateFramebuffers();
-        CreateDescriptorPool(2);
+        descriptorPool.CreateDescriptorPool(device, swapChainImages.size());
         for (int i = 0; i < models.size(); i++) {
             models[i]->CreateSwapResources(pipeline, descriptorPool, swapChainExtent);
         }
@@ -707,7 +707,7 @@ namespace sckz {
         DestroyRenderPass();
         DestroyImageViews();
         DestroySwapChain();
-        DestroyDescriptorPool();
+        descriptorPool.DestroyDescriptorPool();
     }
 
     void Vulkan::CreatePipeline(const char * vertexFile, const char * fragmentFile) {

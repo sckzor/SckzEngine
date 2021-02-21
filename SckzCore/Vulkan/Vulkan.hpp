@@ -5,6 +5,7 @@
 #include "Model.hpp"
 #include "Pipeline.hpp"
 #include "CommandBuffer.hpp"
+#include "DescriptorPool.hpp"
 
 namespace sckz {
     class Image;
@@ -51,14 +52,11 @@ namespace sckz {
         VkExtent2D                   swapChainExtent;
         std::vector<VkFramebuffer>   swapChainFramebuffers;
 
-        //std::vector<std::vector
-        //<VkCommandBuffer>>           commandBuffers;
-
         std::vector<VkCommandBuffer> primaryCmdBuffers;
 
         VkRenderPass                 renderPass;
 
-        VkDescriptorPool             descriptorPool;
+        DescriptorPool               descriptorPool;
         VkCommandPool                commandPool;
 
         Image                        colorImage;
@@ -127,7 +125,7 @@ namespace sckz {
         void CreateColorResources   ();
         void CreateDepthResources   ();
         void CreateFramebuffers     ();
-        void CreateDescriptorPool   (uint32_t size);
+        //void CreateDescriptorPool   (uint32_t size);
         void CreateSyncObjects      ();
 
     private:
@@ -144,7 +142,7 @@ namespace sckz {
         void DestroyRenderPass      ();
         void DestroyCommandPool     ();
         void DestroyFramebuffers    ();
-        void DestroyDescriptorPool  ();
+        //void DestroyDescriptorPool  ();
         void DestroySyncObjects     ();
 
     public: // Public member functions

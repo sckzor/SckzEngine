@@ -8,7 +8,7 @@ namespace sckz {
                             VkCommandPool & commandPool, VkRenderPass & renderPass,
                             VkDevice & device, VkPhysicalDevice & physicalDevice, 
                             std::vector<VkFramebuffer> & swapChainFramebuffers, 
-                            Pipeline & pipeline, VkDescriptorPool & descriptorPool, 
+                            Pipeline & pipeline, DescriptorPool & descriptorPool, 
                             VkExtent2D swapChainExtent, uint32_t numSwapChainImages,
                             VkQueue & queue) {
         this->textureFileName = textureFileName;
@@ -44,7 +44,7 @@ namespace sckz {
         texture.DestroyImage();
     }
 
-    void Model::CreateSwapResources(Pipeline & pipeline, VkDescriptorPool & descriptorPool, VkExtent2D swapChainExtent) {
+    void Model::CreateSwapResources(Pipeline & pipeline, DescriptorPool & descriptorPool, VkExtent2D swapChainExtent) {
         this->descriptorPool  = & descriptorPool;
         this->pipeline        = & pipeline;
         this->swapChainExtent =   swapChainExtent;
@@ -160,7 +160,7 @@ namespace sckz {
         std::vector<VkDescriptorSetLayout> layouts(swapChainFramebuffers->size(), pipeline->GetDescriptorSetLayout());
         VkDescriptorSetAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-        allocInfo.descriptorPool = *descriptorPool;
+        allocInfo.descriptorPool = descriptorPool->GetDescriptorPool();
         allocInfo.descriptorSetCount = static_cast<uint32_t>(swapChainFramebuffers->size());
         allocInfo.pSetLayouts = layouts.data();
 

@@ -4,6 +4,7 @@
 #include "Image.hpp"
 #include "Vertex.hpp"
 #include "Pipeline.hpp"
+#include "DescriptorPool.hpp"
 
 namespace sckz {
     struct UniformBufferObject {
@@ -28,7 +29,7 @@ namespace sckz {
         VkDevice                     * device;
         VkPhysicalDevice             * physicalDevice;
         VkCommandPool                * commandPool;
-        VkDescriptorPool             * descriptorPool;
+        DescriptorPool               * descriptorPool;
         Pipeline                     * pipeline;
         std::vector<VkFramebuffer>   * swapChainFramebuffers;
         VkExtent2D                     swapChainExtent;
@@ -49,7 +50,7 @@ namespace sckz {
                                      VkPhysicalDevice           & physicalDevice, 
                                      std::vector<VkFramebuffer> & swapChainFramebuffers,
                                      Pipeline                   & pipeline,
-                                     VkDescriptorPool           & descriptorPool,
+                                     DescriptorPool             & descriptorPool,
                                      VkExtent2D                   swapChainExtent,
                                      uint32_t                     numSwapChainImages,
                                      VkQueue                    & queue);
@@ -59,7 +60,7 @@ namespace sckz {
 
         void DestroySwapResources   ();
         void CreateSwapResources    (Pipeline                   & pipeline,
-                                     VkDescriptorPool           & descriptorPool,
+                                     DescriptorPool             & descriptorPool,
                                      VkExtent2D                   swapChainExtent);
         void CreateCommandBuffers   ();
 
