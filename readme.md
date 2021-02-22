@@ -10,7 +10,7 @@ A Vulkan games engine by Sckzor
 - [x] Proper makefile.
 - [x] Basic destruction and memory leak prevention.
 - [ ] Make the pipeline a "pipeline" class rather than a "graphics pipeline" class.
-- [ ] Multiple Object Rendering.
+- [x] Multiple Object Rendering.
 - [ ] Memory management.
 - [ ] Instanced Rendering.
 - [ ] FBO filters.
