@@ -1,8 +1,10 @@
 #pragma once
 #include "../Include.hpp"
 
-namespace sckz {
-    class Window {
+namespace sckz
+{
+    class Window
+    {
     private: // Private class members
         GLFWwindow * window;
         bool         resized = false;
@@ -17,7 +19,6 @@ namespace sckz {
         VkExtent2D   GetSize();
 
     public: // Public static functions
-        static void  FramebufferResizeCallback(GLFWwindow * window, int width, int height);
-    
+        static void FramebufferResizeCallback(GLFWwindow * window, int width, int height);
     };
-}
+} // namespace sckz

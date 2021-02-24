@@ -1,24 +1,25 @@
 #pragma once
 #include "../Include.hpp"
 
-namespace sckz {
-    class DescriptorPool{
+namespace sckz
+{
+    class DescriptorPool
+    {
     private:
-        uint32_t allocatedPools = 0;
-        static const uint32_t size_inc = 2;
+        uint32_t                        allocatedPools = 0;
+        static const uint32_t           size_inc       = 2;
         std::vector<VkDescriptorPool *> pools;
 
     private:
-        uint32_t numSwapChainImages;
+        uint32_t   numSwapChainImages;
         VkDevice * device;
 
     public:
-        void CreateDescriptorPool(VkDevice & device, uint32_t numSwapChainImages);
-        void DestroyDescriptorPool();
-        VkDescriptorPool &
-         GetDescriptorPool();
+        void               CreateDescriptorPool(VkDevice & device, uint32_t numSwapChainImages);
+        void               DestroyDescriptorPool();
+        VkDescriptorPool & GetDescriptorPool();
+
     private:
         void CreatePool();
-
     };
-}
+} // namespace sckz

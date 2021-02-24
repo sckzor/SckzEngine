@@ -1,6 +1,7 @@
 #include "SckzEngine.hpp"
 
-int main() {
+int main()
+{
     sckz::Window win;
     win.CreateWindow("SckzEngine", 800, 600);
     sckz::Vulkan vkan;
@@ -9,8 +10,9 @@ int main() {
     sckz::Model m1 = vkan.CreateModel("flare.obj", "placeholder.png");
     sckz::Model m2 = vkan.CreateModel("viking_room.obj", "placeholder.png");
     sckz::Model m3 = vkan.CreateModel("untitled.obj", "placeholder.png");
-    
-    while(!win.QueryClose()) {
+
+    while (!win.QueryClose())
+    {
         win.Update();
         vkan.Update();
     }

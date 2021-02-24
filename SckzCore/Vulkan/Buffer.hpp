@@ -1,39 +1,36 @@
 #pragma once
 #include "../Include.hpp"
-#include "MemoryHelper.hpp"
 #include "CommandBuffer.hpp"
+#include "MemoryHelper.hpp"
 
-namespace sckz {
-    class Buffer {
+namespace sckz
+{
+    class Buffer
+    {
     private:
-        VkBuffer        buffer;
-        VkDeviceMemory  bufferMemory;
-        VkDevice *      device;
-        uint32_t        size;
-        VkQueue  *      queue;
+        VkBuffer       buffer;
+        VkDeviceMemory bufferMemory;
+        VkDevice *     device;
+        uint32_t       size;
+        VkQueue *      queue;
 
     public:
-        void CreateBuffer       (VkPhysicalDevice &     physicalDevice,
-                                 VkDevice         &     device, 
-                                 uint32_t               size, 
-                                 VkBufferUsageFlags     usage, 
-                                 VkMemoryPropertyFlags  properties,
-                                 VkQueue          &     queue);
+        void CreateBuffer(VkPhysicalDevice &    physicalDevice,
+                          VkDevice &            device,
+                          uint32_t              size,
+                          VkBufferUsageFlags    usage,
+                          VkMemoryPropertyFlags properties,
+                          VkQueue &             queue);
 
-        void CopyBufferToBuffer (Buffer        &        buffer, 
-                                 VkCommandPool &        pool);
+        void CopyBufferToBuffer(Buffer & buffer, VkCommandPool & pool);
 
-        void CopyBufferToImage  (VkImage       &        image, 
-                                 VkCommandPool &        pool,
-                                 uint32_t               width,
-                                 uint32_t               height);
+        void CopyBufferToImage(VkImage & image, VkCommandPool & pool, uint32_t width, uint32_t height);
 
-        void CopyDataToBuffer   (void          *        data,
-                                 uint32_t               dataSize);
+        void CopyDataToBuffer(void * data, uint32_t dataSize);
 
-        void DestroyBuffer      ();
+        void DestroyBuffer();
 
     public:
-        VkBuffer GetBuffer      ();
+        VkBuffer GetBuffer();
     };
-}
+} // namespace sckz

@@ -1,82 +1,83 @@
 #pragma once
 #include "../Include.hpp"
 #include "Buffer.hpp"
-#include "Image.hpp"
-#include "Vertex.hpp"
-#include "Pipeline.hpp"
 #include "DescriptorPool.hpp"
+#include "Image.hpp"
+#include "Pipeline.hpp"
+#include "Vertex.hpp"
 
-namespace sckz {
-    struct UniformBufferObject {
+namespace sckz
+{
+    struct UniformBufferObject
+    {
         alignas(16) glm::mat4 model;
         alignas(16) glm::mat4 view;
         alignas(16) glm::mat4 proj;
     };
-    class Model {
+    class Model
+    {
     private:
-        Image                          texture;
+        Image texture;
 
-        std::vector<Vertex>            vertices;
-        std::vector<uint32_t>          indices;
+        std::vector<Vertex>   vertices;
+        std::vector<uint32_t> indices;
 
-        Buffer                         vertexBuffer;
-        Buffer                         indexBuffer;
-        std::vector<Buffer>            uniformBuffers;
+        Buffer              vertexBuffer;
+        Buffer              indexBuffer;
+        std::vector<Buffer> uniformBuffers;
 
-        std::vector<VkDescriptorSet>   descriptorSets;
-        std::vector<VkCommandBuffer>   commandBuffers;
+        std::vector<VkDescriptorSet> descriptorSets;
+        std::vector<VkCommandBuffer> commandBuffers;
 
-        VkDevice                     * device;
-        VkPhysicalDevice             * physicalDevice;
-        VkCommandPool                * commandPool;
-        DescriptorPool               * descriptorPool;
-        Pipeline                     * pipeline;
-        std::vector<VkFramebuffer>   * swapChainFramebuffers;
-        VkExtent2D                     swapChainExtent;
-        uint32_t                       numSwapChainImages;
-        VkQueue                      * queue;
-        VkRenderPass                 * renderPass;
-        bool                           hasCommandBuffer;
+        VkDevice *                   device;
+        VkPhysicalDevice *           physicalDevice;
+        VkCommandPool *              commandPool;
+        DescriptorPool *             descriptorPool;
+        Pipeline *                   pipeline;
+        std::vector<VkFramebuffer> * swapChainFramebuffers;
+        VkExtent2D                   swapChainExtent;
+        uint32_t                     numSwapChainImages;
+        VkQueue *                    queue;
+        VkRenderPass *               renderPass;
+        bool                         hasCommandBuffer;
 
-        const char                   * textureFileName;
-        const char                   * modelFileName;
-    
-    public:
-        void CreateModel            (const char                 * textureFileName, 
-                                     const char                 * modelFileName, 
-                                     VkCommandPool              & commandPool, 
-                                     VkRenderPass               & renderPass,
-                                     VkDevice                   & device, 
-                                     VkPhysicalDevice           & physicalDevice, 
-                                     std::vector<VkFramebuffer> & swapChainFramebuffers,
-                                     Pipeline                   & pipeline,
-                                     DescriptorPool             & descriptorPool,
-                                     VkExtent2D                   swapChainExtent,
-                                     uint32_t                     numSwapChainImages,
-                                     VkQueue                    & queue);
-        void DestroyModel           ();
-
-        void Update                 (uint32_t                     currentImage);
-
-        void DestroySwapResources   ();
-        void CreateSwapResources    (Pipeline                   & pipeline,
-                                     DescriptorPool             & descriptorPool,
-                                     VkExtent2D                   swapChainExtent);
-        void CreateCommandBuffers   ();
+        const char * textureFileName;
+        const char * modelFileName;
 
     public:
-        void LoadModel              ();
-        void CreateVertexBuffer     ();
-        void CreateIndexBuffer      ();
-        void CreateUniformBuffers   ();
+        void CreateModel(const char *                 textureFileName,
+                         const char *                 modelFileName,
+                         VkCommandPool &              commandPool,
+                         VkRenderPass &               renderPass,
+                         VkDevice &                   device,
+                         VkPhysicalDevice &           physicalDevice,
+                         std::vector<VkFramebuffer> & swapChainFramebuffers,
+                         Pipeline &                   pipeline,
+                         DescriptorPool &             descriptorPool,
+                         VkExtent2D                   swapChainExtent,
+                         uint32_t                     numSwapChainImages,
+                         VkQueue &                    queue);
+        void DestroyModel();
 
-        void CreateDescriptorSets   ();
+        void Update(uint32_t currentImage);
+
+        void DestroySwapResources();
+        void CreateSwapResources(Pipeline & pipeline, DescriptorPool & descriptorPool, VkExtent2D swapChainExtent);
+        void CreateCommandBuffers();
 
     public:
-        std::vector<VkCommandBuffer> & GetCommandBuffers ();
-        Buffer                         GetIndexBuffer    ();
-        Buffer                         GetVertexBuffer   ();
-        std::vector<VkDescriptorSet> & GetDescriptorSets ();
-        uint32_t                       GetNumIndices     ();
+        void LoadModel();
+        void CreateVertexBuffer();
+        void CreateIndexBuffer();
+        void CreateUniformBuffers();
+
+        void CreateDescriptorSets();
+
+    public:
+        std::vector<VkCommandBuffer> & GetCommandBuffers();
+        Buffer                         GetIndexBuffer();
+        Buffer                         GetVertexBuffer();
+        std::vector<VkDescriptorSet> & GetDescriptorSets();
+        uint32_t                       GetNumIndices();
     };
-}
+} // namespace sckz

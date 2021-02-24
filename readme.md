@@ -24,7 +24,7 @@ A Vulkan games engine by Sckzor
 - [ ] Networking support.
 - [ ] Video support for cut scenes and similar.
 - [ ] Adding more classes.
-- [ ] FORMATING!
+- [x] FORMATING!
 
 ### 3rd Priority
 
@@ -32,7 +32,13 @@ A Vulkan games engine by Sckzor
 - [ ] Support for other platorms.
 
 ## Known issues and bugs
+
 - [ ] The sampler does not need to be recreated with every texture, one for all of them is fine.
+
+## Build tools
+
+- G++ is required to build the C++ code
+- clang-format is needed to format all of the code that you might add
 
 ## Image of the Engine in action
 
