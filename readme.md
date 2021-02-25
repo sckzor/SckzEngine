@@ -4,20 +4,22 @@ A Vulkan games engine by Sckzor
 
 ## Progress on the engine
 
-### Required
+### 1st Priority
 
 - [x] Basic Vulkan creation and initialization.
 - [x] Proper makefile.
 - [x] Basic destruction and memory leak prevention.
-- [ ] Make the pipeline a "pipeline" class rather than a "graphics pipeline" class.
+- [ ] Change the "pipeline" class to "graphics pipeline" class and make the pipeline swapable.
 - [x] Multiple Object Rendering.
 - [ ] Memory management.
+- [ ] The ability to move, scale and rotate objects at will instead of having them just spin.
 - [ ] Instanced Rendering.
 - [ ] FBO filters.
 - [ ] Simple GUIs.
 - [ ] Lighting.
 - [ ] Ray Tracing.
 - [ ] Animation.
+- [ ] Optimize, Optimize, Optimize
 
 ### 2nd Priority
 
@@ -33,7 +35,7 @@ A Vulkan games engine by Sckzor
 
 ## Known issues and bugs
 
-- [ ] The sampler does not need to be recreated with every texture, one for all of them is fine.
+- [ ] The sampler does not need to be recreated with every texture, one for all of the textures is fine.
 
 ## Build tools
 

@@ -6,10 +6,10 @@ int main()
     win.CreateWindow("SckzEngine", 800, 600);
     sckz::Vulkan vkan;
     vkan.CreateVulkan(win);
-    vkan.CreatePipeline("Resources/vertex.spv", "Resources/fragment.spv");
-    sckz::Model m1 = vkan.CreateModel("Resources/flare.obj", "Resources/placeholder.png");
-    sckz::Model m2 = vkan.CreateModel("Resources/viking_room.obj", "Resources/placeholder.png");
-    sckz::Model m3 = vkan.CreateModel("Resources/untitled.obj", "Resources/placeholder.png");
+    sckz::GraphicsPipeline p  = vkan.CreatePipeline("Resources/simple_vertex.spv", "Resources/simple_fragment.spv");
+    sckz::Model            m1 = vkan.CreateModel("Resources/flare.obj", "Resources/placeholder.png", p);
+    sckz::Model            m2 = vkan.CreateModel("Resources/viking_room.obj", "Resources/placeholder.png", p);
+    sckz::Model            m3 = vkan.CreateModel("Resources/untitled.obj", "Resources/placeholder.png", p);
 
     while (!win.QueryClose())
     {

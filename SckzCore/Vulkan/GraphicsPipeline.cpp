@@ -1,13 +1,13 @@
-#include "Pipeline.hpp"
+#include "GraphicsPipeline.hpp"
 
 namespace sckz
 {
-    void Pipeline::CreatePipeline(VkDevice &            device,
-                                  VkExtent2D            extent,
-                                  VkRenderPass &        renderPass,
-                                  VkSampleCountFlagBits msaaSamples,
-                                  const char *          vertexFile,
-                                  const char *          fragmentFile)
+    void GraphicsPipeline::CreatePipeline(VkDevice &            device,
+                                          VkExtent2D            extent,
+                                          VkRenderPass &        renderPass,
+                                          VkSampleCountFlagBits msaaSamples,
+                                          const char *          vertexFile,
+                                          const char *          fragmentFile)
     {
         this->device       = &device;
         this->extent       = extent;
@@ -19,10 +19,10 @@ namespace sckz
         CreateGraphicsPipeline();
     }
 
-    void Pipeline::CreatePipeline(VkDevice &            device,
-                                  VkExtent2D            extent,
-                                  VkRenderPass &        renderPass,
-                                  VkSampleCountFlagBits msaaSamples)
+    void GraphicsPipeline::CreatePipeline(VkDevice &            device,
+                                          VkExtent2D            extent,
+                                          VkRenderPass &        renderPass,
+                                          VkSampleCountFlagBits msaaSamples)
     {
         this->device      = &device;
         this->extent      = extent;
@@ -37,14 +37,14 @@ namespace sckz
         CreateGraphicsPipeline();
     }
 
-    void Pipeline::DestroyPipeline()
+    void GraphicsPipeline::DestroyPipeline()
     {
         vkDestroyDescriptorSetLayout(*this->device, this->descriptorSetLayout, nullptr);
         vkDestroyPipeline(*this->device, this->pipeline, nullptr);
         vkDestroyPipelineLayout(*this->device, this->pipelineLayout, nullptr);
     }
 
-    std::vector<char> Pipeline::ReadFile(const std::string & filename)
+    std::vector<char> GraphicsPipeline::ReadFile(const std::string & filename)
     {
         std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
@@ -64,7 +64,7 @@ namespace sckz
         return buffer;
     }
 
-    VkShaderModule Pipeline::CreateShaderModule(const std::vector<char> & code)
+    VkShaderModule GraphicsPipeline::CreateShaderModule(const std::vector<char> & code)
     {
         VkShaderModuleCreateInfo createInfo {};
         createInfo.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -80,7 +80,7 @@ namespace sckz
         return shaderModule;
     }
 
-    void Pipeline::CreateDescriptorSetLayout()
+    void GraphicsPipeline::CreateDescriptorSetLayout()
     {
         VkDescriptorSetLayoutBinding uboLayoutBinding {};
         uboLayoutBinding.binding            = 0;
@@ -108,7 +108,7 @@ namespace sckz
         }
     }
 
-    void Pipeline::CreateGraphicsPipeline()
+    void GraphicsPipeline::CreateGraphicsPipeline()
     {
         auto vertShaderCode = ReadFile(vertexFile);
         auto fragShaderCode = ReadFile(fragmentFile);
@@ -239,13 +239,13 @@ namespace sckz
         vkDestroyShaderModule(*device, vertShaderModule, nullptr);
     }
 
-    VkDescriptorSetLayout Pipeline::GetDescriptorSetLayout() { return descriptorSetLayout; }
+    VkDescriptorSetLayout GraphicsPipeline::GetDescriptorSetLayout() { return descriptorSetLayout; }
 
-    VkPipeline Pipeline::GetPipeline() { return pipeline; }
+    VkPipeline GraphicsPipeline::GetPipeline() { return pipeline; }
 
-    VkPipelineLayout Pipeline::GetPieplineLayout() { return pipelineLayout; }
+    VkPipelineLayout GraphicsPipeline::GetPieplineLayout() { return pipelineLayout; }
 
-    bool Pipeline::operator==(Pipeline & otherObject)
+    bool GraphicsPipeline::operator==(GraphicsPipeline & otherObject)
     {
         return (this->vertexFile == otherObject.vertexFile && this->fragmentFile == otherObject.fragmentFile);
     }

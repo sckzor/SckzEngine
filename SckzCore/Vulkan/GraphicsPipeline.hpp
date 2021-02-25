@@ -4,7 +4,7 @@
 
 namespace sckz
 {
-    class Pipeline
+    class GraphicsPipeline
     {
     private:
         VkDescriptorSetLayout descriptorSetLayout;
@@ -45,6 +45,6 @@ namespace sckz
         VkPipelineLayout      GetPieplineLayout();
 
     public:
-        bool operator==(Pipeline & otherObject);
+        bool operator==(GraphicsPipeline & otherObject);
     };
 } // namespace sckz

@@ -12,7 +12,7 @@ namespace sckz
                             VkDevice &                   device,
                             VkPhysicalDevice &           physicalDevice,
                             std::vector<VkFramebuffer> & swapChainFramebuffers,
-                            Pipeline &                   pipeline,
+                            GraphicsPipeline &           pipeline,
                             DescriptorPool &             descriptorPool,
                             VkExtent2D                   swapChainExtent,
                             uint32_t                     numSwapChainImages,
@@ -52,7 +52,9 @@ namespace sckz
         texture.DestroyImage();
     }
 
-    void Model::CreateSwapResources(Pipeline & pipeline, DescriptorPool & descriptorPool, VkExtent2D swapChainExtent)
+    void Model::CreateSwapResources(GraphicsPipeline & pipeline,
+                                    DescriptorPool &   descriptorPool,
+                                    VkExtent2D         swapChainExtent)
     {
         this->descriptorPool  = &descriptorPool;
         this->pipeline        = &pipeline;

@@ -746,11 +746,7 @@ namespace sckz
             vkDestroyFramebuffer(device, framebuffer, nullptr);
         }
     }
-    /*
-void Vulkan::DestroyDescriptorPool() {
-    vkDestroyDescriptorPool(device, descriptorPool, nullptr);
-}
-*/
+
     void Vulkan::DestroySyncObjects()
     {
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
@@ -804,14 +800,17 @@ void Vulkan::DestroyDescriptorPool() {
         CreateSwapChain();
         CreateImageViews();
         CreateRenderPass();
-        pipeline.CreatePipeline(device, swapChainExtent, renderPass, msaaSamples);
+        for (int i = 0; i < pipelines.size(); i++)
+        {
+            pipelines[i]->CreatePipeline(device, swapChainExtent, renderPass, msaaSamples);
+        }
         CreateColorResources();
         CreateDepthResources();
         CreateFramebuffers();
         descriptorPool.CreateDescriptorPool(device, swapChainImages.size());
         for (int i = 0; i < models.size(); i++)
         {
-            models[i]->CreateSwapResources(pipeline, descriptorPool, swapChainExtent);
+            // models[i]->CreateSwapResources(pipeline, descriptorPool, swapChainExtent);
         }
         CreatePrimaryCmdBuffers();
     }
@@ -827,19 +826,25 @@ void Vulkan::DestroyDescriptorPool() {
         {
             models[i]->DestroySwapResources();
         }
-        pipeline.DestroyPipeline();
+        for (int i = 0; i < pipelines.size(); i++)
+        {
+            pipelines[i]->DestroyPipeline();
+        }
         DestroyRenderPass();
         DestroyImageViews();
         DestroySwapChain();
         descriptorPool.DestroyDescriptorPool();
     }
 
-    void Vulkan::CreatePipeline(const char * vertexFile, const char * fragmentFile)
+    GraphicsPipeline & Vulkan::CreatePipeline(const char * vertexFile, const char * fragmentFile)
     {
-        pipeline.CreatePipeline(device, swapChainExtent, renderPass, msaaSamples, vertexFile, fragmentFile);
+        pipelines.push_back(new GraphicsPipeline());
+        pipelines[pipelines.size() - 1]
+            ->CreatePipeline(device, swapChainExtent, renderPass, msaaSamples, vertexFile, fragmentFile);
+        return *pipelines[pipelines.size() - 1];
     }
 
-    Model & Vulkan::CreateModel(const char * modelFile, const char * textureFile)
+    Model & Vulkan::CreateModel(const char * modelFile, const char * textureFile, GraphicsPipeline & pipeline)
     {
         models.push_back(new Model());
         models[models.size() - 1]->CreateModel(textureFile,

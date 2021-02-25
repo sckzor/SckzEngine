@@ -2,8 +2,8 @@
 #include "../Include.hpp"
 #include "Buffer.hpp"
 #include "DescriptorPool.hpp"
+#include "GraphicsPipeline.hpp"
 #include "Image.hpp"
-#include "Pipeline.hpp"
 #include "Vertex.hpp"
 
 namespace sckz
@@ -33,7 +33,7 @@ namespace sckz
         VkPhysicalDevice *           physicalDevice;
         VkCommandPool *              commandPool;
         DescriptorPool *             descriptorPool;
-        Pipeline *                   pipeline;
+        GraphicsPipeline *           pipeline;
         std::vector<VkFramebuffer> * swapChainFramebuffers;
         VkExtent2D                   swapChainExtent;
         uint32_t                     numSwapChainImages;
@@ -52,7 +52,7 @@ namespace sckz
                          VkDevice &                   device,
                          VkPhysicalDevice &           physicalDevice,
                          std::vector<VkFramebuffer> & swapChainFramebuffers,
-                         Pipeline &                   pipeline,
+                         GraphicsPipeline &           pipeline,
                          DescriptorPool &             descriptorPool,
                          VkExtent2D                   swapChainExtent,
                          uint32_t                     numSwapChainImages,
@@ -62,7 +62,9 @@ namespace sckz
         void Update(uint32_t currentImage);
 
         void DestroySwapResources();
-        void CreateSwapResources(Pipeline & pipeline, DescriptorPool & descriptorPool, VkExtent2D swapChainExtent);
+        void CreateSwapResources(GraphicsPipeline & pipeline,
+                                 DescriptorPool &   descriptorPool,
+                                 VkExtent2D         swapChainExtent);
         void CreateCommandBuffers();
 
     public:

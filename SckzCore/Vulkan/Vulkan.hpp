@@ -3,9 +3,9 @@
 #include "../Window/Window.hpp"
 #include "CommandBuffer.hpp"
 #include "DescriptorPool.hpp"
+#include "GraphicsPipeline.hpp"
 #include "Image.hpp"
 #include "Model.hpp"
-#include "Pipeline.hpp"
 
 namespace sckz
 {
@@ -63,8 +63,8 @@ namespace sckz
         Image colorImage;
         Image depthImage;
 
-        Pipeline             pipeline;
-        std::vector<Model *> models;
+        std::vector<GraphicsPipeline *> pipelines;
+        std::vector<Model *>            models;
 
         std::vector<VkSemaphore> imageAvailableSemaphores;
         std::vector<VkSemaphore> renderFinishedSemaphores;
@@ -125,7 +125,7 @@ namespace sckz
         void CreateFramebuffers();
         void CreateSyncObjects();
 
-    private:
+    private: // Swapchain recreation functions
         void RebuildSwapChain();
         void DestroySwapResources();
 
@@ -147,8 +147,8 @@ namespace sckz
         void Update();
 
     public:
-        void CreatePipeline(const char * vertexFile, const char * fragmentFile);
+        GraphicsPipeline & CreatePipeline(const char * vertexFile, const char * fragmentFile);
 
-        Model & CreateModel(const char * modelFile, const char * textureFile);
+        Model & CreateModel(const char * modelFile, const char * textureFile, GraphicsPipeline & pipeline);
     };
 } // namespace sckz
