@@ -14,6 +14,7 @@ namespace sckz
         alignas(16) glm::mat4 view;
         alignas(16) glm::mat4 proj;
     };
+
     class Model
     {
     private:
@@ -52,7 +53,7 @@ namespace sckz
                          VkDevice &                   device,
                          VkPhysicalDevice &           physicalDevice,
                          std::vector<VkFramebuffer> & swapChainFramebuffers,
-                         GraphicsPipeline &           pipeline,
+                         GraphicsPipeline *           pipeline,
                          DescriptorPool &             descriptorPool,
                          VkExtent2D                   swapChainExtent,
                          uint32_t                     numSwapChainImages,
@@ -62,9 +63,7 @@ namespace sckz
         void Update(uint32_t currentImage);
 
         void DestroySwapResources();
-        void CreateSwapResources(GraphicsPipeline & pipeline,
-                                 DescriptorPool &   descriptorPool,
-                                 VkExtent2D         swapChainExtent);
+        void CreateSwapResources(DescriptorPool & descriptorPool, VkExtent2D swapChainExtent);
         void CreateCommandBuffers();
 
     public:

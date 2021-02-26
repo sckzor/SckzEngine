@@ -810,7 +810,7 @@ namespace sckz
         descriptorPool.CreateDescriptorPool(device, swapChainImages.size());
         for (int i = 0; i < models.size(); i++)
         {
-            // models[i]->CreateSwapResources(pipeline, descriptorPool, swapChainExtent);
+            models[i]->CreateSwapResources(descriptorPool, swapChainExtent);
         }
         CreatePrimaryCmdBuffers();
     }
@@ -854,7 +854,7 @@ namespace sckz
                                                device,
                                                physicalDevice,
                                                swapChainFramebuffers,
-                                               pipeline,
+                                               &pipeline,
                                                descriptorPool,
                                                swapChainExtent,
                                                swapChainImages.size(),

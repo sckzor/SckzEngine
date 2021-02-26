@@ -12,7 +12,7 @@ namespace sckz
                             VkDevice &                   device,
                             VkPhysicalDevice &           physicalDevice,
                             std::vector<VkFramebuffer> & swapChainFramebuffers,
-                            GraphicsPipeline &           pipeline,
+                            GraphicsPipeline *           pipeline,
                             DescriptorPool &             descriptorPool,
                             VkExtent2D                   swapChainExtent,
                             uint32_t                     numSwapChainImages,
@@ -25,7 +25,7 @@ namespace sckz
         this->physicalDevice        = &physicalDevice;
         this->commandPool           = &commandPool;
         this->descriptorPool        = &descriptorPool;
-        this->pipeline              = &pipeline;
+        this->pipeline              = pipeline;
         this->swapChainFramebuffers = &swapChainFramebuffers;
         this->swapChainExtent       = swapChainExtent;
         this->numSwapChainImages    = numSwapChainImages;
@@ -52,12 +52,9 @@ namespace sckz
         texture.DestroyImage();
     }
 
-    void Model::CreateSwapResources(GraphicsPipeline & pipeline,
-                                    DescriptorPool &   descriptorPool,
-                                    VkExtent2D         swapChainExtent)
+    void Model::CreateSwapResources(DescriptorPool & descriptorPool, VkExtent2D swapChainExtent)
     {
         this->descriptorPool  = &descriptorPool;
-        this->pipeline        = &pipeline;
         this->swapChainExtent = swapChainExtent;
 
         CreateUniformBuffers();

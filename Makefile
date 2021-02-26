@@ -56,13 +56,10 @@ Resources/simple_vertex.spv: Shaders/simple_shader.vert
 	glslc Shaders/simple_shader.vert -o Resources/simple_vertex.spv
 
 
-BlueShaders: Resources/blue_vertex.spv Resources/blue_fragment.spv
+BlueShaders: Resources/blue_fragment.spv
 
 Resources/blue_fragment.spv: Shaders/blue_shader.frag
 	glslc Shaders/blue_shader.frag -o Resources/blue_fragment.spv
-
-Resources/blue_vertex.spv: Shaders/blue_shader.vert
-	glslc Shaders/blue_shader.vert -o Resources/blue_vertex.spv
 
 
 # Testing based information
