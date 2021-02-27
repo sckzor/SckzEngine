@@ -16,6 +16,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/hash.hpp>
 #include <iostream>
+#include <map>
 #include <optional>
 #include <set>
 #include <stdexcept>

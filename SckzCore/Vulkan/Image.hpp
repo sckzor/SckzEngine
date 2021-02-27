@@ -2,7 +2,7 @@
 #include "../Include.hpp"
 #include "Buffer.hpp"
 #include "CommandBuffer.hpp"
-#include "MemoryHelper.hpp"
+#include "Memory.hpp"
 
 namespace sckz
 {
@@ -10,9 +10,9 @@ namespace sckz
     {
     private:
         VkImage            image;
-        VkDeviceMemory     imageMemory;
         VkImageView        imageView;
         VkSampler          sampler;
+        SubBlock_t *       block;
         VkDevice *         device;
         VkPhysicalDevice * physicalDevice;
         VkFormat           format;
@@ -31,6 +31,7 @@ namespace sckz
                          VkMemoryPropertyFlags properties,
                          VkDevice &            device,
                          VkPhysicalDevice &    physicalDevice,
+                         Memory &              memory,
                          VkQueue &             queue);
 
         void CreateImage(VkDevice & device, VkImage & image, VkFormat & imageFormat, uint32_t mipLevels);
@@ -42,6 +43,7 @@ namespace sckz
         void CreateTextureImage(const char *       fileName,
                                 VkDevice &         device,
                                 VkPhysicalDevice & physicalDevice,
+                                Memory &           memory,
                                 VkCommandPool &    pool,
                                 VkQueue &          queue);
 

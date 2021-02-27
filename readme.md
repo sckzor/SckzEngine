@@ -9,7 +9,7 @@ A Vulkan games engine by Sckzor
 - [x] Basic Vulkan creation and initialization.
 - [x] Proper makefile.
 - [x] Basic destruction and memory leak prevention.
-- [x] Change the "pipeline" class to "graphics pipeline" class and make the pipeline swapable.
+- [ ] Change the "pipeline" class to "graphics pipeline" class and make the pipeline swapable.
 - [x] Multiple Object Rendering.
 - [ ] Memory management.
 - [ ] The ability to move, scale and rotate objects at will instead of having them just spin.

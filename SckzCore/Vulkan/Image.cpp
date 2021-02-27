@@ -15,6 +15,7 @@ namespace sckz
                             VkMemoryPropertyFlags properties,
                             VkDevice &            device,
                             VkPhysicalDevice &    physicalDevice,
+                            Memory &              memory,
                             VkQueue &             queue)
     {
         this->device    = &device;
@@ -47,6 +48,7 @@ namespace sckz
         VkMemoryRequirements memRequirements;
         vkGetImageMemoryRequirements(*this->device, image, &memRequirements);
 
+        /*
         VkMemoryAllocateInfo allocInfo {};
         allocInfo.sType          = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         allocInfo.allocationSize = memRequirements.size;
@@ -57,8 +59,10 @@ namespace sckz
         {
             throw std::runtime_error("failed to allocate image memory!");
         }
+        */
 
-        vkBindImageMemory(*this->device, image, imageMemory, 0);
+        block = &memory.AllocateMemory(memRequirements, properties);
+        vkBindImageMemory(*this->device, image, *block->memory, 0);
     }
 
     void Image::CreateImage(VkDevice & device, VkImage & image, VkFormat & format, uint32_t mipLevels)
@@ -93,6 +97,7 @@ namespace sckz
     void Image::CreateTextureImage(const char *       fileName,
                                    VkDevice &         device,
                                    VkPhysicalDevice & physicalDevice,
+                                   Memory &           memory,
                                    VkCommandPool &    pool,
                                    VkQueue &          queue)
     {
@@ -112,6 +117,7 @@ namespace sckz
         Buffer stagingBuffer;
         stagingBuffer.CreateBuffer(*this->physicalDevice,
                                    *this->device,
+                                   memory,
                                    imageSize,
                                    VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
@@ -130,6 +136,7 @@ namespace sckz
                     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
                     *this->device,
                     *this->physicalDevice,
+                    memory,
                     queue); // queue is the PRIVATE queue
 
         TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, pool);
@@ -148,7 +155,7 @@ namespace sckz
         if (holdsRealImage)
         {
             vkDestroyImage(*device, image, nullptr);
-            vkFreeMemory(*device, imageMemory, nullptr);
+            vkFreeMemory(*device, *block->memory, nullptr);
         }
     }
 

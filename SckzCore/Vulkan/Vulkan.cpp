@@ -638,6 +638,7 @@ namespace sckz
                                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
                                device,
                                physicalDevice,
+                               memory,
                                graphicsQueue);
         colorImage.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
     }
@@ -656,6 +657,7 @@ namespace sckz
                                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
                                device,
                                physicalDevice,
+                               memory,
                                graphicsQueue);
         depthImage.CreateImageView(VK_IMAGE_ASPECT_DEPTH_BIT);
     }
@@ -772,6 +774,7 @@ namespace sckz
         CreateColorResources();
         CreateDepthResources();
         CreateFramebuffers();
+        memory.CreateMemory(device, physicalDevice, 20000000);
         descriptorPool.CreateDescriptorPool(device, swapChainImages.size());
         CreateSyncObjects();
     }
@@ -787,6 +790,7 @@ namespace sckz
 
         DestroySyncObjects();
         DestroyCommandPool();
+        memory.DestroyMemory();
         DestroyLogicalDevice();
         DestroyDebugMessenger();
         DestroySurface();
@@ -839,9 +843,8 @@ namespace sckz
     GraphicsPipeline & Vulkan::CreatePipeline(const char * vertexFile, const char * fragmentFile)
     {
         pipelines.push_back(new GraphicsPipeline());
-        pipelines[pipelines.size() - 1]
-            ->CreatePipeline(device, swapChainExtent, renderPass, msaaSamples, vertexFile, fragmentFile);
-        return *pipelines[pipelines.size() - 1];
+        pipelines.back()->CreatePipeline(device, swapChainExtent, renderPass, msaaSamples, vertexFile, fragmentFile);
+        return *pipelines.back();
     }
 
     Model & Vulkan::CreateModel(const char * modelFile, const char * textureFile, GraphicsPipeline & pipeline)

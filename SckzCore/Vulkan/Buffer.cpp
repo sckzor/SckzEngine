@@ -4,6 +4,7 @@ namespace sckz
 {
     void Buffer::CreateBuffer(VkPhysicalDevice &    physicalDevice,
                               VkDevice &            device,
+                              Memory &              memory,
                               uint32_t              size,
                               VkBufferUsageFlags    usage,
                               VkMemoryPropertyFlags properties,
@@ -12,6 +13,7 @@ namespace sckz
         this->device = &device;
         this->size   = size;
         this->queue  = &queue;
+
         VkBufferCreateInfo bufferInfo {};
         bufferInfo.sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         bufferInfo.size        = this->size;
@@ -25,26 +27,23 @@ namespace sckz
 
         VkMemoryRequirements memRequirements;
         vkGetBufferMemoryRequirements(*this->device, buffer, &memRequirements);
-
+        /*
         VkMemoryAllocateInfo allocInfo {};
         allocInfo.sType          = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         allocInfo.allocationSize = memRequirements.size;
         allocInfo.memoryTypeIndex
-            = MemoryHelper::FindMemoryType(memRequirements.memoryTypeBits, properties, physicalDevice);
+            = Memory::FindMemoryType(memRequirements.memoryTypeBits, properties, physicalDevice);
 
         if (vkAllocateMemory(*this->device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to allocate buffer memory!");
         }
-
-        vkBindBufferMemory(*this->device, buffer, bufferMemory, 0);
+        */
+        block = &memory.AllocateMemory(memRequirements, properties);
+        vkBindBufferMemory(*this->device, buffer, *block->memory, block->offset);
     }
 
-    void Buffer::DestroyBuffer()
-    {
-        vkDestroyBuffer(*this->device, buffer, nullptr);
-        vkFreeMemory(*this->device, bufferMemory, nullptr);
-    }
+    void Buffer::DestroyBuffer() { vkDestroyBuffer(*this->device, buffer, nullptr); }
 
     void Buffer::CopyBufferToBuffer(Buffer & buffer, VkCommandPool & pool)
     {
@@ -92,9 +91,9 @@ namespace sckz
         }
 
         void * location;
-        vkMapMemory(*device, bufferMemory, 0, size, 0, &location);
+        vkMapMemory(*device, *block->memory, 0, size, 0, &location);
         memcpy(location, data, static_cast<size_t>(size));
-        vkUnmapMemory(*device, bufferMemory);
+        vkUnmapMemory(*device, *block->memory);
     }
 
     VkBuffer Buffer::GetBuffer() { return buffer; }

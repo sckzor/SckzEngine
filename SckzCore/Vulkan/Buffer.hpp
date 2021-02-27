@@ -1,22 +1,23 @@
 #pragma once
 #include "../Include.hpp"
 #include "CommandBuffer.hpp"
-#include "MemoryHelper.hpp"
+#include "Memory.hpp"
 
 namespace sckz
 {
     class Buffer
     {
     private:
-        VkBuffer       buffer;
-        VkDeviceMemory bufferMemory;
-        VkDevice *     device;
-        uint32_t       size;
-        VkQueue *      queue;
+        VkBuffer     buffer;
+        SubBlock_t * block;
+        VkDevice *   device;
+        uint32_t     size;
+        VkQueue *    queue;
 
     public:
         void CreateBuffer(VkPhysicalDevice &    physicalDevice,
                           VkDevice &            device,
+                          Memory &              memory,
                           uint32_t              size,
                           VkBufferUsageFlags    usage,
                           VkMemoryPropertyFlags properties,

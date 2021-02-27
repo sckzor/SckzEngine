@@ -48,6 +48,8 @@ namespace sckz
         VkQueue                  graphicsQueue;
         VkQueue                  presentQueue;
 
+        Memory memory;
+
         VkSwapchainKHR             swapChain;
         std::vector<Image>         swapChainImages;
         VkExtent2D                 swapChainExtent;
