@@ -3,22 +3,22 @@
 
 namespace sckz
 {
-    struct SubBlock
+    typedef struct SubBlock
     {
     public:
         uint32_t         offset;
         VkDeviceMemory * memory;
         uint32_t         size;
-        SubBlock_t *     next = nullptr;
-    } typedef SubBlock_t;
+        SubBlock *       next = nullptr;
+    } SubBlock_t;
 
-    struct Block
+    typedef struct Block
     {
-        VkDeviceMemory * memory;
-        SubBlock_t *     beginning;
-        uint32_t         remainingSize;
-        uint32_t         memoryType;
-    } typedef Block_t;
+        VkDeviceMemory memory;
+        SubBlock_t *   beginning;
+        uint32_t       remainingSize;
+        uint32_t       memoryType;
+    } Block_t;
 
     class Memory
     {
@@ -26,10 +26,10 @@ namespace sckz
         friend SubBlock_t;
 
     private:
-        std::vector<Block_t> blocks;
-        VkDevice *           device;
-        VkPhysicalDevice *   physicalDevice;
-        uint32_t             blockSize;
+        std::vector<Block_t *> blocks;
+        VkDevice *             device;
+        VkPhysicalDevice *     physicalDevice;
+        uint32_t               blockSize;
 
     public:
         static uint32_t FindMemoryType(uint32_t                typeFilter,

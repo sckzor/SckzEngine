@@ -40,6 +40,7 @@ namespace sckz
         uint32_t                     numSwapChainImages;
         VkQueue *                    queue;
         VkRenderPass *               renderPass;
+        Memory *                     memory;
         bool                         hasCommandBuffer;
 
         const char * textureFileName;
@@ -57,6 +58,7 @@ namespace sckz
                          DescriptorPool &             descriptorPool,
                          VkExtent2D                   swapChainExtent,
                          uint32_t                     numSwapChainImages,
+                         Memory &                     memory,
                          VkQueue &                    queue);
         void DestroyModel();
 

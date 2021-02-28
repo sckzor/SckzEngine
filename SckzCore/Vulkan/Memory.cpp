@@ -15,7 +15,6 @@ namespace sckz
     {
         VkPhysicalDeviceMemoryProperties memProperties;
         vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
-
         for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
         {
 
@@ -33,20 +32,22 @@ namespace sckz
         uint32_t memoryType = FindMemoryType(memoryRequirements.memoryTypeBits, properties, *physicalDevice);
         for (uint32_t i = 0; i < blocks.size(); i++)
         {
-            if (blocks[i].remainingSize >= memoryRequirements.size && memoryType == blocks[i].memoryType)
+            std::cout << memoryRequirements.size << " " << memoryRequirements.alignment << "\n";
+
+            if (blocks[i]->remainingSize >= memoryRequirements.size && memoryType == blocks[i]->memoryType)
             {
-                SubBlock_t * subBlock = blocks[i].beginning;
+                SubBlock_t * subBlock = blocks[i]->beginning;
                 while (subBlock->next != nullptr)
                 {
                     subBlock = subBlock->next;
                 }
-                blocks[i].remainingSize -= memoryRequirements.size;
-                SubBlock_t * newSubBlock = new SubBlock_t;
+                blocks[i]->remainingSize -= memoryRequirements.size;
+                SubBlock_t * newSubBlock = new SubBlock_t();
 
                 newSubBlock->size   = memoryRequirements.size;
                 newSubBlock->offset = subBlock->offset + subBlock->size;
                 newSubBlock->next   = nullptr;
-                newSubBlock->memory = blocks[i].memory;
+                newSubBlock->memory = &blocks[i]->memory;
 
                 subBlock->next = newSubBlock;
                 return *newSubBlock;
@@ -55,14 +56,14 @@ namespace sckz
 
         VkMemoryAllocateInfo allocInfo {};
         allocInfo.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        allocInfo.allocationSize  = memoryRequirements.size;
+        allocInfo.allocationSize  = blockSize;
         allocInfo.memoryTypeIndex = memoryType;
 
-        Block_t * block      = new Block_t;
-        block->beginning     = new SubBlock_t;
+        Block_t * block      = new Block_t();
+        block->beginning     = new SubBlock_t();
         block->memoryType    = memoryType;
         block->remainingSize = blockSize;
-        vkAllocateMemory(*this->device, &allocInfo, nullptr, block->memory);
+        vkAllocateMemory(*this->device, &allocInfo, nullptr, &block->memory);
 
         blocks.emplace_back(block);
 
@@ -73,7 +74,9 @@ namespace sckz
     {
         for (uint32_t i = 0; i < blocks.size(); i++)
         {
-            vkFreeMemory(*device, *blocks[i].memory, nullptr);
+            vkFreeMemory(*device, blocks[i]->memory, nullptr);
         }
     }
+
+    void Memory::DestroyMemory() { }
 } // namespace sckz

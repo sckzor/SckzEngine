@@ -767,6 +767,7 @@ namespace sckz
         CreateSurface();
         PickPhysicalDevice();
         CreateLogicalDevice();
+        memory.CreateMemory(device, physicalDevice, 332398592);
         CreateSwapChain();
         CreateImageViews();
         CreateRenderPass();
@@ -774,7 +775,6 @@ namespace sckz
         CreateColorResources();
         CreateDepthResources();
         CreateFramebuffers();
-        memory.CreateMemory(device, physicalDevice, 20000000);
         descriptorPool.CreateDescriptorPool(device, swapChainImages.size());
         CreateSyncObjects();
     }
@@ -790,6 +790,7 @@ namespace sckz
 
         DestroySyncObjects();
         DestroyCommandPool();
+        memory.FreeMemory();
         memory.DestroyMemory();
         DestroyLogicalDevice();
         DestroyDebugMessenger();
@@ -861,6 +862,7 @@ namespace sckz
                                                descriptorPool,
                                                swapChainExtent,
                                                swapChainImages.size(),
+                                               memory,
                                                graphicsQueue);
         CreatePrimaryCmdBuffers();
         return *models[models.size() - 1];

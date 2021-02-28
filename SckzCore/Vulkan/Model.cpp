@@ -16,6 +16,7 @@ namespace sckz
                             DescriptorPool &             descriptorPool,
                             VkExtent2D                   swapChainExtent,
                             uint32_t                     numSwapChainImages,
+                            Memory &                     memory,
                             VkQueue &                    queue)
     {
         this->textureFileName       = textureFileName;
@@ -30,10 +31,17 @@ namespace sckz
         this->swapChainExtent       = swapChainExtent;
         this->numSwapChainImages    = numSwapChainImages;
         this->queue                 = &queue;
+        this->memory                = &memory;
 
         this->hasCommandBuffer = false;
 
-        texture.CreateTextureImage(textureFileName, *this->device, *this->physicalDevice, commandPool, queue);
+        texture.CreateTextureImage(textureFileName,
+                                   *this->device,
+                                   *this->physicalDevice,
+                                   *this->memory,
+                                   commandPool,
+                                   queue);
+
         texture.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
         texture.CreateTextureSampler();
 
@@ -139,6 +147,7 @@ namespace sckz
         Buffer stagingBuffer;
         stagingBuffer.CreateBuffer(*physicalDevice,
                                    *device,
+                                   *memory,
                                    bufferSize,
                                    VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
@@ -148,6 +157,7 @@ namespace sckz
 
         vertexBuffer.CreateBuffer(*physicalDevice,
                                   *device,
+                                  *memory,
                                   bufferSize,
                                   VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                                   VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
@@ -165,6 +175,7 @@ namespace sckz
         Buffer stagingBuffer;
         stagingBuffer.CreateBuffer(*physicalDevice,
                                    *device,
+                                   *memory,
                                    bufferSize,
                                    VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
@@ -174,6 +185,7 @@ namespace sckz
 
         indexBuffer.CreateBuffer(*physicalDevice,
                                  *device,
+                                 *memory,
                                  bufferSize,
                                  VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
                                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
@@ -194,6 +206,7 @@ namespace sckz
         {
             uniformBuffers[i].CreateBuffer(*physicalDevice,
                                            *device,
+                                           *memory,
                                            bufferSize,
                                            VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
                                            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,

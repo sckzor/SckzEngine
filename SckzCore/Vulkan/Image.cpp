@@ -155,7 +155,7 @@ namespace sckz
         if (holdsRealImage)
         {
             vkDestroyImage(*device, image, nullptr);
-            vkFreeMemory(*device, *block->memory, nullptr);
+            // vkFreeMemory(*device, *block->memory, nullptr);
         }
     }
 
