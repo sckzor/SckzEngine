@@ -45,7 +45,8 @@ namespace sckz
                 SubBlock_t * newSubBlock = new SubBlock_t();
 
                 newSubBlock->size   = memoryRequirements.size;
-                newSubBlock->offset = subBlock->offset + subBlock->size;
+                newSubBlock->offset = (subBlock->offset + subBlock->size)
+                                    + (subBlock->offset + subBlock->size) / memoryRequirements.alignment;
                 newSubBlock->next   = nullptr;
                 newSubBlock->memory = &blocks[i]->memory;
 

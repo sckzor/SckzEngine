@@ -91,7 +91,7 @@ namespace sckz
         }
 
         void * location;
-        vkMapMemory(*device, *block->memory, 0, size, 0, &location);
+        vkMapMemory(*device, *block->memory, block->offset, size, 0, &location);
         memcpy(location, data, static_cast<size_t>(size));
         vkUnmapMemory(*device, *block->memory);
     }

@@ -62,7 +62,7 @@ namespace sckz
         */
 
         block = &memory.AllocateMemory(memRequirements, properties);
-        vkBindImageMemory(*this->device, image, *block->memory, 0);
+        vkBindImageMemory(*this->device, image, *block->memory, block->offset);
     }
 
     void Image::CreateImage(VkDevice & device, VkImage & image, VkFormat & format, uint32_t mipLevels)
