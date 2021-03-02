@@ -32,7 +32,7 @@ namespace sckz
         uint32_t memoryType = FindMemoryType(memoryRequirements.memoryTypeBits, properties, *physicalDevice);
         for (uint32_t i = 0; i < blocks.size(); i++)
         {
-            std::cout << memoryRequirements.size << " " << memoryRequirements.alignment << "\n";
+            // std::cout << memoryRequirements.size << " " << memoryRequirements.alignment << "\n";
 
             if (blocks[i]->remainingSize >= memoryRequirements.size && memoryType == blocks[i]->memoryType)
             {
@@ -44,9 +44,15 @@ namespace sckz
                 blocks[i]->remainingSize -= memoryRequirements.size;
                 SubBlock_t * newSubBlock = new SubBlock_t();
 
+                std::cout << (subBlock->offset + subBlock->size) << " "
+                          << (memoryRequirements.alignment
+                              - ((subBlock->offset + subBlock->size) % memoryRequirements.alignment))
+                          << std::endl;
+
                 newSubBlock->size   = memoryRequirements.size;
                 newSubBlock->offset = (subBlock->offset + subBlock->size)
-                                    + (subBlock->offset + subBlock->size) / memoryRequirements.alignment;
+                                    + (memoryRequirements.alignment
+                                       - ((subBlock->offset + subBlock->size) % memoryRequirements.alignment));
                 newSubBlock->next   = nullptr;
                 newSubBlock->memory = &blocks[i]->memory;
 
