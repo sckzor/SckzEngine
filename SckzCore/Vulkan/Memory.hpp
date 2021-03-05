@@ -10,6 +10,7 @@ namespace sckz
         VkDeviceMemory * memory;
         uint32_t         size;
         SubBlock *       next = nullptr;
+        bool             isFree;
     } SubBlock_t;
 
     typedef struct Block
