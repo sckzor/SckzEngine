@@ -255,7 +255,7 @@ namespace sckz
     {
         for (const auto & availablePresentMode : availablePresentModes)
         {
-            if (availablePresentMode == VK_PRESENT_MODE_IMMEDIATE_KHR)
+            if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
             {
                 return availablePresentMode;
             }
@@ -777,6 +777,9 @@ namespace sckz
         CreateFramebuffers();
         descriptorPool.CreateDescriptorPool(device, swapChainImages.size());
         CreateSyncObjects();
+        camera.CreateCamera(45, 0.1, 10, swapChainExtent);
+        camera.SetLocation(2, 2, 2);
+        camera.SetRoatation(-1, -1, -1);
     }
 
     void Vulkan::DestroyVulkan()
@@ -927,6 +930,7 @@ namespace sckz
 
     void Vulkan::Update()
     {
+        camera.SetRoatation(camera.GetRoatation().x, camera.GetRoatation().y + 0.01, camera.GetRoatation().z);
         vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
         uint32_t imageIndex;
@@ -949,7 +953,7 @@ namespace sckz
 
         for (int i = 0; i < models.size(); i++)
         {
-            models[i]->Update(imageIndex);
+            models[i]->Update(imageIndex, camera);
         }
 
         if (imagesInFlight[imageIndex] != VK_NULL_HANDLE)
@@ -985,7 +989,8 @@ namespace sckz
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
         presentInfo.waitSemaphoreCount = 1;
-        presentInfo.pWaitSemaphores    = signalSemaphores;
+
+        presentInfo.pWaitSemaphores = signalSemaphores;
 
         VkSwapchainKHR swapChains[] = { swapChain };
         presentInfo.swapchainCount  = 1;

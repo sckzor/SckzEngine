@@ -1,6 +1,7 @@
 #pragma once
 #include "../Include.hpp"
 #include "../Window/Window.hpp"
+#include "Camera.hpp"
 #include "CommandBuffer.hpp"
 #include "DescriptorPool.hpp"
 #include "GraphicsPipeline.hpp"
@@ -61,6 +62,8 @@ namespace sckz
 
         DescriptorPool descriptorPool;
         VkCommandPool  commandPool;
+
+        Camera camera;
 
         Image colorImage;
         Image depthImage;

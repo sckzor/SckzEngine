@@ -12,7 +12,7 @@ A Vulkan games engine by Sckzor
 - [x] Change the "pipeline" class to "graphics pipeline" class and make the pipeline swapable.
 - [x] Multiple Object Rendering.
 - [x] Memory management.
-- [ ] The ability to move, scale and rotate objects at will instead of having them just spin.
+- [ ] The ability to move, scale and rotate objects at will instead of having them just spin as well as adding a camera class.
 - [ ] Instanced Rendering.
 - [ ] FBO filters.
 - [ ] Simple GUIs.

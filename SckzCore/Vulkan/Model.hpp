@@ -1,6 +1,7 @@
 #pragma once
 #include "../Include.hpp"
 #include "Buffer.hpp"
+#include "Camera.hpp"
 #include "DescriptorPool.hpp"
 #include "GraphicsPipeline.hpp"
 #include "Image.hpp"
@@ -62,7 +63,7 @@ namespace sckz
                          VkQueue &                    queue);
         void DestroyModel();
 
-        void Update(uint32_t currentImage);
+        void Update(uint32_t currentImage, Camera & camera);
 
         void DestroySwapResources();
         void CreateSwapResources(DescriptorPool & descriptorPool, VkExtent2D swapChainExtent);
