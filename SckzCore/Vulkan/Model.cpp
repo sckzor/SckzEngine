@@ -35,6 +35,8 @@ namespace sckz
 
         this->hasCommandBuffer = false;
 
+        this->scale = glm::vec3(1.0f, 1.0f, 1.0f);
+
         texture.CreateTextureImage(textureFileName,
                                    *this->device,
                                    *this->physicalDevice,
@@ -85,15 +87,16 @@ namespace sckz
 
     void Model::Update(uint32_t currentImage, Camera & camera)
     {
-        static auto startTime = std::chrono::high_resolution_clock::now();
-
-        auto  currentTime = std::chrono::high_resolution_clock::now();
-        float time        = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
         UniformBufferObject ubo {};
-        ubo.model = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 0.0f, time * 0.1f));
-        ubo.view  = camera.GetView();
-        ubo.proj  = camera.GetProjection();
+        ubo.model = glm::scale(glm::mat4(1.0f), scale);
+        ubo.model = glm::translate(ubo.model, location);
+        ubo.model = glm::rotate(ubo.model, (rotation.x), location + glm::vec3(1.0, 0.0, 0.0));
+        ubo.model = glm::rotate(ubo.model, (rotation.y), location + glm::vec3(0.0, 1.0, 0.0));
+        ubo.model = glm::rotate(ubo.model, (rotation.z), location + glm::vec3(0.0, 0.0, 1.0));
+
+        ubo.view = camera.GetView();
+        ubo.proj = camera.GetProjection();
 
         uniformBuffers[currentImage].CopyDataToBuffer(&ubo, sizeof(ubo));
     }
@@ -341,6 +344,34 @@ namespace sckz
             }
         }
     }
+
+    void Model::SetLocation(float x, float y, float z)
+    {
+        location.x = x;
+        location.y = y;
+        location.z = z;
+        // UpdateUBOs();
+    }
+
+    void Model::SetRotation(float x, float y, float z)
+    {
+        rotation.x = x;
+        rotation.y = y;
+        rotation.z = z;
+        // UpdateUBOs();
+    }
+
+    void Model::SetScale(float x, float y, float z)
+    {
+        scale.x = x;
+        scale.y = y;
+        scale.z = z;
+        // UpdateUBOs();
+    }
+
+    glm::vec3 Model::GetLocation() { return location; }
+    glm::vec3 Model::GetRotation() { return rotation; }
+    glm::vec3 Model::GetScale() { return scale; }
 
     std::vector<VkCommandBuffer> & Model::GetCommandBuffers()
     {

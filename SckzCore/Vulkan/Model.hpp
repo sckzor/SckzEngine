@@ -44,6 +44,10 @@ namespace sckz
         Memory *                     memory;
         bool                         hasCommandBuffer;
 
+        glm::vec3 location;
+        glm::vec3 rotation;
+        glm::vec3 scale;
+
         const char * textureFileName;
         const char * modelFileName;
 
@@ -76,6 +80,15 @@ namespace sckz
         void CreateUniformBuffers();
 
         void CreateDescriptorSets();
+
+    public:
+        void SetLocation(float x, float y, float z);
+        void SetRotation(float x, float y, float z);
+        void SetScale(float x, float y, float z);
+
+        glm::vec3 GetLocation();
+        glm::vec3 GetRotation();
+        glm::vec3 GetScale();
 
     public:
         std::vector<VkCommandBuffer> & GetCommandBuffers();

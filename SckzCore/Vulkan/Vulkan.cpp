@@ -930,7 +930,7 @@ namespace sckz
 
     void Vulkan::Update()
     {
-        camera.SetRoatation(camera.GetRoatation().x, camera.GetRoatation().y + 0.01, camera.GetRoatation().z);
+        // camera.SetLocation(camera.GetLocation().x, camera.GetLocation().y + 0.01, camera.GetLocation().z);
         vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
         uint32_t imageIndex;
