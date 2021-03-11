@@ -11,24 +11,26 @@ namespace sckz
 
         glm::vec3 location;
         glm::vec3 rotation;
-        float     fov;
-        float     near, far;
+
+        float fov;
+        float near, far;
 
         VkExtent2D extent;
 
     public:
         void CreateCamera(float fov, float near, float far, VkExtent2D extent);
+        void UpdateExtent(VkExtent2D extent);
         void DestroyCamera();
 
         void SetLocation(float x, float y, float z);
-        void SetRoatation(float x, float y, float z);
+        void SetRotation(float x, float y, float z);
         void SetFOV(float fov);
 
     public:
         glm::mat4 GetView();
         glm::mat4 GetProjection();
 
-        glm::vec3 GetRoatation();
+        glm::vec3 GetRotation();
         glm::vec3 GetLocation();
 
     private:

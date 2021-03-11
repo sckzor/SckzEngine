@@ -10,11 +10,27 @@ namespace sckz
         this->extent = extent;
     }
 
+    void Camera::UpdateExtent(VkExtent2D extent)
+    {
+        this->extent = extent;
+        UpdateMatrix();
+    }
+
     void Camera::DestroyCamera() { }
 
     void Camera::UpdateMatrix()
     {
-        view       = glm::lookAt(location, location + rotation, glm::vec3(0.0f, 0.0f, 1.0f));
+        view = glm::mat4x4(1.0f);
+        view = glm::rotate(view, glm::radians(rotation.y), glm::vec3(0, 0, 1));
+        view = glm::rotate(view, glm::radians(rotation.x), glm::vec3(1, 0, 0));
+        view = glm::translate(view, location);
+
+        std::cout << view[0][0] << " " << view[0][1] << " " << view[0][2] << " " << view[0][3] << std::endl;
+        std::cout << view[1][0] << " " << view[1][1] << " " << view[1][2] << " " << view[1][3] << std::endl;
+        std::cout << view[2][0] << " " << view[2][1] << " " << view[2][2] << " " << view[2][3] << std::endl;
+        std::cout << view[3][0] << " " << view[3][1] << " " << view[3][2] << " " << view[3][3] << std::endl;
+        std::cout << std::endl;
+
         projection = glm::perspective(glm::radians(fov), extent.width / (float)extent.height, near, far);
         projection[1][1] *= -1;
     }
@@ -23,7 +39,7 @@ namespace sckz
 
     glm::mat4 Camera::GetView() { return view; }
 
-    glm::vec3 Camera::GetRoatation() { return rotation; }
+    glm::vec3 Camera::GetRotation() { return rotation; }
 
     glm::vec3 Camera::GetLocation() { return location; }
 
@@ -41,7 +57,7 @@ namespace sckz
         UpdateMatrix();
     }
 
-    void Camera::SetRoatation(float x, float y, float z)
+    void Camera::SetRotation(float x, float y, float z)
     {
         rotation.x = x;
         rotation.y = y;

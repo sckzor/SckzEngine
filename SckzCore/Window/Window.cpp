@@ -12,6 +12,7 @@ namespace sckz
         window = glfwCreateWindow(width, height, name, nullptr, nullptr);
         glfwSetWindowUserPointer(window, this);
         glfwSetFramebufferSizeCallback(window, FramebufferResizeCallback);
+        glfwSetKeyCallback(window, KeyPressCallback);
     }
 
     void Window::DestroyWindow()
@@ -46,4 +47,20 @@ namespace sckz
         auto app     = reinterpret_cast<Window *>(glfwGetWindowUserPointer(window));
         app->resized = true;
     }
+
+    void Window::KeyPressCallback(GLFWwindow * window, int key, int scanCode, int action, int mod)
+    {
+        auto app = reinterpret_cast<Window *>(glfwGetWindowUserPointer(window));
+        switch (action)
+        {
+            case GLFW_PRESS:
+                app->keys[key] = true;
+                break;
+            case GLFW_RELEASE:
+                app->keys[key] = false;
+                break;
+        }
+    }
+
+    bool Window::QueryKey(char key) { return keys[toupper(key)]; }
 } // namespace sckz

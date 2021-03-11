@@ -63,13 +63,12 @@ namespace sckz
         DescriptorPool descriptorPool;
         VkCommandPool  commandPool;
 
-        Camera camera;
-
         Image colorImage;
         Image depthImage;
 
         std::vector<GraphicsPipeline *> pipelines;
         std::vector<Model *>            models;
+        std::vector<Camera *>           cameras;
 
         std::vector<VkSemaphore> imageAvailableSemaphores;
         std::vector<VkSemaphore> renderFinishedSemaphores;
@@ -149,11 +148,13 @@ namespace sckz
     public: // Public member functions
         void CreateVulkan(Window & window);
         void DestroyVulkan();
-        void Update();
+        void Update(Camera & camera);
 
     public:
         GraphicsPipeline & CreatePipeline(const char * vertexFile, const char * fragmentFile);
 
         Model & CreateModel(const char * modelFile, const char * textureFile, GraphicsPipeline & pipeline);
+
+        Camera & CreateCamera(float fov, float near, float far);
     };
 } // namespace sckz

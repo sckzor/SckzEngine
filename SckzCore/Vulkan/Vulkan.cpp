@@ -777,9 +777,6 @@ namespace sckz
         CreateFramebuffers();
         descriptorPool.CreateDescriptorPool(device, swapChainImages.size());
         CreateSyncObjects();
-        camera.CreateCamera(45, 0.1, 10, swapChainExtent);
-        camera.SetLocation(2, 2, 2);
-        camera.SetRoatation(-1, -1, -1);
     }
 
     void Vulkan::DestroyVulkan()
@@ -821,6 +818,11 @@ namespace sckz
             models[i]->CreateSwapResources(descriptorPool, swapChainExtent);
         }
         CreatePrimaryCmdBuffers();
+
+        for (int i = 0; i < cameras.size(); i++)
+        {
+            cameras[i]->UpdateExtent(swapChainExtent);
+        }
     }
 
     void Vulkan::DestroySwapResources()
@@ -854,21 +856,28 @@ namespace sckz
     Model & Vulkan::CreateModel(const char * modelFile, const char * textureFile, GraphicsPipeline & pipeline)
     {
         models.push_back(new Model());
-        models[models.size() - 1]->CreateModel(textureFile,
-                                               modelFile,
-                                               commandPool,
-                                               renderPass,
-                                               device,
-                                               physicalDevice,
-                                               swapChainFramebuffers,
-                                               &pipeline,
-                                               descriptorPool,
-                                               swapChainExtent,
-                                               swapChainImages.size(),
-                                               memory,
-                                               graphicsQueue);
+        models.back()->CreateModel(textureFile,
+                                   modelFile,
+                                   commandPool,
+                                   renderPass,
+                                   device,
+                                   physicalDevice,
+                                   swapChainFramebuffers,
+                                   &pipeline,
+                                   descriptorPool,
+                                   swapChainExtent,
+                                   swapChainImages.size(),
+                                   memory,
+                                   graphicsQueue);
         CreatePrimaryCmdBuffers();
-        return *models[models.size() - 1];
+        return *models.back();
+    }
+
+    Camera & Vulkan::CreateCamera(float fov, float near, float far)
+    {
+        cameras.push_back(new Camera());
+        cameras.back()->CreateCamera(fov, near, far, swapChainExtent);
+        return *cameras.back();
     }
 
     void Vulkan::CreatePrimaryCmdBuffers()
@@ -928,9 +937,8 @@ namespace sckz
         }
     }
 
-    void Vulkan::Update()
+    void Vulkan::Update(Camera & camera)
     {
-        // camera.SetLocation(camera.GetLocation().x, camera.GetLocation().y + 0.01, camera.GetLocation().z);
         vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
         uint32_t imageIndex;
