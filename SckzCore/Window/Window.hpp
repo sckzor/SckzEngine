@@ -5,11 +5,13 @@ namespace sckz
 {
     class Window
     {
-    private: // Private class members
+    public:
         const static int total_keys = 349;
-        GLFWwindow *     window;
-        bool             resized          = false;
-        bool             keys[total_keys] = { false };
+
+    private: // Private class members
+        GLFWwindow * window;
+        bool         resized          = false;
+        bool         keys[total_keys] = { false };
 
     public: // Pulbic member functions
         void         CreateWindow(const char * name, uint32_t length, uint32_t width);
@@ -18,6 +20,7 @@ namespace sckz
         bool         QueryClose();
         bool         QueryResize();
         bool         QueryKey(char key);
+        bool *       QueryKeys();
         GLFWwindow * GetWindow();
         VkExtent2D   GetSize();
 

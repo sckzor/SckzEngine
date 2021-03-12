@@ -90,10 +90,10 @@ namespace sckz
 
         UniformBufferObject ubo {};
         ubo.model = glm::scale(glm::mat4(1.0f), scale);
+        ubo.model = glm::rotate(ubo.model, rotation.x, glm::vec3(1.0, 0.0, 0.0));
+        ubo.model = glm::rotate(ubo.model, rotation.y, glm::vec3(0.0, 1.0, 0.0));
+        ubo.model = glm::rotate(ubo.model, rotation.z, glm::vec3(0.0, 0.0, 1.0));
         ubo.model = glm::translate(ubo.model, location);
-        ubo.model = glm::rotate(ubo.model, (rotation.x), location + glm::vec3(1.0, 0.0, 0.0));
-        ubo.model = glm::rotate(ubo.model, (rotation.y), location + glm::vec3(0.0, 1.0, 0.0));
-        ubo.model = glm::rotate(ubo.model, (rotation.z), location + glm::vec3(0.0, 0.0, 1.0));
 
         ubo.view = camera.GetView();
         ubo.proj = camera.GetProjection();

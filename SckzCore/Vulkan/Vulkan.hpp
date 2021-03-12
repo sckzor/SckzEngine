@@ -79,6 +79,10 @@ namespace sckz
         const std::vector<const char *> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
         size_t                          currentFrame     = 0;
 
+        std::chrono::time_point<std::chrono::high_resolution_clock> lastTime;
+        std::chrono::time_point<std::chrono::high_resolution_clock> currentTime;
+        float                                                       deltaTime;
+
         bool framebufferResized = false;
 
     public: // Public static functions
@@ -146,9 +150,10 @@ namespace sckz
         void DestroySyncObjects();
 
     public: // Public member functions
-        void CreateVulkan(Window & window);
-        void DestroyVulkan();
-        void Update(Camera & camera);
+        void  CreateVulkan(Window & window);
+        void  DestroyVulkan();
+        void  Update(Camera & camera);
+        float GetDeltaT();
 
     public:
         GraphicsPipeline & CreatePipeline(const char * vertexFile, const char * fragmentFile);

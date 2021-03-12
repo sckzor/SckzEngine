@@ -255,7 +255,7 @@ namespace sckz
     {
         for (const auto & availablePresentMode : availablePresentModes)
         {
-            if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
+            if (availablePresentMode == VK_PRESENT_MODE_IMMEDIATE_KHR)
             {
                 return availablePresentMode;
             }
@@ -939,6 +939,11 @@ namespace sckz
 
     void Vulkan::Update(Camera & camera)
     {
+        lastTime = currentTime;
+
+        currentTime = std::chrono::high_resolution_clock::now();
+        deltaTime   = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
+
         vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
         uint32_t imageIndex;
@@ -1020,4 +1025,6 @@ namespace sckz
 
         currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
+
+    float Vulkan::GetDeltaT() { return deltaTime; }
 } // namespace sckz

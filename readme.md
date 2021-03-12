@@ -12,20 +12,23 @@ A Vulkan games engine by Sckzor
 - [x] Change the "pipeline" class to "graphics pipeline" class and make the pipeline swapable.
 - [x] Multiple Object Rendering.
 - [x] Memory management.
-- [ ] The ability to move, scale and rotate objects at will instead of having them just spin as well as adding a camera class.
+- [x] The ability to move, scale and rotate objects at will instead of having them just spin as well as adding a camera class.
+- [ ] Simple Lighting.
 - [ ] Instanced Rendering.
 - [ ] FBO filters.
+- [ ] Finish the memory manager.
+- [ ] Optimize, Optimize, Optimize.
 - [ ] Simple GUIs.
-- [ ] Lighting.
+- [ ] Advanced Lighting.
 - [ ] Ray Tracing.
 - [ ] Animation.
-- [ ] Optimize, Optimize, Optimize
+- [ ] Optimize, Optimize, Optimize.
 
 ### 2nd Priority
 
 - [ ] Networking support.
 - [ ] Video support for cut scenes and similar.
-- [ ] Adding more classes.
+- [ ] Adding more classes... maybe. (perhaps this is a bad idea, don't add code you don't need?)
 - [x] FORMATING!
 
 ### 3rd Priority
