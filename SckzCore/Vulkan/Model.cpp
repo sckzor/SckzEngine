@@ -350,7 +350,6 @@ namespace sckz
         location.x = x;
         location.y = y;
         location.z = z;
-        // UpdateUBOs();
     }
 
     void Model::SetRotation(float x, float y, float z)
@@ -358,7 +357,6 @@ namespace sckz
         rotation.x = x;
         rotation.y = y;
         rotation.z = z;
-        // UpdateUBOs();
     }
 
     void Model::SetScale(float x, float y, float z)
@@ -366,7 +364,6 @@ namespace sckz
         scale.x = x;
         scale.y = y;
         scale.z = z;
-        // UpdateUBOs();
     }
 
     glm::vec3 Model::GetLocation() { return location; }
