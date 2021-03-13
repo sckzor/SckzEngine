@@ -13,7 +13,7 @@ real_all: SckzEngine Shaders
 SckzEngine: SckzCore/SckzEngine.cpp build/SckzCore.a SckzCore/Window/Window.hpp $(VK_PATH)/Vulkan.hpp $(INCLUDE)
 	g++ $(CFLAGS) SckzCore/SckzEngine.cpp build/SckzCore.a -o SckzEngine $(LDFLAGS)
 
-build/SckzCore.a:build/Buffer.o build/CommandBuffer.o build/Image.o build/Memory.o build/Model.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o  build/Camera.o $(INCLUDE)
+build/SckzCore.a:build/Buffer.o build/CommandBuffer.o build/Image.o build/Memory.o build/Model.o build/Entity.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o  build/Camera.o $(INCLUDE)
 	ar rvs build/SckzCore.a build/Buffer.o build/CommandBuffer.o build/Image.o build/Memory.o build/Model.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o build/Camera.o
 
 build/Buffer.o: $(VK_PATH)/Buffer.cpp $(VK_PATH)/Buffer.hpp $(VK_PATH)/Memory.hpp $(VK_PATH)/CommandBuffer.hpp $(INCLUDE)
@@ -28,8 +28,11 @@ build/Image.o: $(VK_PATH)/Image.cpp $(VK_PATH)/Image.hpp $(VK_PATH)/Memory.hpp $
 build/Memory.o: $(VK_PATH)/Memory.cpp $(VK_PATH)/Memory.hpp $(INCLUDE)
 	g++ $(CFLAGS) -c $(VK_PATH)/Memory.cpp -o build/Memory.o $(LDFLAGS)
 
-build/Model.o: $(VK_PATH)/Model.cpp $(VK_PATH)/Model.hpp $(VK_PATH)/Buffer.hpp $(VK_PATH)/Image.hpp $(VK_PATH)/Vertex.hpp $(VK_PATH)/GraphicsPipeline.hpp $(INCLUDE)
+build/Model.o: $(VK_PATH)/Model.cpp $(VK_PATH)/Model.hpp $(VK_PATH)/Buffer.hpp $(VK_PATH)/Image.hpp $(VK_PATH)/Camera.hpp $(VK_PATH)/Vertex.hpp $(VK_PATH)/GraphicsPipeline.hpp $(INCLUDE)
 	g++ $(CFLAGS) -c $(VK_PATH)/Model.cpp -o build/Model.o $(LDFLAGS)
+
+build/Entity.o: $(VK_PATH)/Entity.cpp $(VK_PATH)/Entity.hpp $(VK_PATH)/Buffer.hpp $(VK_PATH)/Camera.hpp $(VK_PATH)/GraphicsPipeline.hpp $(INCLUDE)
+	g++ $(CFLAGS) -c $(VK_PATH)/Entity.cpp -o build/Entity.o $(LDFLAGS)
 
 build/GraphicsPipeline.o: $(VK_PATH)/GraphicsPipeline.cpp $(VK_PATH)/GraphicsPipeline.hpp $(INCLUDE)
 	g++ $(CFLAGS) -c $(VK_PATH)/GraphicsPipeline.cpp -o build/GraphicsPipeline.o $(LDFLAGS)

@@ -57,32 +57,11 @@ namespace sckz
 
     void Model::DestroyModel()
     {
+        DestroySwapResources();
+
         vertexBuffer.DestroyBuffer();
         indexBuffer.DestroyBuffer();
         texture.DestroyImage();
-    }
-
-    void Model::CreateSwapResources(DescriptorPool & descriptorPool, VkExtent2D swapChainExtent)
-    {
-        this->descriptorPool  = &descriptorPool;
-        this->swapChainExtent = swapChainExtent;
-
-        CreateUniformBuffers();
-        CreateDescriptorSets();
-        CreateCommandBuffers();
-    }
-
-    void Model::DestroySwapResources()
-    {
-        for (size_t i = 0; i < numSwapChainImages; i++)
-        {
-            uniformBuffers[i].DestroyBuffer();
-        }
-
-        vkFreeCommandBuffers(*device,
-                             *commandPool,
-                             static_cast<uint32_t>(commandBuffers.size()),
-                             commandBuffers.data());
     }
 
     void Model::Update(uint32_t currentImage, Camera & camera)
@@ -195,6 +174,20 @@ namespace sckz
         stagingBuffer.CopyBufferToBuffer(indexBuffer, *commandPool);
 
         stagingBuffer.DestroyBuffer();
+    }
+
+    void Model::RebuildSwapResources(DescriptorPool & descriptorPool, VkExtent2D swapChainExtent)
+    {
+        DestroySwapResources();
+
+        // Create
+
+        this->descriptorPool  = &descriptorPool;
+        this->swapChainExtent = swapChainExtent;
+
+        CreateUniformBuffers();
+        CreateDescriptorSets();
+        CreateCommandBuffers();
     }
 
     void Model::CreateUniformBuffers()
@@ -388,4 +381,17 @@ namespace sckz
     std::vector<VkDescriptorSet> & Model::GetDescriptorSets() { return descriptorSets; }
 
     uint32_t Model::GetNumIndices() { return static_cast<uint32_t>(indices.size()); }
+
+    void Model::DestroySwapResources()
+    {
+        for (size_t i = 0; i < numSwapChainImages; i++)
+        {
+            uniformBuffers[i].DestroyBuffer();
+        }
+
+        vkFreeCommandBuffers(*device,
+                             *commandPool,
+                             static_cast<uint32_t>(commandBuffers.size()),
+                             commandBuffers.data());
+    }
 } // namespace sckz

@@ -815,7 +815,7 @@ namespace sckz
         descriptorPool.CreateDescriptorPool(device, swapChainImages.size());
         for (int i = 0; i < models.size(); i++)
         {
-            models[i]->CreateSwapResources(descriptorPool, swapChainExtent);
+            models[i]->RebuildSwapResources(descriptorPool, swapChainExtent);
         }
         CreatePrimaryCmdBuffers();
 
@@ -832,10 +832,6 @@ namespace sckz
         depthImage.DestroyImage();
         colorImage.DestroyImage();
         DestroyFramebuffers();
-        for (int i = 0; i < models.size(); i++)
-        {
-            models[i]->DestroySwapResources();
-        }
         for (int i = 0; i < pipelines.size(); i++)
         {
             pipelines[i]->DestroyPipeline();

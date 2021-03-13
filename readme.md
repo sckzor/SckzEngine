@@ -15,6 +15,7 @@ A Vulkan games engine by Sckzor
 - [x] The ability to move, scale and rotate objects at will instead of having them just spin as well as adding a camera class.
 - [ ] Simple Lighting.
 - [ ] Instanced/Batched Rendering.
+- [ ] Add sub-allocated buffers.
 - [ ] FBO filters.
 - [ ] Finish the memory manager.
 - [ ] Optimize, Optimize, Optimize.

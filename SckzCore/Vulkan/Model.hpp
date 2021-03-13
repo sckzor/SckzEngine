@@ -65,12 +65,13 @@ namespace sckz
                          uint32_t                     numSwapChainImages,
                          Memory &                     memory,
                          VkQueue &                    queue);
+
         void DestroyModel();
 
         void Update(uint32_t currentImage, Camera & camera);
 
-        void DestroySwapResources();
-        void CreateSwapResources(DescriptorPool & descriptorPool, VkExtent2D swapChainExtent);
+        void RebuildSwapResources(DescriptorPool & descriptorPool, VkExtent2D swapChainExtent);
+
         void CreateCommandBuffers();
 
     public:
@@ -96,5 +97,8 @@ namespace sckz
         Buffer                         GetVertexBuffer();
         std::vector<VkDescriptorSet> & GetDescriptorSets();
         uint32_t                       GetNumIndices();
+
+    private:
+        void DestroySwapResources();
     };
 } // namespace sckz
