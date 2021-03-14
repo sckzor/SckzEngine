@@ -15,15 +15,29 @@ int main()
     sckz::Entity &           e1  = vkan.CreateEntity(m1);
     sckz::Entity &           e2  = vkan.CreateEntity(m1);
     sckz::Camera &           cam = vkan.CreateCamera(45, 0.1, 10);
-    // e1.SetLocation(0, 1, 0);
+    e1.SetLocation(0, 1, 0);
     cam.SetLocation(0, 5, 0);
     cam.SetRotation(-90, 0, 0);
 
+    win.Update();
+    vkan.Update(cam);
     while (!win.QueryClose())
     {
-        e2.SetLocation(e2.GetLocation().x, e2.GetLocation().y + (1 * vkan.GetDeltaT()), e2.GetLocation().z);
-        // m1.SetRotation(m1.GetRotation().x + 0.02, m1.GetRotation().y + 0.02, m1.GetRotation().z + 0.02);
-        // m1.SetScale(m1.GetScale().x, m1.GetScale().y + 0.001, m1.GetScale().z);
+        // std::cout << vkan.GetDeltaT() << std::endl;
+        // std::cout << e2.GetLocation().x << " " << e2.GetLocation().y << " " << e2.GetLocation().z << std::endl;
+        // std::cout << e1.GetLocation().x << " " << e1.GetLocation().y << " " << e1.GetLocation().z << std::endl;
+
+        if (win.QueryKey('h'))
+        {
+            e2.SetLocation(e2.GetLocation().x - (1 * vkan.GetDeltaT()), e2.GetLocation().y, e2.GetLocation().z);
+            e1.SetLocation(e1.GetLocation().x + (1 * vkan.GetDeltaT()), e1.GetLocation().y, e1.GetLocation().z);
+        }
+
+        if (win.QueryKey('j'))
+        {
+            e2.SetLocation(e2.GetLocation().x + (1 * vkan.GetDeltaT()), e2.GetLocation().y, e2.GetLocation().z);
+            e1.SetLocation(e1.GetLocation().x - (1 * vkan.GetDeltaT()), e1.GetLocation().y, e1.GetLocation().z);
+        }
 
         if (win.QueryKey('w'))
         {

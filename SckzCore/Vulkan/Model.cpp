@@ -46,9 +46,6 @@ namespace sckz
         LoadModel();
         CreateVertexBuffer();
         CreateIndexBuffer();
-        // CreateUniformBuffers();
-
-        // CreateDescriptorSets();
     }
 
     void Model::DestroyModel()
@@ -182,82 +179,9 @@ namespace sckz
         this->descriptorPool  = &descriptorPool;
         this->swapChainExtent = swapChainExtent;
 
-        // CreateUniformBuffers();
-        // CreateDescriptorSets();
         CreateCommandBuffers();
     }
-    /*
-    void Model::CreateUniformBuffers()
-    {
-        VkDeviceSize bufferSize = sizeof(UniformBufferObject);
 
-        uniformBuffers.resize(swapChainFramebuffers->size());
-
-        for (size_t i = 0; i < swapChainFramebuffers->size(); i++)
-        {
-            uniformBuffers[i].CreateBuffer(*physicalDevice,
-                                           *device,
-                                           *memory,
-                                           bufferSize,
-                                           VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                                           VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                                           *queue);
-        }
-    }
-
-    void Model::CreateDescriptorSets()
-    {
-        std::vector<VkDescriptorSetLayout> layouts(swapChainFramebuffers->size(), pipeline->GetDescriptorSetLayout());
-        VkDescriptorSetAllocateInfo        allocInfo {};
-        allocInfo.sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-        allocInfo.descriptorPool     = descriptorPool->GetDescriptorPool();
-        allocInfo.descriptorSetCount = static_cast<uint32_t>(swapChainFramebuffers->size());
-        allocInfo.pSetLayouts        = layouts.data();
-
-        descriptorSets.resize(swapChainFramebuffers->size());
-        if (vkAllocateDescriptorSets(*device, &allocInfo, descriptorSets.data()) != VK_SUCCESS)
-        {
-            throw std::runtime_error("failed to allocate descriptor sets!");
-        }
-
-        for (size_t i = 0; i < swapChainFramebuffers->size(); i++)
-        {
-            VkDescriptorBufferInfo bufferInfo {};
-            bufferInfo.buffer = uniformBuffers[i].GetBuffer();
-            bufferInfo.offset = 0;
-            bufferInfo.range  = sizeof(UniformBufferObject);
-
-            VkDescriptorImageInfo imageInfo {};
-            imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            imageInfo.imageView   = texture.GetImageView();
-            imageInfo.sampler     = texture.GetSampler();
-
-            std::array<VkWriteDescriptorSet, 2> descriptorWrites {};
-
-            descriptorWrites[0].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            descriptorWrites[0].dstSet          = descriptorSets[i];
-            descriptorWrites[0].dstBinding      = 0;
-            descriptorWrites[0].dstArrayElement = 0;
-            descriptorWrites[0].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            descriptorWrites[0].descriptorCount = 1;
-            descriptorWrites[0].pBufferInfo     = &bufferInfo;
-
-            descriptorWrites[1].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            descriptorWrites[1].dstSet          = descriptorSets[i];
-            descriptorWrites[1].dstBinding      = 1;
-            descriptorWrites[1].dstArrayElement = 0;
-            descriptorWrites[1].descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-            descriptorWrites[1].descriptorCount = 1;
-            descriptorWrites[1].pImageInfo      = &imageInfo;
-
-            vkUpdateDescriptorSets(*device,
-                                   static_cast<uint32_t>(descriptorWrites.size()),
-                                   descriptorWrites.data(),
-                                   0,
-                                   nullptr);
-        }
-    }
-    */
     void Model::CreateCommandBuffers()
     {
         commandBuffers.resize(swapChainFramebuffers->size());
@@ -337,32 +261,7 @@ namespace sckz
             }
         }
     }
-    /*
-    void Model::SetLocation(float x, float y, float z)
-    {
-        location.x = x;
-        location.y = y;
-        location.z = z;
-    }
 
-    void Model::SetRotation(float x, float y, float z)
-    {
-        rotation.x = x;
-        rotation.y = y;
-        rotation.z = z;
-    }
-
-    void Model::SetScale(float x, float y, float z)
-    {
-        scale.x = x;
-        scale.y = y;
-        scale.z = z;
-    }
-
-    glm::vec3 Model::GetLocation() { return location; }
-    glm::vec3 Model::GetRotation() { return rotation; }
-    glm::vec3 Model::GetScale() { return scale; }
-    */
     std::vector<VkCommandBuffer> & Model::GetCommandBuffers()
     {
         if (!hasCommandBuffer)
@@ -385,8 +284,8 @@ namespace sckz
                              *pipeline,
                              swapChainFramebuffers->size(),
                              texture);
-
         entities.push_back(entity);
+        CreateCommandBuffers();
 
         return *entity;
     }
