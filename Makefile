@@ -71,11 +71,11 @@ Resources/blue_fragment.spv: Shaders/blue_shader.frag
 # Testing based information
 
 test: SckzEngine
-	make real_all -j16
+	make all
 	./SckzEngine
 
 debug: SckzEngine
-	make real_all -j16
+	make all
 	gdb SckzEngine
 
 clean:

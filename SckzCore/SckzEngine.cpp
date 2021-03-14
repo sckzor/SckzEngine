@@ -80,11 +80,11 @@ int main()
 
         if (win.QueryKey('p'))
         {
-            vkan.Render(cam1);
+            vkan.Render(cam2);
         }
         else
         {
-            vkan.Render(cam2);
+            vkan.Render(cam1);
         }
 
         win.Update();
