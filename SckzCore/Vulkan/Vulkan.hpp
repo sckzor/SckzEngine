@@ -150,9 +150,11 @@ namespace sckz
         void DestroySyncObjects();
 
     public: // Public member functions
-        void  CreateVulkan(Window & window);
-        void  DestroyVulkan();
-        void  Update(Camera & camera);
+        void CreateVulkan(Window & window);
+        void DestroyVulkan();
+
+        void  Update();
+        void  Render(Camera & camera);
         float GetDeltaT();
 
     public:

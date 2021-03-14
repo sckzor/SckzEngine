@@ -931,13 +931,8 @@ namespace sckz
         }
     }
 
-    void Vulkan::Update(Camera & camera)
+    void Vulkan::Render(Camera & camera)
     {
-        lastTime = currentTime;
-
-        currentTime = std::chrono::high_resolution_clock::now();
-        deltaTime   = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
-
         vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
         uint32_t imageIndex;
@@ -1018,6 +1013,14 @@ namespace sckz
         }
 
         currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+    }
+
+    void Vulkan::Update()
+    {
+        lastTime = currentTime;
+
+        currentTime = std::chrono::high_resolution_clock::now();
+        deltaTime   = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
     }
 
     float Vulkan::GetDeltaT() { return deltaTime; }

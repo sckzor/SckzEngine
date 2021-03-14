@@ -9,18 +9,19 @@ int main()
     vkan.CreateVulkan(win);
 
     // sckz::GraphicsPipeline & p1 = vkan.CreatePipeline("Resources/simple_vertex.spv", "Resources/blue_fragment.spv");
-    sckz::GraphicsPipeline & p2  = vkan.CreatePipeline("Resources/simple_vertex.spv", "Resources/simple_fragment.spv");
-    sckz::Model &            m1  = vkan.CreateModel("Resources/flare.obj", "Resources/placeholder.png", p2);
-    sckz::Model &            m2  = vkan.CreateModel("Resources/viking_room.obj", "Resources/viking_room.png", p2);
-    sckz::Entity &           e1  = vkan.CreateEntity(m1);
-    sckz::Entity &           e2  = vkan.CreateEntity(m1);
-    sckz::Camera &           cam = vkan.CreateCamera(45, 0.1, 10);
+    sckz::GraphicsPipeline & p2   = vkan.CreatePipeline("Resources/simple_vertex.spv", "Resources/simple_fragment.spv");
+    sckz::Model &            m1   = vkan.CreateModel("Resources/flare.obj", "Resources/placeholder.png", p2);
+    sckz::Model &            m2   = vkan.CreateModel("Resources/viking_room.obj", "Resources/viking_room.png", p2);
+    sckz::Entity &           e1   = vkan.CreateEntity(m1);
+    sckz::Entity &           e2   = vkan.CreateEntity(m1);
+    sckz::Camera &           cam1 = vkan.CreateCamera(45, 0.1, 10);
+    sckz::Camera &           cam2 = vkan.CreateCamera(45, 0.1, 10);
     e1.SetLocation(0, 1, 0);
-    cam.SetLocation(0, 5, 0);
-    cam.SetRotation(-90, 0, 0);
+    cam1.SetLocation(0, 5, 0);
+    cam2.SetLocation(0, 8, 0);
+    cam1.SetRotation(-90, 0, 0);
+    cam2.SetRotation(-90, 0, 0);
 
-    win.Update();
-    vkan.Update(cam);
     while (!win.QueryClose())
     {
         // std::cout << vkan.GetDeltaT() << std::endl;
@@ -41,35 +42,53 @@ int main()
 
         if (win.QueryKey('w'))
         {
-            cam.SetLocation(cam.GetLocation().x, cam.GetLocation().y + (1 * vkan.GetDeltaT()), cam.GetLocation().z);
+            cam1.SetLocation(cam1.GetLocation().x, cam1.GetLocation().y + (1 * vkan.GetDeltaT()), cam1.GetLocation().z);
         }
 
         if (win.QueryKey('S'))
         {
-            cam.SetLocation(cam.GetLocation().x, cam.GetLocation().y - (1 * vkan.GetDeltaT()), cam.GetLocation().z);
+            cam1.SetLocation(cam1.GetLocation().x, cam1.GetLocation().y - (1 * vkan.GetDeltaT()), cam1.GetLocation().z);
         }
 
         if (win.QueryKey('A'))
         {
-            cam.SetRotation(cam.GetRotation().x, cam.GetRotation().y, cam.GetRotation().z - (10 * vkan.GetDeltaT()));
+            cam1.SetRotation(cam1.GetRotation().x,
+                             cam1.GetRotation().y,
+                             cam1.GetRotation().z - (10 * vkan.GetDeltaT()));
         }
 
         if (win.QueryKey('D'))
         {
-            cam.SetRotation(cam.GetRotation().x, cam.GetRotation().y, cam.GetRotation().z + (10 * vkan.GetDeltaT()));
+            cam1.SetRotation(cam1.GetRotation().x,
+                             cam1.GetRotation().y,
+                             cam1.GetRotation().z + (10 * vkan.GetDeltaT()));
         }
 
         if (win.QueryKey('q'))
         {
-            cam.SetRotation(cam.GetRotation().x - (10 * vkan.GetDeltaT()), cam.GetRotation().y, cam.GetRotation().z);
+            cam1.SetRotation(cam1.GetRotation().x - (10 * vkan.GetDeltaT()),
+                             cam1.GetRotation().y,
+                             cam1.GetRotation().z);
         }
 
         if (win.QueryKey('e'))
         {
-            cam.SetRotation(cam.GetRotation().x + (10 * vkan.GetDeltaT()), cam.GetRotation().y, cam.GetRotation().z);
+            cam1.SetRotation(cam1.GetRotation().x + (10 * vkan.GetDeltaT()),
+                             cam1.GetRotation().y,
+                             cam1.GetRotation().z);
         }
+
+        if (win.QueryKey('p'))
+        {
+            vkan.Render(cam1);
+        }
+        else
+        {
+            vkan.Render(cam2);
+        }
+
         win.Update();
-        vkan.Update(cam);
+        vkan.Update();
     }
 
     vkan.DestroyVulkan();

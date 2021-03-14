@@ -13,11 +13,12 @@ A Vulkan games engine by Sckzor
 - [x] Multiple Object Rendering.
 - [x] Memory management.
 - [x] The ability to move, scale and rotate objects at will instead of having them just spin as well as adding a camera class.
-- [ ] Add a render function that allows the scene to be rendered from multiple cameras without having the time advance.
+- [x] Add a render function that allows the scene to be rendered from multiple cameras without having the time advance.
 - [ ] Simple Lighting.
 - [x] Batched Rendering.
 - [ ] Add sub-allocated buffers.
 - [ ] FBO filters.
+- [ ] Add an options for on-demand changes to the swap chain like locked refresh rate and stuff like that.
 - [ ] Finish the memory manager.
 - [ ] Optimize, Optimize, Optimize.
 - [ ] Simple GUIs.
