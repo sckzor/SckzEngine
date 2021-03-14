@@ -12,13 +12,16 @@ int main()
     sckz::GraphicsPipeline & p2  = vkan.CreatePipeline("Resources/simple_vertex.spv", "Resources/simple_fragment.spv");
     sckz::Model &            m1  = vkan.CreateModel("Resources/flare.obj", "Resources/placeholder.png", p2);
     sckz::Model &            m2  = vkan.CreateModel("Resources/viking_room.obj", "Resources/viking_room.png", p2);
+    sckz::Entity &           e1  = vkan.CreateEntity(m1);
+    sckz::Entity &           e2  = vkan.CreateEntity(m1);
     sckz::Camera &           cam = vkan.CreateCamera(45, 0.1, 10);
+    // e1.SetLocation(0, 1, 0);
     cam.SetLocation(0, 5, 0);
     cam.SetRotation(-90, 0, 0);
 
     while (!win.QueryClose())
     {
-        // m1.SetLocation(m1.GetLocation().x, m1.GetLocation().y + 0.002, m1.GetLocation().z);
+        e2.SetLocation(e2.GetLocation().x, e2.GetLocation().y + (1 * vkan.GetDeltaT()), e2.GetLocation().z);
         // m1.SetRotation(m1.GetRotation().x + 0.02, m1.GetRotation().y + 0.02, m1.GetRotation().z + 0.02);
         // m1.SetScale(m1.GetScale().x, m1.GetScale().y + 0.001, m1.GetScale().z);
 

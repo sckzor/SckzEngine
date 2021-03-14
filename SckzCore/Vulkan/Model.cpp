@@ -15,7 +15,6 @@ namespace sckz
                             GraphicsPipeline *           pipeline,
                             DescriptorPool &             descriptorPool,
                             VkExtent2D                   swapChainExtent,
-                            uint32_t                     numSwapChainImages,
                             Memory &                     memory,
                             VkQueue &                    queue)
     {
@@ -29,13 +28,10 @@ namespace sckz
         this->pipeline              = pipeline;
         this->swapChainFramebuffers = &swapChainFramebuffers;
         this->swapChainExtent       = swapChainExtent;
-        this->numSwapChainImages    = numSwapChainImages;
         this->queue                 = &queue;
         this->memory                = &memory;
 
         this->hasCommandBuffer = false;
-
-        this->scale = glm::vec3(1.0f, 1.0f, 1.0f);
 
         texture.CreateTextureImage(textureFileName,
                                    *this->device,
@@ -50,13 +46,17 @@ namespace sckz
         LoadModel();
         CreateVertexBuffer();
         CreateIndexBuffer();
-        CreateUniformBuffers();
+        // CreateUniformBuffers();
 
-        CreateDescriptorSets();
+        // CreateDescriptorSets();
     }
 
     void Model::DestroyModel()
     {
+        for (uint32_t i = 0; i < entities.size(); i++)
+        {
+            entities[i]->DestroyEntity();
+        }
         DestroySwapResources();
 
         vertexBuffer.DestroyBuffer();
@@ -67,17 +67,10 @@ namespace sckz
     void Model::Update(uint32_t currentImage, Camera & camera)
     {
 
-        UniformBufferObject ubo {};
-        ubo.model = glm::scale(glm::mat4(1.0f), scale);
-        ubo.model = glm::rotate(ubo.model, rotation.x, glm::vec3(1.0, 0.0, 0.0));
-        ubo.model = glm::rotate(ubo.model, rotation.y, glm::vec3(0.0, 1.0, 0.0));
-        ubo.model = glm::rotate(ubo.model, rotation.z, glm::vec3(0.0, 0.0, 1.0));
-        ubo.model = glm::translate(ubo.model, location);
-
-        ubo.view = camera.GetView();
-        ubo.proj = camera.GetProjection();
-
-        uniformBuffers[currentImage].CopyDataToBuffer(&ubo, sizeof(ubo));
+        for (uint32_t i = 0; i < entities.size(); i++)
+        {
+            entities[i]->Update(currentImage, camera);
+        }
     }
 
     void Model::LoadModel()
@@ -180,23 +173,27 @@ namespace sckz
     {
         DestroySwapResources();
 
+        for (size_t i = 0; i < entities.size(); i++)
+        {
+            entities[i]->RebuildSwapResources();
+        }
         // Create
 
         this->descriptorPool  = &descriptorPool;
         this->swapChainExtent = swapChainExtent;
 
-        CreateUniformBuffers();
-        CreateDescriptorSets();
+        // CreateUniformBuffers();
+        // CreateDescriptorSets();
         CreateCommandBuffers();
     }
-
+    /*
     void Model::CreateUniformBuffers()
     {
         VkDeviceSize bufferSize = sizeof(UniformBufferObject);
 
-        uniformBuffers.resize(numSwapChainImages);
+        uniformBuffers.resize(swapChainFramebuffers->size());
 
-        for (size_t i = 0; i < numSwapChainImages; i++)
+        for (size_t i = 0; i < swapChainFramebuffers->size(); i++)
         {
             uniformBuffers[i].CreateBuffer(*physicalDevice,
                                            *device,
@@ -260,7 +257,7 @@ namespace sckz
                                    nullptr);
         }
     }
-
+    */
     void Model::CreateCommandBuffers()
     {
         commandBuffers.resize(swapChainFramebuffers->size());
@@ -320,16 +317,19 @@ namespace sckz
 
             vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer.GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
-            vkCmdBindDescriptorSets(commandBuffers[i],
-                                    VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                    pipeline->GetPieplineLayout(),
-                                    0,
-                                    1,
-                                    &descriptorSets[i],
-                                    0,
-                                    nullptr);
+            for (uint32_t j = 0; j < entities.size(); j++)
+            {
+                vkCmdBindDescriptorSets(commandBuffers[i],
+                                        VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                        pipeline->GetPieplineLayout(),
+                                        0,
+                                        1,
+                                        &entities[j]->GetDescriptorSets()[i],
+                                        0,
+                                        nullptr);
 
-            vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+                vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+            }
 
             if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS)
             {
@@ -337,7 +337,7 @@ namespace sckz
             }
         }
     }
-
+    /*
     void Model::SetLocation(float x, float y, float z)
     {
         location.x = x;
@@ -362,7 +362,7 @@ namespace sckz
     glm::vec3 Model::GetLocation() { return location; }
     glm::vec3 Model::GetRotation() { return rotation; }
     glm::vec3 Model::GetScale() { return scale; }
-
+    */
     std::vector<VkCommandBuffer> & Model::GetCommandBuffers()
     {
         if (!hasCommandBuffer)
@@ -374,21 +374,33 @@ namespace sckz
         return commandBuffers;
     }
 
+    Entity & Model::CreateEntity()
+    {
+        Entity * entity = new Entity();
+        entity->CreateEntity(*physicalDevice,
+                             *device,
+                             *queue,
+                             *memory,
+                             *descriptorPool,
+                             *pipeline,
+                             swapChainFramebuffers->size(),
+                             texture);
+
+        entities.push_back(entity);
+
+        return *entity;
+    }
+
     Buffer Model::GetIndexBuffer() { return indexBuffer; }
 
     Buffer Model::GetVertexBuffer() { return vertexBuffer; }
 
-    std::vector<VkDescriptorSet> & Model::GetDescriptorSets() { return descriptorSets; }
+    // std::vector<VkDescriptorSet> & Model::GetDescriptorSets() { return descriptorSets; }
 
     uint32_t Model::GetNumIndices() { return static_cast<uint32_t>(indices.size()); }
 
     void Model::DestroySwapResources()
     {
-        for (size_t i = 0; i < numSwapChainImages; i++)
-        {
-            uniformBuffers[i].DestroyBuffer();
-        }
-
         vkFreeCommandBuffers(*device,
                              *commandPool,
                              static_cast<uint32_t>(commandBuffers.size()),

@@ -161,5 +161,7 @@ namespace sckz
         Model & CreateModel(const char * modelFile, const char * textureFile, GraphicsPipeline & pipeline);
 
         Camera & CreateCamera(float fov, float near, float far);
+
+        Entity & CreateEntity(Model & model);
     };
 } // namespace sckz

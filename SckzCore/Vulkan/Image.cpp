@@ -48,19 +48,6 @@ namespace sckz
         VkMemoryRequirements memRequirements;
         vkGetImageMemoryRequirements(*this->device, image, &memRequirements);
 
-        /*
-        VkMemoryAllocateInfo allocInfo {};
-        allocInfo.sType          = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        allocInfo.allocationSize = memRequirements.size;
-        allocInfo.memoryTypeIndex
-            = MemoryHelper::FindMemoryType(memRequirements.memoryTypeBits, properties, physicalDevice);
-
-        if (vkAllocateMemory(*this->device, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS)
-        {
-            throw std::runtime_error("failed to allocate image memory!");
-        }
-        */
-
         block = &memory.AllocateMemory(memRequirements, properties);
         vkBindImageMemory(*this->device, image, *block->memory, block->offset);
     }

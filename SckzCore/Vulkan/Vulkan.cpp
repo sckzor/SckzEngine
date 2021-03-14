@@ -862,10 +862,8 @@ namespace sckz
                                    &pipeline,
                                    descriptorPool,
                                    swapChainExtent,
-                                   swapChainImages.size(),
                                    memory,
                                    graphicsQueue);
-        CreatePrimaryCmdBuffers();
         return *models.back();
     }
 
@@ -1023,4 +1021,11 @@ namespace sckz
     }
 
     float Vulkan::GetDeltaT() { return deltaTime; }
+
+    Entity & Vulkan::CreateEntity(Model & model)
+    {
+        Entity & entity = model.CreateEntity();
+        CreatePrimaryCmdBuffers();
+        return entity;
+    }
 } // namespace sckz
