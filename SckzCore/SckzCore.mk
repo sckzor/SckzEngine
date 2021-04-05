@@ -4,8 +4,8 @@ all: SckzCore.a
 
 # C++ based make information
 
-SckzCore.a:build/Buffer.o build/CommandBuffer.o build/Image.o build/Memory.o build/Model.o build/Entity.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o  build/Camera.o $(INCLUDE)
-	ar rvs SckzCore.a build/Buffer.o build/CommandBuffer.o build/Image.o build/Memory.o build/Model.o build/Entity.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o build/Camera.o
+SckzCore.a:build/Buffer.o build/CommandBuffer.o build/Image.o build/Memory.o build/Model.o build/Entity.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o build/Light.o  build/Camera.o $(INCLUDE)
+	ar rvs SckzCore.a build/Buffer.o build/CommandBuffer.o build/Image.o build/Memory.o build/Model.o build/Entity.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o build/Camera.o build/Light.o
 
 build/Buffer.o: $(VK_PATH)/Buffer.cpp $(VK_PATH)/Buffer.hpp $(VK_PATH)/Memory.hpp $(VK_PATH)/CommandBuffer.hpp $(INCLUDE)
 	g++ $(CFLAGS) -c $(VK_PATH)/Buffer.cpp -o build/Buffer.o $(LDFLAGS)
@@ -34,11 +34,14 @@ build/Vulkan.o: $(VK_PATH)/Vulkan.cpp Window/Window.hpp $(VK_PATH)/Image.hpp $(V
 build/Window.o:Window/Window.cpp Window/Window.hpp $(INCLUDE)
 	g++ $(CFLAGS) -c Window/Window.cpp -o build/Window.o $(LDFLAGS)
 
-build/DescriptorPool.o: $(VK_PATH)/DescriptorPool.cpp $(VK_PATH)/DescriptorPool.hpp ${INCLUDE}
+build/DescriptorPool.o: $(VK_PATH)/DescriptorPool.cpp $(VK_PATH)/DescriptorPool.hpp $(INCLUDE)
 	g++ $(CFLAGS) -c $(VK_PATH)/DescriptorPool.cpp -o build/DescriptorPool.o $(LDFLAGS)
 
-build/Camera.o: $(VK_PATH)/Camera.cpp $(VK_PATH)/Camera.hpp ${INCLUDE}
+build/Camera.o: $(VK_PATH)/Camera.cpp $(VK_PATH)/Camera.hpp $(INCLUDE)
 	g++ $(CFLAGS) -c $(VK_PATH)/Camera.cpp -o build/Camera.o $(LDFLAGS)
+
+build/Light.o: $(VK_PATH)/Light.cpp $(VK_PATH)/Light.hpp $(INCLUDE)
+	g++ $(CFLAGS) -c $(VK_PATH)/Light.cpp -o build/Light.o $(LDFLAGS)
 
 # GLSL based make information
 
