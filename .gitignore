@@ -1,3 +1,6 @@
 .vscode/
 .VSCodeCounter/
-build/
+Game/SckzEngine
+SckzCore/SckzCore.a
+SckzCore/build/
+valgrind-out.txt

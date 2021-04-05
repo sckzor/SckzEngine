@@ -50,6 +50,7 @@ namespace sckz
         for (uint32_t i = 0; i < pools.size(); i++)
         {
             vkDestroyDescriptorPool(*device, *pools[i], nullptr);
+            delete pools[i];
         }
 
         pools.clear();

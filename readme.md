@@ -1,6 +1,13 @@
 # SckzEngine
 
-A Vulkan games engine by Sckzor
+#### A Vulkan games engine by Sckzor
+
+All Code in this library is (c) Sckzor 2021, All rights reserved!
+
+## Goals for the engine
+
+1. Learn to write extremely high performance code
+2. Learn to implement advanced graphics features
 
 ## Progress on the engine
 
@@ -19,13 +26,15 @@ A Vulkan games engine by Sckzor
 - [ ] Add sub-allocated buffers.
 - [ ] FBO filters.
 - [ ] Add an options for on-demand changes to the swap chain like locked refresh rate and stuff like that.
-- [ ] Finish the memory manager.
+- [ ] Finish the _vulkan_ memory manager.
 - [ ] Optimize, Optimize, Optimize.
 - [ ] Simple GUIs.
 - [ ] Advanced Lighting.
 - [ ] Ray Tracing.
 - [ ] Animation.
 - [ ] Optimize, Optimize, Optimize.
+- [ ] Add custom _system_ memory managment
+- [ ] Add custom dynamic _system_ memory structures
 
 ### 2nd Priority
 
@@ -47,6 +56,20 @@ A Vulkan games engine by Sckzor
 
 - G++ is required to build the C++ code
 - clang-format is needed to format all of the code that you might add
+- Valgrind for leak checking the code
+
+## Latest Valgrind results
+
+```
+==31995== LEAK SUMMARY:
+==31995==    definitely lost: 139,696 bytes in 19 blocks
+==31995==    indirectly lost: 22,255 bytes in 312 blocks
+==31995==      possibly lost: 0 bytes in 0 blocks
+==31995==    still reachable: 184,876 bytes in 2,306 blocks
+==31995==         suppressed: 0 bytes in 0 blocks
+==31995==
+==31995== ERROR SUMMARY: 99 errors from 80 contexts (suppressed: 0 from 0)
+```
 
 ## Image of the Engine in action
 

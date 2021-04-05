@@ -786,6 +786,13 @@ namespace sckz
         for (int i = 0; i < models.size(); i++)
         {
             models[i]->DestroyModel();
+            delete models[i];
+        }
+
+        for (int i = 0; i < cameras.size(); i++)
+        {
+            cameras[i]->DestroyCamera();
+            delete cameras[i];
         }
 
         DestroySyncObjects();
@@ -835,6 +842,7 @@ namespace sckz
         for (int i = 0; i < pipelines.size(); i++)
         {
             pipelines[i]->DestroyPipeline();
+            delete pipelines[i];
         }
         DestroyRenderPass();
         DestroyImageViews();
