@@ -53,6 +53,7 @@ namespace sckz
         for (uint32_t i = 0; i < entities.size(); i++)
         {
             entities[i]->DestroyEntity();
+            delete entities[i];
         }
         DestroySwapResources();
 
@@ -96,8 +97,11 @@ namespace sckz
 
                 vertex.texCoord = { attrib.texcoords[2 * index.texcoord_index + 0],
                                     1.0f - attrib.texcoords[2 * index.texcoord_index + 1] };
+                // vertex.normal   = { 2.0f, 2.0f, 2.0f };
 
-                vertex.color = { 1.0f, 1.0f, 1.0f };
+                vertex.normal = { attrib.normals[3 * index.normal_index + 0],
+                                  attrib.normals[3 * index.normal_index + 1],
+                                  attrib.normals[3 * index.normal_index + 2] };
 
                 if (uniqueVertices.count(vertex) == 0)
                 {
@@ -293,8 +297,6 @@ namespace sckz
     Buffer Model::GetIndexBuffer() { return indexBuffer; }
 
     Buffer Model::GetVertexBuffer() { return vertexBuffer; }
-
-    // std::vector<VkDescriptorSet> & Model::GetDescriptorSets() { return descriptorSets; }
 
     uint32_t Model::GetNumIndices() { return static_cast<uint32_t>(indices.size()); }
 

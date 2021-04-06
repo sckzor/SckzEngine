@@ -783,6 +783,11 @@ namespace sckz
     {
         DestroySwapResources();
 
+        for (int i = 0; i < pipelines.size(); i++)
+        {
+            delete pipelines[i];
+        }
+
         for (int i = 0; i < models.size(); i++)
         {
             models[i]->DestroyModel();
@@ -794,6 +799,7 @@ namespace sckz
             cameras[i]->DestroyCamera();
             delete cameras[i];
         }
+        delete light;
 
         DestroySyncObjects();
         DestroyCommandPool();
@@ -842,7 +848,6 @@ namespace sckz
         for (int i = 0; i < pipelines.size(); i++)
         {
             pipelines[i]->DestroyPipeline();
-            delete pipelines[i];
         }
         DestroyRenderPass();
         DestroyImageViews();
@@ -1037,6 +1042,13 @@ namespace sckz
     {
         Entity & entity = model.CreateEntity();
         CreatePrimaryCmdBuffers();
+        entity.LoadExternalShaderData(*light);
         return entity;
+    }
+
+    Light & Vulkan::CreateLight()
+    {
+        light = new Light();
+        return *light;
     }
 } // namespace sckz

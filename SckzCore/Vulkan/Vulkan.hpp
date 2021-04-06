@@ -66,6 +66,8 @@ namespace sckz
         Image colorImage;
         Image depthImage;
 
+        Light * light;
+
         std::vector<GraphicsPipeline *> pipelines;
         std::vector<Model *>            models;
         std::vector<Camera *>           cameras;
@@ -159,11 +161,9 @@ namespace sckz
 
     public:
         GraphicsPipeline & CreatePipeline(const char * vertexFile, const char * fragmentFile);
-
-        Model & CreateModel(const char * modelFile, const char * textureFile, GraphicsPipeline & pipeline);
-
-        Camera & CreateCamera(float fov, float near, float far);
-
-        Entity & CreateEntity(Model & model);
+        Model &            CreateModel(const char * modelFile, const char * textureFile, GraphicsPipeline & pipeline);
+        Camera &           CreateCamera(float fov, float near, float far);
+        Entity &           CreateEntity(Model & model);
+        Light &            CreateLight();
     };
 } // namespace sckz

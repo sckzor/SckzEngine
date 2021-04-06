@@ -6,6 +6,7 @@
 #include "Entity.hpp"
 #include "GraphicsPipeline.hpp"
 #include "Image.hpp"
+#include "Light.hpp"
 
 namespace sckz
 {
@@ -14,6 +15,9 @@ namespace sckz
         alignas(16) glm::mat4 model;
         alignas(16) glm::mat4 view;
         alignas(16) glm::mat4 proj;
+
+        alignas(16) glm::vec3 lightPosition;
+        alignas(16) glm::vec3 lightColor;
     };
 
     class Entity
@@ -27,6 +31,7 @@ namespace sckz
         GraphicsPipeline * pipeline;
         uint32_t           numFrameBuffers;
         Image *            texture;
+        Light *            light = nullptr;
 
         std::vector<Buffer>          uniformBuffers;
         std::vector<VkDescriptorSet> descriptorSets;
@@ -58,6 +63,8 @@ namespace sckz
         void SetLocation(float x, float y, float z);
         void SetRotation(float x, float y, float z);
         void SetScale(float x, float y, float z);
+
+        void LoadExternalShaderData(Light & light);
 
         glm::vec3 GetLocation();
         glm::vec3 GetRotation();

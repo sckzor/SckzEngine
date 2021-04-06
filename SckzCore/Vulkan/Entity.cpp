@@ -53,6 +53,17 @@ namespace sckz
         ubo.view = camera.GetView();
         ubo.proj = camera.GetProjection();
 
+        if (light != nullptr)
+        {
+            ubo.lightColor    = light->GetColor();
+            ubo.lightPosition = light->GetLocation();
+        }
+        else
+        {
+            ubo.lightColor    = glm::vec3(0, 0, 0);
+            ubo.lightPosition = glm::vec3(0, 0, 0);
+        }
+
         uniformBuffers[currentImage].CopyDataToBuffer(&ubo, sizeof(ubo));
     }
 
@@ -147,6 +158,8 @@ namespace sckz
         scale.y = y;
         scale.z = z;
     }
+
+    void Entity::LoadExternalShaderData(Light & light) { this->light = &light; }
 
     glm::vec3 Entity::GetLocation() { return location; }
     glm::vec3 Entity::GetRotation() { return rotation; }

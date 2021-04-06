@@ -12,6 +12,7 @@ int main()
     sckz::GraphicsPipeline & p2   = vkan.CreatePipeline("Resources/simple_vertex.spv", "Resources/simple_fragment.spv");
     sckz::Model &            m1   = vkan.CreateModel("Resources/flare.obj", "Resources/placeholder.png", p2);
     sckz::Model &            m2   = vkan.CreateModel("Resources/viking_room.obj", "Resources/viking_room.png", p2);
+    sckz::Light &            l1   = vkan.CreateLight();
     sckz::Entity &           e1   = vkan.CreateEntity(m1);
     sckz::Entity &           e2   = vkan.CreateEntity(m1);
     sckz::Camera &           cam1 = vkan.CreateCamera(45, 0.1, 10);
