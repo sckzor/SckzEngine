@@ -82,12 +82,12 @@ namespace sckz
 
     void GraphicsPipeline::CreateDescriptorSetLayout()
     {
-        VkDescriptorSetLayoutBinding uboLayoutBinding {};
-        uboLayoutBinding.binding            = 0;
-        uboLayoutBinding.descriptorCount    = 1;
-        uboLayoutBinding.descriptorType     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        uboLayoutBinding.pImmutableSamplers = nullptr;
-        uboLayoutBinding.stageFlags         = VK_SHADER_STAGE_VERTEX_BIT;
+        VkDescriptorSetLayoutBinding vertUboLayoutBinding {};
+        vertUboLayoutBinding.binding            = 0;
+        vertUboLayoutBinding.descriptorCount    = 1;
+        vertUboLayoutBinding.descriptorType     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        vertUboLayoutBinding.pImmutableSamplers = nullptr;
+        vertUboLayoutBinding.stageFlags         = VK_SHADER_STAGE_VERTEX_BIT;
 
         VkDescriptorSetLayoutBinding samplerLayoutBinding {};
         samplerLayoutBinding.binding            = 1;
@@ -96,8 +96,17 @@ namespace sckz
         samplerLayoutBinding.pImmutableSamplers = nullptr;
         samplerLayoutBinding.stageFlags         = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-        std::array<VkDescriptorSetLayoutBinding, 2> bindings = { uboLayoutBinding, samplerLayoutBinding };
-        VkDescriptorSetLayoutCreateInfo             layoutInfo {};
+        VkDescriptorSetLayoutBinding fragUboLayoutBinding {};
+        fragUboLayoutBinding.binding            = 2;
+        fragUboLayoutBinding.descriptorCount    = 1;
+        fragUboLayoutBinding.descriptorType     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        fragUboLayoutBinding.pImmutableSamplers = nullptr;
+        fragUboLayoutBinding.stageFlags         = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+        std::array<VkDescriptorSetLayoutBinding, 3> bindings
+            = { vertUboLayoutBinding, samplerLayoutBinding, fragUboLayoutBinding };
+
+        VkDescriptorSetLayoutCreateInfo layoutInfo {};
         layoutInfo.sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
         layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
         layoutInfo.pBindings    = bindings.data();

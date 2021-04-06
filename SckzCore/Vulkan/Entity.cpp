@@ -30,7 +30,8 @@ namespace sckz
     {
         for (size_t i = 0; i < numFrameBuffers; i++)
         {
-            uniformBuffers[i].DestroyBuffer();
+            uniformBuffers[i][0].DestroyBuffer();
+            uniformBuffers[i][1].DestroyBuffer();
         }
     }
 
@@ -41,30 +42,41 @@ namespace sckz
         CreateDescriptorSets();
     }
 
+    void Entity::SetShine(float reflectivity, float shineDamper)
+    {
+        this->reflectivity = reflectivity;
+        this->shineDamper  = shineDamper;
+    }
+
     void Entity::Update(uint32_t currentImage, Camera & camera)
     {
-        UniformBufferObject ubo {};
-        ubo.model = glm::scale(glm::mat4(1.0f), scale);
-        ubo.model = glm::rotate(ubo.model, glm::radians(rotation.x), glm::vec3(1.0, 0.0, 0.0));
-        ubo.model = glm::rotate(ubo.model, glm::radians(rotation.y), glm::vec3(0.0, 1.0, 0.0));
-        ubo.model = glm::rotate(ubo.model, glm::radians(rotation.z), glm::vec3(0.0, 0.0, 1.0));
-        ubo.model = glm::translate(ubo.model, location);
+        VertexUniformBufferObject   Vubo {};
+        FragmentUniformBufferObject Fubo {};
+        Vubo.model = glm::scale(glm::mat4(1.0f), scale);
+        Vubo.model = glm::rotate(Vubo.model, glm::radians(rotation.x), glm::vec3(1.0, 0.0, 0.0));
+        Vubo.model = glm::rotate(Vubo.model, glm::radians(rotation.y), glm::vec3(0.0, 1.0, 0.0));
+        Vubo.model = glm::rotate(Vubo.model, glm::radians(rotation.z), glm::vec3(0.0, 0.0, 1.0));
+        Vubo.model = glm::translate(Vubo.model, location);
 
-        ubo.view = camera.GetView();
-        ubo.proj = camera.GetProjection();
+        Vubo.view = camera.GetView();
+        Vubo.proj = camera.GetProjection();
+
+        Fubo.reflectivity = this->reflectivity;
+        Fubo.shineDamper  = this->shineDamper;
 
         if (light != nullptr)
         {
-            ubo.lightColor    = light->GetColor();
-            ubo.lightPosition = light->GetLocation();
+            Vubo.lightPosition = light->GetLocation();
+            Fubo.lightColor    = light->GetColor();
         }
         else
         {
-            ubo.lightColor    = glm::vec3(0, 0, 0);
-            ubo.lightPosition = glm::vec3(0, 0, 0);
+            Vubo.lightPosition = glm::vec3(0, 0, 0);
+            Fubo.lightColor    = glm::vec3(0, 0, 0);
         }
 
-        uniformBuffers[currentImage].CopyDataToBuffer(&ubo, sizeof(ubo));
+        uniformBuffers[currentImage][0].CopyDataToBuffer(&Vubo, sizeof(Vubo));
+        uniformBuffers[currentImage][1].CopyDataToBuffer(&Fubo, sizeof(Fubo));
     }
 
     void Entity::CreateDescriptorSets()
@@ -84,17 +96,22 @@ namespace sckz
 
         for (size_t i = 0; i < numFrameBuffers; i++)
         {
-            VkDescriptorBufferInfo bufferInfo {};
-            bufferInfo.buffer = uniformBuffers[i].GetBuffer();
-            bufferInfo.offset = 0;
-            bufferInfo.range  = sizeof(UniformBufferObject);
+            VkDescriptorBufferInfo VInfo {};
+            VInfo.buffer = uniformBuffers[i][0].GetBuffer();
+            VInfo.offset = 0;
+            VInfo.range  = sizeof(VertexUniformBufferObject);
+
+            VkDescriptorBufferInfo FInfo {};
+            FInfo.buffer = uniformBuffers[i][1].GetBuffer();
+            FInfo.offset = 0;
+            FInfo.range  = sizeof(FragmentUniformBufferObject);
 
             VkDescriptorImageInfo imageInfo {};
             imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
             imageInfo.imageView   = texture->GetImageView();
             imageInfo.sampler     = texture->GetSampler();
 
-            std::array<VkWriteDescriptorSet, 2> descriptorWrites {};
+            std::array<VkWriteDescriptorSet, 3> descriptorWrites {};
 
             descriptorWrites[0].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[0].dstSet          = descriptorSets[i];
@@ -102,7 +119,7 @@ namespace sckz
             descriptorWrites[0].dstArrayElement = 0;
             descriptorWrites[0].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             descriptorWrites[0].descriptorCount = 1;
-            descriptorWrites[0].pBufferInfo     = &bufferInfo;
+            descriptorWrites[0].pBufferInfo     = &VInfo;
 
             descriptorWrites[1].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[1].dstSet          = descriptorSets[i];
@@ -111,6 +128,14 @@ namespace sckz
             descriptorWrites[1].descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
             descriptorWrites[1].descriptorCount = 1;
             descriptorWrites[1].pImageInfo      = &imageInfo;
+
+            descriptorWrites[2].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[2].dstSet          = descriptorSets[i];
+            descriptorWrites[2].dstBinding      = 2;
+            descriptorWrites[2].dstArrayElement = 0;
+            descriptorWrites[2].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            descriptorWrites[2].descriptorCount = 1;
+            descriptorWrites[2].pBufferInfo     = &FInfo;
 
             vkUpdateDescriptorSets(*device,
                                    static_cast<uint32_t>(descriptorWrites.size()),
@@ -122,19 +147,30 @@ namespace sckz
 
     void Entity::CreateUniformBuffers()
     {
-        VkDeviceSize bufferSize = sizeof(UniformBufferObject);
+        VkDeviceSize VuboSize = sizeof(VertexUniformBufferObject);
+        VkDeviceSize FuboSize = sizeof(FragmentUniformBufferObject);
 
         uniformBuffers.resize(numFrameBuffers);
 
         for (size_t i = 0; i < numFrameBuffers; i++)
         {
-            uniformBuffers[i].CreateBuffer(*physicalDevice,
-                                           *device,
-                                           *memory,
-                                           bufferSize,
-                                           VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                                           VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                                           *queue);
+            uniformBuffers[i][0].CreateBuffer(*physicalDevice,
+                                              *device,
+                                              *memory,
+                                              VuboSize,
+                                              VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                                              VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
+                                                  | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                                              *queue);
+
+            uniformBuffers[i][1].CreateBuffer(*physicalDevice,
+                                              *device,
+                                              *memory,
+                                              FuboSize,
+                                              VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                                              VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
+                                                  | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                                              *queue);
         }
     }
 

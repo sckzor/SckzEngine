@@ -97,7 +97,6 @@ namespace sckz
 
                 vertex.texCoord = { attrib.texcoords[2 * index.texcoord_index + 0],
                                     1.0f - attrib.texcoords[2 * index.texcoord_index + 1] };
-                // vertex.normal   = { 2.0f, 2.0f, 2.0f };
 
                 vertex.normal = { attrib.normals[3 * index.normal_index + 0],
                                   attrib.normals[3 * index.normal_index + 1],

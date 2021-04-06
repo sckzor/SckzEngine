@@ -10,14 +10,21 @@
 
 namespace sckz
 {
-    struct UniformBufferObject
+    struct VertexUniformBufferObject
     {
         alignas(16) glm::mat4 model;
         alignas(16) glm::mat4 view;
         alignas(16) glm::mat4 proj;
 
         alignas(16) glm::vec3 lightPosition;
+    };
+
+    struct FragmentUniformBufferObject
+    {
         alignas(16) glm::vec3 lightColor;
+
+        alignas(16) float shineDamper;
+        alignas(16) float reflectivity;
     };
 
     class Entity
@@ -33,12 +40,15 @@ namespace sckz
         Image *            texture;
         Light *            light = nullptr;
 
-        std::vector<Buffer>          uniformBuffers;
-        std::vector<VkDescriptorSet> descriptorSets;
+        std::vector<std::array<Buffer, 2>> uniformBuffers;
+        std::vector<VkDescriptorSet>       descriptorSets;
 
         glm::vec3 location;
         glm::vec3 rotation;
         glm::vec3 scale;
+
+        float shineDamper;
+        float reflectivity;
 
     public:
         void CreateEntity(VkPhysicalDevice & physicalDevice,
@@ -65,6 +75,8 @@ namespace sckz
         void SetScale(float x, float y, float z);
 
         void LoadExternalShaderData(Light & light);
+
+        void SetShine(float reflectivity, float shineDamper);
 
         glm::vec3 GetLocation();
         glm::vec3 GetRotation();
