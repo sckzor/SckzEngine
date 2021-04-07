@@ -64,15 +64,18 @@ namespace sckz
         Fubo.reflectivity = this->reflectivity;
         Fubo.shineDamper  = this->shineDamper;
 
-        if (light != nullptr)
+        for (int i = 0; i < lights.size(); i++)
         {
-            Vubo.lightPosition = light->GetLocation();
-            Fubo.lightColor    = light->GetColor();
-        }
-        else
-        {
-            Vubo.lightPosition = glm::vec3(0, 0, 0);
-            Fubo.lightColor    = glm::vec3(0, 0, 0);
+            if (lights[i] != nullptr)
+            {
+                Vubo.lightPosition = lights[i]->GetLocation();
+                Fubo.lightColor    = lights[i]->GetColor();
+            }
+            else
+            {
+                Vubo.lightPosition = glm::vec3(0, 0, 0);
+                Fubo.lightColor    = glm::vec3(0, 0, 0);
+            }
         }
 
         uniformBuffers[currentImage][0].CopyDataToBuffer(&Vubo, sizeof(Vubo));
@@ -195,7 +198,7 @@ namespace sckz
         scale.z = z;
     }
 
-    void Entity::LoadExternalShaderData(Light & light) { this->light = &light; }
+    void Entity::LoadLights(std::array<Light *, MAX_LIGHTS> lights) { this->lights = lights; }
 
     glm::vec3 Entity::GetLocation() { return location; }
     glm::vec3 Entity::GetRotation() { return rotation; }

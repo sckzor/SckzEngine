@@ -13,17 +13,14 @@ int main()
     sckz::Light &            l1   = vkan.CreateLight();
     sckz::Entity &           e1   = vkan.CreateEntity(m1);
     sckz::Camera &           cam1 = vkan.CreateCamera(45, 0.1, 10);
-    sckz::Camera &           cam2 = vkan.CreateCamera(45, 0.1, 10);
 
-    e1.SetShine(0, 0);
+    e1.SetShine(0, 0.1);
     e1.SetRotation(90, 0, 0);
-    l1.SetColor(1, 1, 1);
-    l1.SetLocation(0, 0, 1);
+    l1.SetColor(0, 0, 1);
+    l1.SetLocation(0, 0, 1.5);
     e1.SetLocation(0, 1, 0);
     cam1.SetLocation(0, 5, 0);
-    cam2.SetLocation(0, 8, 0);
     cam1.SetRotation(-90, 0, 0);
-    cam2.SetRotation(-90, 0, 0);
 
     while (!win.QueryClose())
     {
@@ -85,14 +82,7 @@ int main()
             cam1.SetLocation(cam1.GetLocation().x, cam1.GetLocation().y, cam1.GetLocation().z - (1 * vkan.GetDeltaT()));
         }
 
-        if (win.QueryKey('p'))
-        {
-            vkan.Render(cam2);
-        }
-        else
-        {
-            vkan.Render(cam1);
-        }
+        vkan.Render(cam1);
 
         win.Update();
         vkan.Update();
