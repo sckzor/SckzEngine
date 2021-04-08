@@ -66,7 +66,7 @@ namespace sckz
         Image colorImage;
         Image depthImage;
 
-        Light * light;
+        std::vector<Light *> lights;
 
         std::vector<GraphicsPipeline *> pipelines;
         std::vector<Model *>            models;

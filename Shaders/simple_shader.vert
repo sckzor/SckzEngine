@@ -1,7 +1,7 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-const int MAX_LIGHTS = 4;
+const int MAX_LIGHTS = 2;
 
 layout(binding = 0) uniform UniformBufferObject
 {
@@ -20,7 +20,7 @@ layout(location = 2) in vec2 inTexCoord;
 layout(location = 0) out vec2 fragTexCoord;
 layout(location = 1) out vec3 surfaceNormal;
 layout(location = 2) out vec3 toLightVector[MAX_LIGHTS];
-layout(location = 3) out vec3 toCameraVector;
+layout(location = 6) out vec3 toCameraVector;
 
 void main()
 {

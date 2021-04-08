@@ -10,7 +10,7 @@
 
 namespace sckz
 {
-    static const int MAX_LIGHTS = 4;
+    static const int MAX_LIGHTS = 2;
 
     struct VertexUniformBufferObject
     {
@@ -24,6 +24,7 @@ namespace sckz
     struct FragmentUniformBufferObject
     {
         alignas(16) glm::vec3 lightColor[MAX_LIGHTS];
+        alignas(16) glm::vec3 attenuation[MAX_LIGHTS];
 
         alignas(16) float shineDamper;
         alignas(16) float reflectivity;
@@ -32,15 +33,15 @@ namespace sckz
     class Entity
     {
     private:
-        VkPhysicalDevice *              physicalDevice;
-        VkQueue *                       queue;
-        Memory *                        memory;
-        VkDevice *                      device;
-        DescriptorPool *                pool;
-        GraphicsPipeline *              pipeline;
-        uint32_t                        numFrameBuffers;
-        Image *                         texture;
-        std::array<Light *, MAX_LIGHTS> lights;
+        VkPhysicalDevice *     physicalDevice;
+        VkQueue *              queue;
+        Memory *               memory;
+        VkDevice *             device;
+        DescriptorPool *       pool;
+        GraphicsPipeline *     pipeline;
+        uint32_t               numFrameBuffers;
+        Image *                texture;
+        std::vector<Light *> * lights;
 
         std::vector<std::array<Buffer, 2>> uniformBuffers;
         std::vector<VkDescriptorSet>       descriptorSets;
@@ -76,7 +77,7 @@ namespace sckz
         void SetRotation(float x, float y, float z);
         void SetScale(float x, float y, float z);
 
-        void LoadLights(std::array<Light *, MAX_LIGHTS> lights);
+        void LoadLights(std::vector<Light *> & lights);
 
         void SetShine(float reflectivity, float shineDamper);
 

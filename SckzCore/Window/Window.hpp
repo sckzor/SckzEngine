@@ -19,7 +19,7 @@ namespace sckz
         void         Update();
         bool         QueryClose();
         bool         QueryResize();
-        bool         QueryKey(char key);
+        bool         QueryKey(uint32_t key);
         bool *       QueryKeys();
         GLFWwindow * GetWindow();
         VkExtent2D   GetSize();

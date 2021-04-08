@@ -255,7 +255,7 @@ namespace sckz
     {
         for (const auto & availablePresentMode : availablePresentModes)
         {
-            if (availablePresentMode == VK_PRESENT_MODE_IMMEDIATE_KHR)
+            if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
             {
                 return availablePresentMode;
             }
@@ -783,11 +783,6 @@ namespace sckz
     {
         DestroySwapResources();
 
-        for (int i = 0; i < pipelines.size(); i++)
-        {
-            delete pipelines[i];
-        }
-
         for (int i = 0; i < models.size(); i++)
         {
             models[i]->DestroyModel();
@@ -799,7 +794,6 @@ namespace sckz
             cameras[i]->DestroyCamera();
             delete cameras[i];
         }
-        delete light;
 
         DestroySyncObjects();
         DestroyCommandPool();
@@ -809,6 +803,16 @@ namespace sckz
         DestroyDebugMessenger();
         DestroySurface();
         DestroyInstance();
+
+        for (int i = 0; i < pipelines.size(); i++)
+        {
+            delete pipelines[i];
+        }
+        for (int i = 0; i < lights.size(); i++)
+        {
+            lights[i]->DestroyLight();
+            delete lights[i];
+        }
     }
 
     void Vulkan::RebuildSwapChain()
@@ -1042,13 +1046,13 @@ namespace sckz
     {
         Entity & entity = model.CreateEntity();
         CreatePrimaryCmdBuffers();
-        entity.LoadExternalShaderData(*light);
+        entity.LoadLights(lights);
         return entity;
     }
 
     Light & Vulkan::CreateLight()
     {
-        light = new Light();
-        return *light;
+        lights.push_back(new Light());
+        return *lights.back();
     }
 } // namespace sckz

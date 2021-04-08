@@ -62,5 +62,5 @@ namespace sckz
         }
     }
 
-    bool Window::QueryKey(char key) { return keys[toupper(key)]; }
+    bool Window::QueryKey(uint32_t key) { return keys[toupper(key)]; }
 } // namespace sckz
