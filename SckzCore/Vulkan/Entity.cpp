@@ -61,22 +61,24 @@ namespace sckz
         Vubo.view = camera.GetView();
         Vubo.proj = camera.GetProjection();
 
-        Fubo.reflectivity = this->reflectivity;
-        Fubo.shineDamper  = this->shineDamper;
+        Fubo.reflectivity.x = this->reflectivity;
+        Fubo.reflectivity.y = this->shineDamper;
 
         for (int i = 0; i < MAX_LIGHTS; i++)
         {
             if (i < lights->size())
             {
+                std::cout << (*lights)[i]->GetColor().x << " " << (*lights)[i]->GetColor().y << " "
+                          << (*lights)[i]->GetColor().z << " " << std::endl;
                 Vubo.lightPosition[i] = (*lights)[i]->GetLocation();
-                Fubo.lightColor[i]    = (*lights)[i]->GetColor();
-                Fubo.attenuation[i]   = (*lights)[i]->GetAttenuation();
+                Fubo.lightColor[i]    = glm::vec4((*lights)[i]->GetColor(), 0);
+                Fubo.attenuation[i]   = glm::vec4((*lights)[i]->GetColor(), 0);
             }
             else
             {
                 Vubo.lightPosition[i] = glm::vec3(0, 0, 0);
-                Fubo.lightColor[i]    = glm::vec3(0, 0, 0);
-                Fubo.attenuation[i]   = glm::vec3(1, 0, 0);
+                Fubo.lightColor[i]    = glm::vec4(0, 0, 0, 0);
+                Fubo.attenuation[i]   = glm::vec4(1, 0, 0, 0);
             }
         }
 

@@ -1,7 +1,7 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-const int MAX_LIGHTS = 2;
+const int MAX_LIGHTS = 4;
 
 layout(binding = 0) uniform UniformBufferObject
 {

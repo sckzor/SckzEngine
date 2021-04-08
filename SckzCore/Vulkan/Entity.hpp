@@ -10,7 +10,12 @@
 
 namespace sckz
 {
-    static const int MAX_LIGHTS = 2;
+    static const int MAX_LIGHTS = 4;
+
+    struct SpecialVec3
+    {
+        glm::vec3 vec[MAX_LIGHTS];
+    };
 
     struct VertexUniformBufferObject
     {
@@ -23,11 +28,11 @@ namespace sckz
 
     struct FragmentUniformBufferObject
     {
-        alignas(16) glm::vec3 lightColor[MAX_LIGHTS];
-        alignas(16) glm::vec3 attenuation[MAX_LIGHTS];
-
-        alignas(16) float shineDamper;
-        alignas(16) float reflectivity;
+        alignas(16) glm::vec4 lightColor[MAX_LIGHTS];
+        alignas(16) glm::vec4 attenuation[MAX_LIGHTS];
+        // Use Vec4 instead of vec3 for alignment, it takes up the same amount of bytes as aligning it properly and
+        // this is easier
+        alignas(16) glm::vec2 reflectivity;
     };
 
     class Entity

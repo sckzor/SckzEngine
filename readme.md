@@ -51,6 +51,7 @@ All Code in this library is (c) Sckzor 2021, All rights reserved!
 ## Known issues and bugs
 
 - [ ] The sampler does not need to be recreated with every texture, one for all of the textures is fine.
+- [ ] Some strange bug where if a time.deltatime call is made in the first iteration of the main while loop then the movement/ rotation of an object will just lockup and not move at all?
 
 ## Build tools
 

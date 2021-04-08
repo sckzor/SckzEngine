@@ -1,17 +1,18 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-const int MAX_LIGHTS = 2;
+const int MAX_LIGHTS = 4;
 
 layout(binding = 1) uniform sampler2D texSampler;
 
 layout(binding = 2) uniform UniformBufferObject
 {
-    vec3 lightColor[MAX_LIGHTS];
-    vec3 attenuation[MAX_LIGHTS];
-
-    float shineDamper;
-    float reflectivity;
+    vec4 lightColor[MAX_LIGHTS];
+    vec4 attenuation[MAX_LIGHTS];
+    // Use Vec4 instead of vec3 for alignment, it takes up the same amount of bytes as aligning it properly and
+    // this is easier
+    
+    vec2 reflectivity;
 }
 ubo;
 
@@ -40,18 +41,17 @@ void main()
 
         float brightness = dot(unitNormal, unitLightVector);
         brightness = max(brightness, 0.0);
-        totalDiffuse = totalDiffuse + (brightness * ubo.lightColor[i]);
-        totalDiffuse = totalDiffuse / attFactor;
+        totalDiffuse = totalDiffuse + (brightness * ubo.lightColor[i].xyz);
 
         vec3 lightDirection = -unitLightVector;
         vec3 reflectedLightDirection = reflect(lightDirection, unitNormal);
         float specularFactor = dot(reflectedLightDirection, unitToCameraVector);
         specularFactor = max(specularFactor, 0.0);
-        float dampedFactor = pow(specularFactor, ubo.shineDamper);
-        totalSpecular = totalSpecular + (dampedFactor * ubo.reflectivity * ubo.lightColor[i]);
+        float dampedFactor = pow(specularFactor, ubo.reflectivity.y);
+        totalSpecular = totalSpecular + (dampedFactor * ubo.reflectivity.x * ubo.lightColor[i].xyz) / attFactor;
     }
     totalDiffuse = max(totalDiffuse, 0.2);
 
-    outColor = vec4(totalDiffuse, 1.0) * texture(texSampler, fragTexCoord);
+    outColor = vec4(totalDiffuse, 1.0) * texture(texSampler, fragTexCoord) + vec4(totalSpecular, 1.0);
 }
 
