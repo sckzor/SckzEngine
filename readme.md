@@ -21,7 +21,7 @@ All Code in this library is (c) Sckzor 2021, All rights reserved!
 - [x] Memory management.
 - [x] The ability to move, scale and rotate objects at will instead of having them just spin as well as adding a camera class.
 - [x] Add a render function that allows the scene to be rendered from multiple cameras without having the time advance.
-- [ ] Simple Lighting.
+- [x] Simple Lighting.
 - [x] Batched Rendering.
 - [ ] Add sub-allocated buffers.
 - [ ] FBO filters.
