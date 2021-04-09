@@ -8,31 +8,20 @@ int main()
     sckz::Vulkan vkan;
     vkan.CreateVulkan(win);
 
-    sckz::GraphicsPipeline & p1 = vkan.CreatePipeline("Resources/simple_vertex.spv", "Resources/simple_fragment.spv");
-    sckz::Model &            m1 = vkan.CreateModel("Resources/room.obj", "Resources/RoomTextureAtlas.png", p1);
-    // sckz::Model &            m2   = vkan.CreateModel("Resources/flare.obj", "Resources/placeholder.png", p1);
-    sckz::Light &  l1 = vkan.CreateLight();
-    sckz::Light &  l2 = vkan.CreateLight();
-    sckz::Entity & e1 = vkan.CreateEntity(m1);
-    // sckz::Entity &           e2   = vkan.CreateEntity(m2);
-    // sckz::Entity &           e3   = vkan.CreateEntity(m2);
-    sckz::Camera & cam1 = vkan.CreateCamera(45, 0.1, 10);
+    sckz::GraphicsPipeline & p1   = vkan.CreatePipeline("Resources/simple_vertex.spv", "Resources/simple_fragment.spv");
+    sckz::Model &            m1   = vkan.CreateModel("Resources/room.obj", "Resources/RoomTextureAtlas.png", p1);
+    sckz::Light &            l1   = vkan.CreateLight();
+    sckz::Light &            l2   = vkan.CreateLight();
+    sckz::Entity &           e1   = vkan.CreateEntity(m1);
+    sckz::Camera &           cam1 = vkan.CreateCamera(45, 0.1, 10);
 
     e1.SetShine(1, 10);
     e1.SetRotation(90, 0, 0);
     e1.SetLocation(0, 1, 0);
 
-    // e2.SetShine(1, 10);
-    // e2.SetRotation(90, 0, 0);
-    // e2.SetLocation(1, 1, 1);
-
     l1.SetColor(0.2, 0.2, 0.2);
     l1.SetLocation(1, 1, 1);
     l1.SetAttenuation(1, 0.01, 0.002);
-
-    // e3.SetShine(1, 10);
-    // e3.SetRotation(90, 0, 0);
-    // e3.SetLocation(0, 0, 0);
 
     l2.SetColor(1, 1, 0);
     l2.SetLocation(0, 0, 0);
@@ -43,8 +32,6 @@ int main()
 
     while (!win.QueryClose())
     {
-        std::cout << "[Camera location] X: " << cam1.GetLocation().x << " Y: " << cam1.GetLocation().y
-                  << " Z: " << cam1.GetLocation().z << std::endl;
 
         if (win.QueryKey('y'))
         {

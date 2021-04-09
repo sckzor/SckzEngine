@@ -68,11 +68,9 @@ namespace sckz
         {
             if (i < lights->size())
             {
-                std::cout << (*lights)[i]->GetColor().x << " " << (*lights)[i]->GetColor().y << " "
-                          << (*lights)[i]->GetColor().z << " " << std::endl;
                 Vubo.lightPosition[i] = (*lights)[i]->GetLocation();
                 Fubo.lightColor[i]    = glm::vec4((*lights)[i]->GetColor(), 0);
-                Fubo.attenuation[i]   = glm::vec4((*lights)[i]->GetColor(), 0);
+                Fubo.attenuation[i]   = glm::vec4((*lights)[i]->GetAttenuation(), 0);
             }
             else
             {
