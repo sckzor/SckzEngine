@@ -18,8 +18,11 @@ namespace sckz
         std::vector<Vertex>   vertices;
         std::vector<uint32_t> indices;
 
-        Buffer vertexBuffer;
-        Buffer indexBuffer;
+        Buffer * hostLocalBuffer;
+        Buffer * deviceLocalBuffer;
+
+        Buffer::SubBlock indexBuffer;
+        Buffer::SubBlock vertexBuffer;
 
         std::vector<VkCommandBuffer> commandBuffers;
 
@@ -32,7 +35,6 @@ namespace sckz
         VkExtent2D                   swapChainExtent;
         VkQueue *                    queue;
         VkRenderPass *               renderPass;
-        Memory *                     memory;
         bool                         hasCommandBuffer;
 
         const char * textureFileName;
@@ -51,6 +53,8 @@ namespace sckz
                          GraphicsPipeline *           pipeline,
                          DescriptorPool &             descriptorPool,
                          VkExtent2D                   swapChainExtent,
+                         Buffer &                     hostLocalBuffer,
+                         Buffer &                     deviceLocalBuffer,
                          Memory &                     memory,
                          VkQueue &                    queue);
 
@@ -71,8 +75,8 @@ namespace sckz
 
     public:
         std::vector<VkCommandBuffer> & GetCommandBuffers();
-        Buffer                         GetIndexBuffer();
-        Buffer                         GetVertexBuffer();
+        Buffer::SubBlock               GetIndexBuffer();
+        Buffer::SubBlock               GetVertexBuffer();
         uint32_t                       GetNumIndices();
 
     private:

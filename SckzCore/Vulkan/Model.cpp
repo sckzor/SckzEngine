@@ -15,6 +15,8 @@ namespace sckz
                             GraphicsPipeline *           pipeline,
                             DescriptorPool &             descriptorPool,
                             VkExtent2D                   swapChainExtent,
+                            Buffer &                     hostLocalBuffer,
+                            Buffer &                     deviceLocalBuffer,
                             Memory &                     memory,
                             VkQueue &                    queue)
     {
@@ -29,14 +31,16 @@ namespace sckz
         this->swapChainFramebuffers = &swapChainFramebuffers;
         this->swapChainExtent       = swapChainExtent;
         this->queue                 = &queue;
-        this->memory                = &memory;
+        this->hostLocalBuffer       = &hostLocalBuffer;
+        this->deviceLocalBuffer     = &deviceLocalBuffer;
 
         this->hasCommandBuffer = false;
 
         texture.CreateTextureImage(textureFileName,
                                    *this->device,
                                    *this->physicalDevice,
-                                   *this->memory,
+                                   memory,
+                                   *this->hostLocalBuffer,
                                    commandPool,
                                    queue);
 
@@ -57,8 +61,8 @@ namespace sckz
         }
         DestroySwapResources();
 
-        vertexBuffer.DestroyBuffer();
-        indexBuffer.DestroyBuffer();
+        vertexBuffer.DestroySubBlock();
+        indexBuffer.DestroySubBlock();
         texture.DestroyImage();
     }
 
@@ -117,56 +121,34 @@ namespace sckz
     {
         VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 
-        Buffer stagingBuffer;
-        stagingBuffer.CreateBuffer(*physicalDevice,
-                                   *device,
-                                   *memory,
-                                   bufferSize,
-                                   VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                                   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                                   *queue);
+        Buffer::SubBlock stagingBuffer;
+        stagingBuffer = hostLocalBuffer->GetBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
 
         stagingBuffer.CopyDataToBuffer(vertices.data(), bufferSize);
 
-        vertexBuffer.CreateBuffer(*physicalDevice,
-                                  *device,
-                                  *memory,
-                                  bufferSize,
-                                  VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                                  *queue);
+        vertexBuffer = hostLocalBuffer->GetBuffer(bufferSize,
+                                                  VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 
         stagingBuffer.CopyBufferToBuffer(vertexBuffer, *commandPool);
 
-        stagingBuffer.DestroyBuffer();
+        stagingBuffer.DestroySubBlock();
     }
 
     void Model::CreateIndexBuffer()
     {
         VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
 
-        Buffer stagingBuffer;
-        stagingBuffer.CreateBuffer(*physicalDevice,
-                                   *device,
-                                   *memory,
-                                   bufferSize,
-                                   VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                                   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                                   *queue);
+        Buffer::SubBlock stagingBuffer;
+        stagingBuffer = hostLocalBuffer->GetBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
 
-        stagingBuffer.CopyDataToBuffer(indices.data(), bufferSize);
+        stagingBuffer.CopyDataToBuffer(vertices.data(), bufferSize);
 
-        indexBuffer.CreateBuffer(*physicalDevice,
-                                 *device,
-                                 *memory,
-                                 bufferSize,
-                                 VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-                                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                                 *queue);
+        indexBuffer = hostLocalBuffer->GetBuffer(bufferSize,
+                                                 VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
 
         stagingBuffer.CopyBufferToBuffer(indexBuffer, *commandPool);
 
-        stagingBuffer.DestroyBuffer();
+        stagingBuffer.DestroySubBlock();
     }
 
     void Model::RebuildSwapResources(DescriptorPool & descriptorPool, VkExtent2D swapChainExtent)
@@ -236,13 +218,17 @@ namespace sckz
             vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetPipeline());
 
             VkBuffer     rawVertexBuffer[1];
-            VkDeviceSize offsets[] = { 0 };
+            VkDeviceSize offsets[1];
 
-            rawVertexBuffer[0] = vertexBuffer.GetBuffer();
+            rawVertexBuffer[0] = vertexBuffer.parent->buffer;
+            offsets[0]         = vertexBuffer.offset;
 
             vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, rawVertexBuffer, offsets);
 
-            vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer.GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
+            vkCmdBindIndexBuffer(commandBuffers[i],
+                                 indexBuffer.parent->buffer,
+                                 vertexBuffer.offset,
+                                 VK_INDEX_TYPE_UINT32);
 
             for (uint32_t j = 0; j < entities.size(); j++)
             {
@@ -282,7 +268,8 @@ namespace sckz
         entity->CreateEntity(*physicalDevice,
                              *device,
                              *queue,
-                             *memory,
+                             *hostLocalBuffer,
+                             *deviceLocalBuffer,
                              *descriptorPool,
                              *pipeline,
                              swapChainFramebuffers->size(),
@@ -293,9 +280,9 @@ namespace sckz
         return *entity;
     }
 
-    Buffer Model::GetIndexBuffer() { return indexBuffer; }
+    Buffer::SubBlock Model::GetIndexBuffer() { return indexBuffer; }
 
-    Buffer Model::GetVertexBuffer() { return vertexBuffer; }
+    Buffer::SubBlock Model::GetVertexBuffer() { return vertexBuffer; }
 
     uint32_t Model::GetNumIndices() { return static_cast<uint32_t>(indices.size()); }
 

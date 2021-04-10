@@ -5,20 +5,22 @@ namespace sckz
     void Entity::CreateEntity(VkPhysicalDevice & physicalDevice,
                               VkDevice &         device,
                               VkQueue &          queue,
-                              Memory &           memory,
+                              Buffer &           hostLocalBuffer,
+                              Buffer &           deviceLocalBuffer,
                               DescriptorPool &   pool,
                               GraphicsPipeline & pipeline,
                               uint32_t           numFrameBuffers,
                               Image &            texture)
     {
-        this->physicalDevice  = &physicalDevice;
-        this->queue           = &queue;
-        this->memory          = &memory;
-        this->device          = &device;
-        this->pool            = &pool;
-        this->pipeline        = &pipeline;
-        this->numFrameBuffers = numFrameBuffers;
-        this->texture         = &texture;
+        this->physicalDevice    = &physicalDevice;
+        this->queue             = &queue;
+        this->hostLocalBuffer   = &hostLocalBuffer;
+        this->deviceLocalBuffer = &deviceLocalBuffer;
+        this->device            = &device;
+        this->pool              = &pool;
+        this->pipeline          = &pipeline;
+        this->numFrameBuffers   = numFrameBuffers;
+        this->texture           = &texture;
 
         this->scale = glm::vec3(1.0f, 1.0f, 1.0f);
 
@@ -26,14 +28,7 @@ namespace sckz
         CreateDescriptorSets();
     }
 
-    void Entity::DestroyEntity()
-    {
-        for (size_t i = 0; i < numFrameBuffers; i++)
-        {
-            uniformBuffers[i][0].DestroyBuffer();
-            uniformBuffers[i][1].DestroyBuffer();
-        }
-    }
+    void Entity::DestroyEntity() { }
 
     void Entity::RebuildSwapResources()
     {
@@ -102,13 +97,13 @@ namespace sckz
         for (size_t i = 0; i < numFrameBuffers; i++)
         {
             VkDescriptorBufferInfo VInfo {};
-            VInfo.buffer = uniformBuffers[i][0].GetBuffer();
-            VInfo.offset = 0;
+            VInfo.buffer = uniformBuffers[i][0].parent->buffer;
+            VInfo.offset = uniformBuffers[i][0].offset;
             VInfo.range  = sizeof(VertexUniformBufferObject);
 
             VkDescriptorBufferInfo FInfo {};
-            FInfo.buffer = uniformBuffers[i][1].GetBuffer();
-            FInfo.offset = 0;
+            FInfo.buffer = uniformBuffers[i][1].parent->buffer;
+            FInfo.offset = uniformBuffers[i][1].offset;
             FInfo.range  = sizeof(FragmentUniformBufferObject);
 
             VkDescriptorImageInfo imageInfo {};
@@ -159,23 +154,8 @@ namespace sckz
 
         for (size_t i = 0; i < numFrameBuffers; i++)
         {
-            uniformBuffers[i][0].CreateBuffer(*physicalDevice,
-                                              *device,
-                                              *memory,
-                                              VuboSize,
-                                              VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                                              VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
-                                                  | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                                              *queue);
-
-            uniformBuffers[i][1].CreateBuffer(*physicalDevice,
-                                              *device,
-                                              *memory,
-                                              FuboSize,
-                                              VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                                              VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
-                                                  | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                                              *queue);
+            uniformBuffers[i][0] = hostLocalBuffer->GetBuffer(VuboSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+            uniformBuffers[i][1] = hostLocalBuffer->GetBuffer(FuboSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
         }
     }
 

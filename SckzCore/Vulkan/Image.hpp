@@ -9,16 +9,16 @@ namespace sckz
     class Image
     {
     private:
-        VkImage            image;
-        VkImageView        imageView;
-        VkSampler          sampler;
-        SubBlock_t *       block;
-        VkDevice *         device;
-        VkPhysicalDevice * physicalDevice;
-        VkFormat           format;
-        VkQueue *          queue;
-        bool               holdsRealImage;
-        uint32_t           mipLevels;
+        VkImage              image;
+        VkImageView          imageView;
+        VkSampler            sampler;
+        Memory::SubBlock_t * block;
+        VkDevice *           device;
+        VkPhysicalDevice *   physicalDevice;
+        VkFormat             format;
+        VkQueue *            queue;
+        bool                 holdsRealImage;
+        uint32_t             mipLevels;
 
     public:
         void CreateImage(uint32_t              width,
@@ -32,6 +32,7 @@ namespace sckz
                          VkDevice &            device,
                          VkPhysicalDevice &    physicalDevice,
                          Memory &              memory,
+                         Buffer &              hostLocalBuffer,
                          VkQueue &             queue);
 
         void CreateImage(VkDevice & device, VkImage & image, VkFormat & imageFormat, uint32_t mipLevels);
@@ -44,6 +45,7 @@ namespace sckz
                                 VkDevice &         device,
                                 VkPhysicalDevice & physicalDevice,
                                 Memory &           memory,
+                                Buffer &           deviceLocalBuffer,
                                 VkCommandPool &    pool,
                                 VkQueue &          queue);
 

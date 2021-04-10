@@ -27,7 +27,8 @@ namespace sckz
         throw std::runtime_error("failed to find suitable memory type!");
     }
 
-    SubBlock_t & Memory::AllocateMemory(VkMemoryRequirements memoryRequirements, VkMemoryPropertyFlags & properties)
+    Memory::SubBlock_t & Memory::AllocateMemory(VkMemoryRequirements    memoryRequirements,
+                                                VkMemoryPropertyFlags & properties)
     {
         uint32_t memoryType = FindMemoryType(memoryRequirements.memoryTypeBits, properties, *physicalDevice);
         for (uint32_t i = 0; i < blocks.size(); i++)
@@ -75,6 +76,17 @@ namespace sckz
         for (uint32_t i = 0; i < blocks.size(); i++)
         {
             vkFreeMemory(*device, blocks[i]->memory, nullptr);
+            SubBlock_t * currentBlock = nullptr;
+            SubBlock_t * nextBlock    = blocks[i]->beginning;
+
+            while (nextBlock != nullptr)
+            {
+                currentBlock = nextBlock;
+                nextBlock    = nextBlock->next;
+                delete currentBlock;
+            }
+
+            delete blocks[i];
         }
     }
 

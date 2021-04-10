@@ -3,28 +3,27 @@
 
 namespace sckz
 {
-    typedef struct SubBlock
-    {
-    public:
-        uint32_t         offset;
-        VkDeviceMemory * memory;
-        uint32_t         size;
-        SubBlock *       next = nullptr;
-        bool             isFree;
-    } SubBlock_t;
-
-    typedef struct Block
-    {
-        VkDeviceMemory memory;
-        SubBlock_t *   beginning;
-        uint32_t       remainingSize;
-        uint32_t       memoryType;
-    } Block_t;
 
     class Memory
     {
-        friend Block_t;
-        friend SubBlock_t;
+    public:
+        typedef struct SubBlock
+        {
+        public:
+            uint32_t         offset;
+            VkDeviceMemory * memory;
+            uint32_t         size;
+            SubBlock *       next = nullptr;
+            bool             isFree;
+        } SubBlock_t;
+
+        typedef struct Block
+        {
+            VkDeviceMemory memory;
+            SubBlock_t *   beginning;
+            uint32_t       remainingSize;
+            uint32_t       memoryType;
+        } Block_t;
 
     private:
         std::vector<Block_t *> blocks;

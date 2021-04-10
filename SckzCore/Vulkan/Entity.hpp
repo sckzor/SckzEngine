@@ -40,7 +40,8 @@ namespace sckz
     private:
         VkPhysicalDevice *     physicalDevice;
         VkQueue *              queue;
-        Memory *               memory;
+        Buffer *               hostLocalBuffer;
+        Buffer *               deviceLocalBuffer;
         VkDevice *             device;
         DescriptorPool *       pool;
         GraphicsPipeline *     pipeline;
@@ -48,8 +49,8 @@ namespace sckz
         Image *                texture;
         std::vector<Light *> * lights;
 
-        std::vector<std::array<Buffer, 2>> uniformBuffers;
-        std::vector<VkDescriptorSet>       descriptorSets;
+        std::vector<std::array<Buffer::SubBlock, 2>> uniformBuffers;
+        std::vector<VkDescriptorSet>                 descriptorSets;
 
         glm::vec3 location;
         glm::vec3 rotation;
@@ -62,7 +63,8 @@ namespace sckz
         void CreateEntity(VkPhysicalDevice & physicalDevice,
                           VkDevice &         device,
                           VkQueue &          queue,
-                          Memory &           memory,
+                          Buffer &           hostLocalBuffer,
+                          Buffer &           deviceLocalBuffer,
                           DescriptorPool &   pool,
                           GraphicsPipeline & pipeline,
                           uint32_t           numFrameBuffers,

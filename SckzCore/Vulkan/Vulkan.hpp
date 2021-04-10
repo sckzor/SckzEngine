@@ -50,6 +50,8 @@ namespace sckz
         VkQueue                  presentQueue;
 
         Memory memory;
+        Buffer deviceLocalBuffer;
+        Buffer hostLocalBuffer;
 
         VkSwapchainKHR             swapChain;
         std::vector<Image>         swapChainImages;
