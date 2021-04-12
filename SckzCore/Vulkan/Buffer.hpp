@@ -29,6 +29,8 @@ namespace sckz
             SubBlock * next = nullptr;
             bool       isFree;
 
+            SubBlock() = default;
+
             void CopyBufferToBuffer(Buffer::SubBlock & buffer, VkCommandPool & pool);
 
             void CopyBufferToImage(VkImage & image, VkCommandPool & pool, uint32_t width, uint32_t height);
@@ -39,28 +41,24 @@ namespace sckz
         };
 
     private:
-        std::vector<Block *>    blocks;
-        Memory::SubBlock_t *    memoryBlock;
-        VkBuffer                buffer;
-        VkDevice *              device;
-        uint32_t                blockSize;
-        VkQueue *               queue;
-        Memory *                memory;
-        VkMemoryPropertyFlags * memoryProperty;
+        std::vector<Block *>  blocks;
+        Memory::SubBlock_t *  memoryBlock;
+        VkDevice *            device;
+        uint32_t              blockSize;
+        VkQueue *             queue;
+        Memory *              memory;
+        VkMemoryPropertyFlags memoryProperty;
 
     public:
-        void CreateBuffer(VkPhysicalDevice & physicalDevice,
-                          VkDevice &         device,
-                          Memory &           memory,
-                          uint32_t           blockSize,
-                          VkBufferUsageFlags usage,
-                          VkQueue &          queue);
+        void CreateBuffer(VkPhysicalDevice &    physicalDevice,
+                          VkDevice &            device,
+                          Memory &              memory,
+                          uint32_t              blockSize,
+                          VkMemoryPropertyFlags memoryProperty,
+                          VkQueue &             queue);
 
         SubBlock & GetBuffer(uint32_t size, VkBufferUsageFlags usage);
 
         void DestroyBuffer();
-
-    public:
-        VkBuffer GetBuffer();
     };
 } // namespace sckz

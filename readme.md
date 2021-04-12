@@ -52,6 +52,7 @@ All Code in this library is (c) Sckzor 2021, All rights reserved!
 
 - [ ] The sampler does not need to be recreated with every texture, one for all of the textures is fine.
 - [ ] Some strange bug where if a time.deltatime call is made in the first iteration of the main while loop then the movement/ rotation of an object will just lockup and not move at all?
+- [ ] Program breaks when the resolution becomes too large because the frame buffer gets bigger than the size of the memory blocks.
 
 ## Build tools
 

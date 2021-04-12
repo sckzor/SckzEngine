@@ -61,8 +61,8 @@ namespace sckz
         }
         DestroySwapResources();
 
-        vertexBuffer.DestroySubBlock();
-        indexBuffer.DestroySubBlock();
+        vertexBuffer->DestroySubBlock();
+        indexBuffer->DestroySubBlock();
         texture.DestroyImage();
     }
 
@@ -126,10 +126,11 @@ namespace sckz
 
         stagingBuffer.CopyDataToBuffer(vertices.data(), bufferSize);
 
-        vertexBuffer = hostLocalBuffer->GetBuffer(bufferSize,
-                                                  VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+        vertexBuffer
+            = &hostLocalBuffer->GetBuffer(bufferSize,
+                                          VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 
-        stagingBuffer.CopyBufferToBuffer(vertexBuffer, *commandPool);
+        stagingBuffer.CopyBufferToBuffer(*vertexBuffer, *commandPool);
 
         stagingBuffer.DestroySubBlock();
     }
@@ -143,10 +144,10 @@ namespace sckz
 
         stagingBuffer.CopyDataToBuffer(vertices.data(), bufferSize);
 
-        indexBuffer = hostLocalBuffer->GetBuffer(bufferSize,
-                                                 VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+        indexBuffer = &hostLocalBuffer->GetBuffer(bufferSize,
+                                                  VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
 
-        stagingBuffer.CopyBufferToBuffer(indexBuffer, *commandPool);
+        stagingBuffer.CopyBufferToBuffer(*indexBuffer, *commandPool);
 
         stagingBuffer.DestroySubBlock();
     }
@@ -220,14 +221,17 @@ namespace sckz
             VkBuffer     rawVertexBuffer[1];
             VkDeviceSize offsets[1];
 
-            rawVertexBuffer[0] = vertexBuffer.parent->buffer;
-            offsets[0]         = vertexBuffer.offset;
+            rawVertexBuffer[0] = vertexBuffer->parent->buffer;
+            offsets[0]         = vertexBuffer->offset;
+
+            std::cout << "Vertex remainingSize: " << vertexBuffer << std::endl;
+            std::cout << "Index remainingSize: " << indexBuffer << std::endl;
 
             vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, rawVertexBuffer, offsets);
 
             vkCmdBindIndexBuffer(commandBuffers[i],
-                                 indexBuffer.parent->buffer,
-                                 vertexBuffer.offset,
+                                 indexBuffer->parent->buffer,
+                                 indexBuffer->offset,
                                  VK_INDEX_TYPE_UINT32);
 
             for (uint32_t j = 0; j < entities.size(); j++)
@@ -280,9 +284,9 @@ namespace sckz
         return *entity;
     }
 
-    Buffer::SubBlock Model::GetIndexBuffer() { return indexBuffer; }
+    Buffer::SubBlock Model::GetIndexBuffer() { return *indexBuffer; }
 
-    Buffer::SubBlock Model::GetVertexBuffer() { return vertexBuffer; }
+    Buffer::SubBlock Model::GetVertexBuffer() { return *vertexBuffer; }
 
     uint32_t Model::GetNumIndices() { return static_cast<uint32_t>(indices.size()); }
 

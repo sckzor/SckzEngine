@@ -52,6 +52,6 @@ void main()
     }
     totalDiffuse = max(totalDiffuse, 0.2);
 
-    outColor = vec4(totalDiffuse, 1.0) * texture(texSampler, fragTexCoord) + vec4(totalSpecular, 1.0);
+    outColor = vec4(0,1,0,1);
 }
 

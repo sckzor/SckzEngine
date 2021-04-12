@@ -21,8 +21,8 @@ namespace sckz
         Buffer * hostLocalBuffer;
         Buffer * deviceLocalBuffer;
 
-        Buffer::SubBlock indexBuffer;
-        Buffer::SubBlock vertexBuffer;
+        Buffer::SubBlock * indexBuffer;
+        Buffer::SubBlock * vertexBuffer;
 
         std::vector<VkCommandBuffer> commandBuffers;
 

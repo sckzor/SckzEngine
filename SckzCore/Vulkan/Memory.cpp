@@ -30,6 +30,10 @@ namespace sckz
     Memory::SubBlock_t & Memory::AllocateMemory(VkMemoryRequirements    memoryRequirements,
                                                 VkMemoryPropertyFlags & properties)
     {
+        if (memoryRequirements.size > blockSize)
+        {
+            throw std::runtime_error("Memory Allocation Size was too big!");
+        }
         uint32_t memoryType = FindMemoryType(memoryRequirements.memoryTypeBits, properties, *physicalDevice);
         for (uint32_t i = 0; i < blocks.size(); i++)
         {

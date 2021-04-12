@@ -769,18 +769,18 @@ namespace sckz
         CreateSurface();
         PickPhysicalDevice();
         CreateLogicalDevice();
-        memory.CreateMemory(device, physicalDevice, 332398592);
+        memory.CreateMemory(device, physicalDevice, 0xFFFFFFF);
         deviceLocalBuffer.CreateBuffer(physicalDevice,
                                        device,
                                        memory,
-                                       332398592,
+                                       0x7FFFFFF,
                                        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
                                        graphicsQueue);
 
         hostLocalBuffer.CreateBuffer(physicalDevice,
                                      device,
                                      memory,
-                                     332398591,
+                                     0x7FFFFFF,
                                      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                                      graphicsQueue);
         CreateSwapChain();

@@ -2,39 +2,58 @@
 
 namespace sckz
 {
-    void Buffer::CreateBuffer(VkPhysicalDevice & physicalDevice,
-                              VkDevice &         device,
-                              Memory &           memory,
-                              uint32_t           size,
-                              VkBufferUsageFlags usage,
-                              VkQueue &          queue)
+    void Buffer::CreateBuffer(VkPhysicalDevice &    physicalDevice,
+                              VkDevice &            device,
+                              Memory &              memory,
+                              uint32_t              blockSize,
+                              VkMemoryPropertyFlags memoryProperty,
+                              VkQueue &             queue)
     {
-        this->device    = &device;
-        this->blockSize = blockSize;
-        this->queue     = &queue;
-        this->memory    = &memory;
+        this->device         = &device;
+        this->blockSize      = blockSize;
+        this->queue          = &queue;
+        this->memory         = &memory;
+        this->memoryProperty = memoryProperty;
     }
 
     Buffer::SubBlock & Buffer::GetBuffer(uint32_t size, VkBufferUsageFlags usage)
     {
+        if (size > blockSize)
+        {
+            throw std::runtime_error("Buffer Size was too big!");
+        }
         for (uint32_t i = 0; i < blocks.size(); i++)
         {
-            if (blocks[i]->remainingSize >= size && blocks[i]->usage == usage)
+            if (blocks[i]->remainingSize + size >= size && blocks[i]->usage == usage)
             {
                 SubBlock * subBlock = blocks[i]->beginning;
-                while (subBlock->next != nullptr)
+
+                while (subBlock != nullptr && subBlock->next != nullptr)
                 {
                     subBlock = subBlock->next;
                 }
+
                 blocks[i]->remainingSize -= size;
                 SubBlock * newSubBlock = new SubBlock();
 
                 newSubBlock->size   = size;
-                newSubBlock->offset = (subBlock->offset + subBlock->size);
                 newSubBlock->next   = nullptr;
                 newSubBlock->parent = blocks[i];
 
-                subBlock->next = newSubBlock;
+                if (subBlock == nullptr)
+                {
+                    newSubBlock->offset  = 0;
+                    blocks[i]->beginning = newSubBlock;
+                }
+                else
+                {
+                    newSubBlock->offset
+                        = (subBlock->offset + subBlock->size) + (64 - ((subBlock->offset + subBlock->size) % 64));
+                    subBlock->next = newSubBlock;
+                }
+
+                std::cout << "Offset: " << newSubBlock->offset << std::endl;
+
                 return *newSubBlock;
             }
         }
@@ -46,9 +65,10 @@ namespace sckz
         bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
         Block * block        = new Block();
-        block->beginning     = new SubBlock();
+        block->beginning     = nullptr;
         block->usage         = usage;
         block->remainingSize = blockSize;
+        block->parent        = this;
 
         if (vkCreateBuffer(*this->device, &bufferInfo, nullptr, &block->buffer) != VK_SUCCESS)
         {
@@ -56,32 +76,36 @@ namespace sckz
         }
 
         VkMemoryRequirements memRequirements;
-        vkGetBufferMemoryRequirements(*this->device, buffer, &memRequirements);
+        vkGetBufferMemoryRequirements(*this->device, block->buffer, &memRequirements);
 
-        memoryBlock = &memory->AllocateMemory(memRequirements, *memoryProperty);
-        vkBindBufferMemory(*this->device, buffer, *memoryBlock->memory, memoryBlock->offset);
+        memoryBlock = &memory->AllocateMemory(memRequirements, this->memoryProperty);
+        vkBindBufferMemory(*this->device, block->buffer, *memoryBlock->memory, memoryBlock->offset);
 
         blocks.emplace_back(block);
 
         return GetBuffer(size, usage);
     }
 
-    void Buffer::DestroyBuffer() { vkDestroyBuffer(*this->device, buffer, nullptr); }
+    void Buffer::DestroyBuffer()
+    { /*vkDestroyBuffer(*this->device, buffer, nullptr);*/
+    }
 
     void Buffer::SubBlock::CopyBufferToBuffer(Buffer::SubBlock & buffer, VkCommandPool & pool)
     {
+        std::cout << "First Buffer Offset: " << this->size << " Second Buffer Offset " << buffer.size << std::endl;
+        if (this->size != buffer.size)
+        {
+            throw std::runtime_error("Buffer Size Mis-match!");
+        }
+
         CommandBuffer cmdBuffer;
         cmdBuffer.BeginSingleUseCommandBuffer(*this->parent->parent->device, pool, *this->parent->parent->queue);
 
         VkBufferCopy copyRegion {};
         copyRegion.dstOffset = buffer.offset;
         copyRegion.srcOffset = this->offset;
-        copyRegion.size      = size;
-        vkCmdCopyBuffer(cmdBuffer.GetCommandBuffer(),
-                        this->parent->parent->buffer,
-                        buffer.parent->parent->buffer,
-                        1,
-                        &copyRegion);
+        copyRegion.size      = this->size;
+        vkCmdCopyBuffer(cmdBuffer.GetCommandBuffer(), this->parent->buffer, buffer.parent->buffer, 1, &copyRegion);
 
         cmdBuffer.EndSingleUseCommandBuffer();
     }
@@ -116,7 +140,7 @@ namespace sckz
 
     void Buffer::SubBlock::CopyDataToBuffer(void * data, uint32_t dataSize)
     {
-        if (dataSize != size)
+        if (dataSize != this->size)
         {
             throw std::runtime_error("buffer size mis-match!");
         }
@@ -132,5 +156,4 @@ namespace sckz
         vkUnmapMemory(*this->parent->parent->device, *this->parent->parent->memoryBlock->memory);
     }
 
-    VkBuffer Buffer::GetBuffer() { return buffer; }
 } // namespace sckz
