@@ -60,14 +60,14 @@ namespace sckz
 
         VkBufferCreateInfo bufferInfo {};
         bufferInfo.sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        bufferInfo.size        = this->blockSize;
+        bufferInfo.size        = size;
         bufferInfo.usage       = usage;
         bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
         Block * block        = new Block();
         block->beginning     = nullptr;
         block->usage         = usage;
-        block->remainingSize = blockSize;
+        block->remainingSize = size;
         block->parent        = this;
 
         if (vkCreateBuffer(*this->device, &bufferInfo, nullptr, &block->buffer) != VK_SUCCESS)

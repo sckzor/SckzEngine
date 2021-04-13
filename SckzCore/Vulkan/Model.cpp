@@ -224,9 +224,6 @@ namespace sckz
             rawVertexBuffer[0] = vertexBuffer->parent->buffer;
             offsets[0]         = vertexBuffer->offset;
 
-            std::cout << "Vertex remainingSize: " << vertexBuffer << std::endl;
-            std::cout << "Index remainingSize: " << indexBuffer << std::endl;
-
             vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, rawVertexBuffer, offsets);
 
             vkCmdBindIndexBuffer(commandBuffers[i],

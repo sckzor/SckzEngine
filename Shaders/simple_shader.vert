@@ -26,7 +26,7 @@ void main()
 {
     vec4 worldPosition = ubo.model * vec4(inPosition, 1.0);
 
-    gl_Position  = vec4(0,0,0, 0);
+    gl_Position  = ubo.proj * ubo.view * worldPosition;
     fragTexCoord = inTexCoord;
 
     surfaceNormal = (ubo.model * vec4(inNormal, 0.0)).xyz;

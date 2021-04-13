@@ -101,10 +101,14 @@ namespace sckz
             VInfo.offset = uniformBuffers[i][0].offset;
             VInfo.range  = sizeof(VertexUniformBufferObject);
 
+            std::cout << "Vertex UBO offset: " << VInfo.offset << std::endl;
+
             VkDescriptorBufferInfo FInfo {};
             FInfo.buffer = uniformBuffers[i][1].parent->buffer;
             FInfo.offset = uniformBuffers[i][1].offset;
             FInfo.range  = sizeof(FragmentUniformBufferObject);
+
+            std::cout << "Fragment UBO offset: " << FInfo.offset << std::endl;
 
             VkDescriptorImageInfo imageInfo {};
             imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;

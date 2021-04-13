@@ -770,6 +770,7 @@ namespace sckz
         PickPhysicalDevice();
         CreateLogicalDevice();
         memory.CreateMemory(device, physicalDevice, 0xFFFFFFF);
+
         deviceLocalBuffer.CreateBuffer(physicalDevice,
                                        device,
                                        memory,
