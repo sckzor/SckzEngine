@@ -813,6 +813,8 @@ namespace sckz
 
         DestroySyncObjects();
         DestroyCommandPool();
+        deviceLocalBuffer.DestroyBuffer();
+        hostLocalBuffer.DestroyBuffer();
         memory.FreeMemory();
         memory.DestroyMemory();
         DestroyLogicalDevice();

@@ -22,6 +22,7 @@ namespace sckz
         {
             throw std::runtime_error("Buffer Size was too big!");
         }
+
         for (uint32_t i = 0; i < blocks.size(); i++)
         {
             if (blocks[i]->remainingSize + size >= size && blocks[i]->usage == usage)
@@ -52,22 +53,20 @@ namespace sckz
                     subBlock->next = newSubBlock;
                 }
 
-                std::cout << "Offset: " << newSubBlock->offset << std::endl;
-
                 return *newSubBlock;
             }
         }
 
         VkBufferCreateInfo bufferInfo {};
         bufferInfo.sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        bufferInfo.size        = size;
+        bufferInfo.size        = blockSize;
         bufferInfo.usage       = usage;
         bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
         Block * block        = new Block();
         block->beginning     = nullptr;
         block->usage         = usage;
-        block->remainingSize = size;
+        block->remainingSize = blockSize;
         block->parent        = this;
 
         if (vkCreateBuffer(*this->device, &bufferInfo, nullptr, &block->buffer) != VK_SUCCESS)
@@ -87,12 +86,26 @@ namespace sckz
     }
 
     void Buffer::DestroyBuffer()
-    { /*vkDestroyBuffer(*this->device, buffer, nullptr);*/
+    {
+        for (uint32_t i = 0; i < blocks.size(); i++)
+        {
+            vkDestroyBuffer(*device, blocks[i]->buffer, nullptr);
+            SubBlock * currentBlock = nullptr;
+            SubBlock * nextBlock    = blocks[i]->beginning;
+
+            while (nextBlock != nullptr)
+            {
+                currentBlock = nextBlock;
+                nextBlock    = nextBlock->next;
+                delete currentBlock;
+            }
+
+            delete blocks[i];
+        }
     }
 
     void Buffer::SubBlock::CopyBufferToBuffer(Buffer::SubBlock & buffer, VkCommandPool & pool)
     {
-        std::cout << "First Buffer Offset: " << this->size << " Second Buffer Offset " << buffer.size << std::endl;
         if (this->size != buffer.size)
         {
             throw std::runtime_error("Buffer Size Mis-match!");
@@ -104,7 +117,7 @@ namespace sckz
         VkBufferCopy copyRegion {};
         copyRegion.dstOffset = buffer.offset;
         copyRegion.srcOffset = this->offset;
-        copyRegion.size      = this->size;
+        copyRegion.size      = this->offset + this->size;
         vkCmdCopyBuffer(cmdBuffer.GetCommandBuffer(), this->parent->buffer, buffer.parent->buffer, 1, &copyRegion);
 
         cmdBuffer.EndSingleUseCommandBuffer();
@@ -152,7 +165,9 @@ namespace sckz
                     size,
                     0,
                     &location);
-        memcpy(location + this->offset, data, static_cast<size_t>(size));
+
+        char * OffsetLocation = (char *)location + this->offset;
+        memcpy(OffsetLocation, data, static_cast<size_t>(size));
         vkUnmapMemory(*this->parent->parent->device, *this->parent->parent->memoryBlock->memory);
     }
 
