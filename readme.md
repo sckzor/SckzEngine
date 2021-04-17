@@ -23,7 +23,7 @@ All Code in this library is (c) Sckzor 2021, All rights reserved!
 - [x] Add a render function that allows the scene to be rendered from multiple cameras without having the time advance.
 - [x] Simple Lighting.
 - [x] Batched Rendering.
-- [ ] Add sub-allocated buffers.
+- [x] Add sub-allocated buffers.
 - [ ] FBO filters.
 - [ ] Add an options for on-demand changes to the swap chain like locked refresh rate and stuff like that.
 - [ ] Finish the _vulkan_ memory manager.
