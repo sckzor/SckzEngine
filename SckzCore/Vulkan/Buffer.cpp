@@ -25,7 +25,7 @@ namespace sckz
 
         for (uint32_t i = 0; i < blocks.size(); i++)
         {
-            if (blocks[i]->remainingSize + size >= size && blocks[i]->usage == usage)
+            if (blocks[i]->remainingSize >= size && blocks[i]->usage == usage)
             {
                 SubBlock * subBlock = blocks[i]->beginning;
 

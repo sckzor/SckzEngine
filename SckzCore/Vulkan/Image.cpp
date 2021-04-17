@@ -16,7 +16,6 @@ namespace sckz
                             VkDevice &            device,
                             VkPhysicalDevice &    physicalDevice,
                             Memory &              memory,
-                            Buffer &              hostLocalBuffer,
                             VkQueue &             queue)
     {
         this->device    = &device;
@@ -86,12 +85,26 @@ namespace sckz
                                    VkDevice &         device,
                                    VkPhysicalDevice & physicalDevice,
                                    Memory &           memory,
-                                   Buffer &           hostLocalBuffer,
                                    VkCommandPool &    pool,
                                    VkQueue &          queue)
     {
         this->device         = &device;
         this->physicalDevice = &physicalDevice;
+        this->memory         = &memory;
+
+        hostLocalBuffer.CreateBuffer(*this->physicalDevice,
+                                     *this->device,
+                                     *this->memory,
+                                     0x7FFFFFF,
+                                     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                                     queue);
+
+        deviceLocalBuffer.CreateBuffer(*this->physicalDevice,
+                                       *this->device,
+                                       *this->memory,
+                                       0x7FFFFFF,
+                                       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                                       queue);
 
         int          texWidth, texHeight, texChannels;
         stbi_uc *    pixels    = stbi_load(fileName, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
@@ -103,10 +116,9 @@ namespace sckz
             throw std::runtime_error("failed to load texture image!");
         }
 
-        Buffer::SubBlock * stagingBuffer;
-        stagingBuffer = &hostLocalBuffer.GetBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+        Buffer::SubBlock stagingBuffer = hostLocalBuffer.GetBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
 
-        stagingBuffer->CopyDataToBuffer(pixels, static_cast<size_t>(imageSize));
+        stagingBuffer.CopyDataToBuffer(pixels, static_cast<size_t>(imageSize));
         stbi_image_free(pixels);
 
         CreateImage(texWidth,
@@ -120,17 +132,13 @@ namespace sckz
                     *this->device,
                     *this->physicalDevice,
                     memory,
-                    hostLocalBuffer,
                     queue); // queue is the PRIVATE queue
 
         TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, pool);
-        stagingBuffer->CopyBufferToImage(image,
-                                         pool,
-                                         static_cast<uint32_t>(texWidth),
-                                         static_cast<uint32_t>(texHeight));
+        stagingBuffer.CopyBufferToImage(image, pool, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
         // transitioned to VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL while generating mipmaps
 
-        stagingBuffer->DestroySubBlock();
+        stagingBuffer.DestroySubBlock();
 
         GenerateMipmaps(VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight, pool);
     }
@@ -143,6 +151,9 @@ namespace sckz
         {
             vkDestroyImage(*device, image, nullptr);
         }
+
+        hostLocalBuffer.DestroyBuffer();
+        deviceLocalBuffer.DestroyBuffer();
     }
 
     void Image::TransitionImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout, VkCommandPool & pool)

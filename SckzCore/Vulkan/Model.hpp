@@ -18,8 +18,11 @@ namespace sckz
         std::vector<Vertex>   vertices;
         std::vector<uint32_t> indices;
 
-        Buffer * hostLocalBuffer;
-        Buffer * deviceLocalBuffer;
+        Buffer hostLocalBuffer;
+        Buffer deviceLocalBuffer;
+        Buffer stagingLocalBuffer;
+
+        Memory * memory;
 
         Buffer::SubBlock * indexBuffer;
         Buffer::SubBlock * vertexBuffer;
@@ -53,8 +56,6 @@ namespace sckz
                          GraphicsPipeline *           pipeline,
                          DescriptorPool &             descriptorPool,
                          VkExtent2D                   swapChainExtent,
-                         Buffer &                     hostLocalBuffer,
-                         Buffer &                     deviceLocalBuffer,
                          Memory &                     memory,
                          VkQueue &                    queue);
 

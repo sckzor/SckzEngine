@@ -15,8 +15,6 @@ namespace sckz
                             GraphicsPipeline *           pipeline,
                             DescriptorPool &             descriptorPool,
                             VkExtent2D                   swapChainExtent,
-                            Buffer &                     hostLocalBuffer,
-                            Buffer &                     deviceLocalBuffer,
                             Memory &                     memory,
                             VkQueue &                    queue)
     {
@@ -31,18 +29,25 @@ namespace sckz
         this->swapChainFramebuffers = &swapChainFramebuffers;
         this->swapChainExtent       = swapChainExtent;
         this->queue                 = &queue;
-        this->hostLocalBuffer       = &hostLocalBuffer;
-        this->deviceLocalBuffer     = &deviceLocalBuffer;
+        this->memory                = &memory;
+
+        this->hostLocalBuffer.CreateBuffer(*this->physicalDevice,
+                                           *this->device,
+                                           *this->memory,
+                                           0x7FFFFFF,
+                                           VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                                           *this->queue);
+
+        this->deviceLocalBuffer.CreateBuffer(*this->physicalDevice,
+                                             *this->device,
+                                             *this->memory,
+                                             0x7FFFFFF,
+                                             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                                             *this->queue);
 
         this->hasCommandBuffer = false;
 
-        texture.CreateTextureImage(textureFileName,
-                                   *this->device,
-                                   *this->physicalDevice,
-                                   memory,
-                                   *this->hostLocalBuffer,
-                                   commandPool,
-                                   queue);
+        texture.CreateTextureImage(textureFileName, *this->device, *this->physicalDevice, memory, commandPool, queue);
 
         texture.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
         texture.CreateTextureSampler();
@@ -63,6 +68,10 @@ namespace sckz
 
         vertexBuffer->DestroySubBlock();
         indexBuffer->DestroySubBlock();
+
+        hostLocalBuffer.DestroyBuffer();
+        deviceLocalBuffer.DestroyBuffer();
+
         texture.DestroyImage();
     }
 
@@ -122,13 +131,13 @@ namespace sckz
         VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 
         Buffer::SubBlock stagingBuffer;
-        stagingBuffer = hostLocalBuffer->GetBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+        stagingBuffer = hostLocalBuffer.GetBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
 
         stagingBuffer.CopyDataToBuffer(vertices.data(), bufferSize);
 
         vertexBuffer
-            = &deviceLocalBuffer->GetBuffer(bufferSize,
-                                            VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+            = &deviceLocalBuffer.GetBuffer(bufferSize,
+                                           VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 
         stagingBuffer.CopyBufferToBuffer(*vertexBuffer, *commandPool);
 
@@ -140,13 +149,12 @@ namespace sckz
         VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
 
         Buffer::SubBlock stagingBuffer;
-        stagingBuffer = hostLocalBuffer->GetBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+        stagingBuffer = hostLocalBuffer.GetBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
 
-        stagingBuffer.CopyDataToBuffer(vertices.data(), bufferSize);
+        stagingBuffer.CopyDataToBuffer(indices.data(), bufferSize);
 
-        indexBuffer
-            = &deviceLocalBuffer->GetBuffer(bufferSize,
-                                            VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+        indexBuffer = &deviceLocalBuffer.GetBuffer(bufferSize,
+                                                   VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
 
         stagingBuffer.CopyBufferToBuffer(*indexBuffer, *commandPool);
 
@@ -270,8 +278,7 @@ namespace sckz
         entity->CreateEntity(*physicalDevice,
                              *device,
                              *queue,
-                             *hostLocalBuffer,
-                             *deviceLocalBuffer,
+                             hostLocalBuffer,
                              *descriptorPool,
                              *pipeline,
                              swapChainFramebuffers->size(),

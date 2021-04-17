@@ -13,6 +13,9 @@ namespace sckz
         VkImageView          imageView;
         VkSampler            sampler;
         Memory::SubBlock_t * block;
+        Memory *             memory;
+        Buffer               hostLocalBuffer;
+        Buffer               deviceLocalBuffer;
         VkDevice *           device;
         VkPhysicalDevice *   physicalDevice;
         VkFormat             format;
@@ -32,7 +35,6 @@ namespace sckz
                          VkDevice &            device,
                          VkPhysicalDevice &    physicalDevice,
                          Memory &              memory,
-                         Buffer &              hostLocalBuffer,
                          VkQueue &             queue);
 
         void CreateImage(VkDevice & device, VkImage & image, VkFormat & imageFormat, uint32_t mipLevels);
@@ -45,7 +47,6 @@ namespace sckz
                                 VkDevice &         device,
                                 VkPhysicalDevice & physicalDevice,
                                 Memory &           memory,
-                                Buffer &           deviceLocalBuffer,
                                 VkCommandPool &    pool,
                                 VkQueue &          queue);
 

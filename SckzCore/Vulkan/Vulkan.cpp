@@ -639,7 +639,6 @@ namespace sckz
                                device,
                                physicalDevice,
                                memory,
-                               deviceLocalBuffer,
                                graphicsQueue);
         colorImage.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
     }
@@ -659,7 +658,6 @@ namespace sckz
                                device,
                                physicalDevice,
                                memory,
-                               deviceLocalBuffer,
                                graphicsQueue);
         depthImage.CreateImageView(VK_IMAGE_ASPECT_DEPTH_BIT);
     }
@@ -770,20 +768,6 @@ namespace sckz
         PickPhysicalDevice();
         CreateLogicalDevice();
         memory.CreateMemory(device, physicalDevice, 0xFFFFFFF);
-
-        deviceLocalBuffer.CreateBuffer(physicalDevice,
-                                       device,
-                                       memory,
-                                       0x7FFFFFF,
-                                       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                                       graphicsQueue);
-
-        hostLocalBuffer.CreateBuffer(physicalDevice,
-                                     device,
-                                     memory,
-                                     0x7FFFFFF,
-                                     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                                     graphicsQueue);
         CreateSwapChain();
         CreateImageViews();
         CreateRenderPass();
@@ -813,8 +797,6 @@ namespace sckz
 
         DestroySyncObjects();
         DestroyCommandPool();
-        deviceLocalBuffer.DestroyBuffer();
-        hostLocalBuffer.DestroyBuffer();
         memory.FreeMemory();
         memory.DestroyMemory();
         DestroyLogicalDevice();
@@ -897,8 +879,6 @@ namespace sckz
                                    &pipeline,
                                    descriptorPool,
                                    swapChainExtent,
-                                   hostLocalBuffer,
-                                   deviceLocalBuffer,
                                    memory,
                                    graphicsQueue);
         return *models.back();

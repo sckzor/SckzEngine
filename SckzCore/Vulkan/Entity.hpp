@@ -41,7 +41,6 @@ namespace sckz
         VkPhysicalDevice *     physicalDevice;
         VkQueue *              queue;
         Buffer *               hostLocalBuffer;
-        Buffer *               deviceLocalBuffer;
         VkDevice *             device;
         DescriptorPool *       pool;
         GraphicsPipeline *     pipeline;
@@ -64,7 +63,6 @@ namespace sckz
                           VkDevice &         device,
                           VkQueue &          queue,
                           Buffer &           hostLocalBuffer,
-                          Buffer &           deviceLocalBuffer,
                           DescriptorPool &   pool,
                           GraphicsPipeline & pipeline,
                           uint32_t           numFrameBuffers,

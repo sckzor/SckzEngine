@@ -6,21 +6,19 @@ namespace sckz
                               VkDevice &         device,
                               VkQueue &          queue,
                               Buffer &           hostLocalBuffer,
-                              Buffer &           deviceLocalBuffer,
                               DescriptorPool &   pool,
                               GraphicsPipeline & pipeline,
                               uint32_t           numFrameBuffers,
                               Image &            texture)
     {
-        this->physicalDevice    = &physicalDevice;
-        this->queue             = &queue;
-        this->hostLocalBuffer   = &hostLocalBuffer;
-        this->deviceLocalBuffer = &deviceLocalBuffer;
-        this->device            = &device;
-        this->pool              = &pool;
-        this->pipeline          = &pipeline;
-        this->numFrameBuffers   = numFrameBuffers;
-        this->texture           = &texture;
+        this->physicalDevice  = &physicalDevice;
+        this->queue           = &queue;
+        this->device          = &device;
+        this->pool            = &pool;
+        this->pipeline        = &pipeline;
+        this->numFrameBuffers = numFrameBuffers;
+        this->texture         = &texture;
+        this->hostLocalBuffer = &hostLocalBuffer;
 
         this->scale = glm::vec3(1.0f, 1.0f, 1.0f);
 
