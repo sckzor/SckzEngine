@@ -162,7 +162,7 @@ namespace sckz
         vkMapMemory(*this->parent->parent->device,
                     *this->parent->parent->memoryBlock->memory,
                     this->parent->parent->memoryBlock->offset,
-                    size,
+                    this->size,
                     0,
                     &location);
 

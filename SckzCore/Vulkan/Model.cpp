@@ -127,8 +127,8 @@ namespace sckz
         stagingBuffer.CopyDataToBuffer(vertices.data(), bufferSize);
 
         vertexBuffer
-            = &hostLocalBuffer->GetBuffer(bufferSize,
-                                          VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+            = &deviceLocalBuffer->GetBuffer(bufferSize,
+                                            VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 
         stagingBuffer.CopyBufferToBuffer(*vertexBuffer, *commandPool);
 
@@ -144,8 +144,9 @@ namespace sckz
 
         stagingBuffer.CopyDataToBuffer(vertices.data(), bufferSize);
 
-        indexBuffer = &hostLocalBuffer->GetBuffer(bufferSize,
-                                                  VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+        indexBuffer
+            = &deviceLocalBuffer->GetBuffer(bufferSize,
+                                            VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
 
         stagingBuffer.CopyBufferToBuffer(*indexBuffer, *commandPool);
 
