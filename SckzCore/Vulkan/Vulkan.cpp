@@ -255,9 +255,19 @@ namespace sckz
     {
         for (const auto & availablePresentMode : availablePresentModes)
         {
-            if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
+            if (fps == 0)
             {
-                return availablePresentMode;
+                if (availablePresentMode == VK_PRESENT_MODE_FIFO_KHR)
+                {
+                    return availablePresentMode;
+                }
+            }
+            else
+            {
+                if (availablePresentMode == VK_PRESENT_MODE_IMMEDIATE_KHR)
+                {
+                    return availablePresentMode;
+                }
             }
         }
 
@@ -1030,15 +1040,30 @@ namespace sckz
         }
 
         currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
-    }
 
-    void Vulkan::Update()
-    {
-        lastTime = currentTime;
+        // TODO: Probably fix this because although it works it is ugly as h*ll
+        if (fps > 0)
+        {
+            point1                                              = std::chrono::system_clock::now();
+            std::chrono::duration<double, std::milli> work_time = point1 - point2;
 
+            if (work_time.count() < (1.0 / fps) * 1000.0)
+            {
+                std::chrono::duration<double, std::milli> delta_ms((1.0 / fps) * 1000.0 - work_time.count());
+                auto delta_ms_duration = std::chrono::duration_cast<std::chrono::milliseconds>(delta_ms);
+                std::this_thread::sleep_for(std::chrono::milliseconds(delta_ms_duration.count()));
+            }
+
+            point2                                               = std::chrono::system_clock::now();
+            std::chrono::duration<double, std::milli> sleep_time = point1 - point2;
+        }
+
+        lastTime    = currentTime;
         currentTime = std::chrono::high_resolution_clock::now();
         deltaTime   = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
     }
+
+    void Vulkan::Update() { }
 
     float Vulkan::GetDeltaT() { return deltaTime; }
 
@@ -1054,5 +1079,11 @@ namespace sckz
     {
         lights.push_back(new Light());
         return *lights.back();
+    }
+
+    void Vulkan::SetFPS(int32_t fps)
+    {
+        this->fps = fps;
+        RebuildSwapChain();
     }
 } // namespace sckz

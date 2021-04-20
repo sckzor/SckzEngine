@@ -22,5 +22,6 @@
 #include <optional>
 #include <set>
 #include <stdexcept>
+#include <thread>
 #include <unordered_map>
 #include <vector>

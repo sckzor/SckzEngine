@@ -23,6 +23,10 @@ debug:
 	$(MAKE) all
 	gdb Game/SckzEngine
 
+profile:
+	$(MAKE) all
+	mangohud Game/SckzEngine
+
 validate:
 	$(MAKE) all
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=valgrind-out.txt Game/SckzEngine

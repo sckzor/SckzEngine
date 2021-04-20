@@ -3,7 +3,7 @@
 int main()
 {
     sckz::Window win;
-    win.CreateWindow("SckzEngine", 800, 600);
+    win.CreateWindow("SckzEngine", 854, 480);
 
     sckz::Vulkan vkan;
     vkan.CreateVulkan(win);
@@ -91,6 +91,15 @@ int main()
                              cam1.GetRotation().z);
         }
 
+        if (win.QueryKey('p'))
+        {
+            vkan.SetFPS(20);
+        }
+        if (win.QueryKey('l'))
+        {
+            vkan.SetFPS(-1);
+        }
+
         if (win.QueryKey(GLFW_KEY_LEFT_SHIFT))
         {
             cam1.SetLocation(cam1.GetLocation().x, cam1.GetLocation().y, cam1.GetLocation().z + (1 * vkan.GetDeltaT()));
@@ -101,10 +110,10 @@ int main()
             cam1.SetLocation(cam1.GetLocation().x, cam1.GetLocation().y, cam1.GetLocation().z - (1 * vkan.GetDeltaT()));
         }
 
-        vkan.Render(cam1);
-
         win.Update();
         vkan.Update();
+
+        vkan.Render(cam1);
     }
 
     vkan.DestroyVulkan();

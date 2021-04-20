@@ -85,7 +85,14 @@ namespace sckz
         std::chrono::time_point<std::chrono::high_resolution_clock> currentTime;
         float                                                       deltaTime;
 
+        std::chrono::system_clock::time_point point1
+            = std::chrono::system_clock::now(); // Used to add delay to the loop accurately for limiting FPS, we cant
+                                                // use deltaTime because it will keep increaseing
+        std::chrono::system_clock::time_point point2 = std::chrono::system_clock::now();
+
         bool framebufferResized = false;
+
+        int32_t fps = 0;
 
     public: // Public static functions
         static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -158,6 +165,7 @@ namespace sckz
         void  Update();
         void  Render(Camera & camera);
         float GetDeltaT();
+        void  SetFPS(int32_t fps);
 
     public:
         GraphicsPipeline & CreatePipeline(const char * vertexFile, const char * fragmentFile);
