@@ -43,8 +43,9 @@ namespace sckz
         VkInstance               instance;
         VkDebugUtilsMessengerEXT debugMessenger;
         VkSurfaceKHR             surface;
-        VkPhysicalDevice         physicalDevice = VK_NULL_HANDLE;
-        VkSampleCountFlagBits    msaaSamples    = VK_SAMPLE_COUNT_1_BIT;
+        VkPhysicalDevice         physicalDevice    = VK_NULL_HANDLE;
+        VkSampleCountFlagBits    msaaSamples       = VK_SAMPLE_COUNT_1_BIT;
+        VkSampleCountFlagBits    targetMsaaSamples = VK_SAMPLE_COUNT_1_BIT;
         VkDevice                 device;
         VkQueue                  graphicsQueue;
         VkQueue                  presentQueue;
@@ -112,7 +113,7 @@ namespace sckz
     private: // Private helper functions
         std::vector<const char *>          GetRequiredExtensions();
         VkDebugUtilsMessengerCreateInfoEXT MakeDebugMessengerCreateInfo();
-        VkSampleCountFlagBits              GetMaxUsableSampleCount();
+        VkSampleCountFlagBits              GetMaxUsableSampleCount(VkSampleCountFlagBits targetSampleCount);
         bool                               CheckValidationLayerSupport();
         QueueFamilyIndices                 FindQueueFamilies(VkPhysicalDevice device);
         bool                               CheckDeviceExtensionSupport(VkPhysicalDevice device);
@@ -166,6 +167,7 @@ namespace sckz
         void  Render(Camera & camera);
         float GetDeltaT();
         void  SetFPS(int32_t fps);
+        void  SetMSAA(VkSampleCountFlagBits targetMsaaSamples);
 
     public:
         GraphicsPipeline & CreatePipeline(const char * vertexFile, const char * fragmentFile);

@@ -37,7 +37,7 @@ namespace sckz
         imageInfo.tiling        = tiling;
         imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         imageInfo.usage         = usage;
-        imageInfo.samples       = numSamples;
+        imageInfo.samples       = numSamples; // Make this extensible
         imageInfo.sharingMode   = VK_SHARING_MODE_EXCLUSIVE;
 
         if (vkCreateImage(*this->device, &imageInfo, nullptr, &image) != VK_SUCCESS)

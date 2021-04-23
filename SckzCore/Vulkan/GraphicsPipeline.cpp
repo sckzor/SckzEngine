@@ -187,7 +187,7 @@ namespace sckz
         VkPipelineMultisampleStateCreateInfo multisampling {};
         multisampling.sType                = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
         multisampling.sampleShadingEnable  = VK_FALSE;
-        multisampling.rasterizationSamples = msaaSamples;
+        multisampling.rasterizationSamples = msaaSamples; // TODO: Make this extensable
 
         VkPipelineDepthStencilStateCreateInfo depthStencil {};
         depthStencil.sType                 = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;

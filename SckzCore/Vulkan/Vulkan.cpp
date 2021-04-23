@@ -71,13 +71,30 @@ namespace sckz
         return createInfo;
     }
 
-    VkSampleCountFlagBits Vulkan::GetMaxUsableSampleCount()
+    VkSampleCountFlagBits Vulkan::GetMaxUsableSampleCount(
+        VkSampleCountFlagBits targetSampleCount) // TODO: make this mutable
     {
         VkPhysicalDeviceProperties physicalDeviceProperties;
         vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
 
         VkSampleCountFlags counts = physicalDeviceProperties.limits.framebufferColorSampleCounts
                                   & physicalDeviceProperties.limits.framebufferDepthSampleCounts;
+
+        std::cout << counts << " " << targetSampleCount << std::endl;
+        while (1) { }
+
+        if (counts < targetSampleCount)
+        {
+            // Max MSAA on this system is 8
+
+            std::cout << "[WARN] MSAA sample count too large for this system, falling back to a sample size of 1"
+                      << std::endl;
+
+            return VK_SAMPLE_COUNT_1_BIT;
+        }
+
+        return targetSampleCount;
+
         if (counts & VK_SAMPLE_COUNT_64_BIT)
         {
             return VK_SAMPLE_COUNT_64_BIT;
@@ -409,7 +426,7 @@ namespace sckz
             if (IsDeviceSuitable(device))
             {
                 physicalDevice = device;
-                msaaSamples    = GetMaxUsableSampleCount();
+                msaaSamples    = GetMaxUsableSampleCount(targetMsaaSamples);
                 break;
             }
         }
@@ -545,14 +562,24 @@ namespace sckz
     void Vulkan::CreateRenderPass()
     {
         VkAttachmentDescription colorAttachment {};
-        colorAttachment.format         = swapChainImages[0].GetFormat();
-        colorAttachment.samples        = msaaSamples;
+        colorAttachment.format = swapChainImages[0].GetFormat();
+
+        colorAttachment.samples = msaaSamples;
+
         colorAttachment.loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;
         colorAttachment.storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
         colorAttachment.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         colorAttachment.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
-        colorAttachment.finalLayout    = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+        if (msaaSamples == VK_SAMPLE_COUNT_1_BIT)
+        {
+            colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        }
+        else
+        {
+            colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        }
 
         VkAttachmentDescription depthAttachment {};
         depthAttachment.format         = FindDepthFormat();
@@ -591,7 +618,10 @@ namespace sckz
         subpass.colorAttachmentCount    = 1;
         subpass.pColorAttachments       = &colorAttachmentRef;
         subpass.pDepthStencilAttachment = &depthAttachmentRef;
-        subpass.pResolveAttachments     = &colorAttachmentResolveRef;
+        if (msaaSamples != VK_SAMPLE_COUNT_1_BIT)
+        {
+            subpass.pResolveAttachments = &colorAttachmentResolveRef;
+        }
 
         VkSubpassDependency dependency {};
         dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
@@ -603,14 +633,21 @@ namespace sckz
             = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
         dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
-        std::array<VkAttachmentDescription, 3> attachments
-            = { colorAttachment, depthAttachment, colorAttachmentResolve };
+        std::vector<VkAttachmentDescription> attachments = { colorAttachment, depthAttachment };
+
+        if (msaaSamples != VK_SAMPLE_COUNT_1_BIT)
+        {
+            attachments.push_back(colorAttachmentResolve);
+        }
+
         VkRenderPassCreateInfo renderPassInfo {};
         renderPassInfo.sType           = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
         renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
         renderPassInfo.pAttachments    = attachments.data();
         renderPassInfo.subpassCount    = 1;
-        renderPassInfo.pSubpasses      = &subpass;
+
+        renderPassInfo.pSubpasses = &subpass;
+
         renderPassInfo.dependencyCount = 1;
         renderPassInfo.pDependencies   = &dependency;
 
@@ -678,8 +715,19 @@ namespace sckz
 
         for (size_t i = 0; i < swapChainImages.size(); i++)
         {
-            std::array<VkImageView, 3> attachments
-                = { colorImage.GetImageView(), depthImage.GetImageView(), swapChainImages[i].GetImageView() };
+            std::vector<VkImageView> attachments;
+
+            if (msaaSamples == VK_SAMPLE_COUNT_1_BIT)
+            {
+                attachments.push_back(swapChainImages[i].GetImageView());
+                attachments.push_back(depthImage.GetImageView());
+            }
+            else
+            {
+                attachments.push_back(colorImage.GetImageView());
+                attachments.push_back(depthImage.GetImageView());
+                attachments.push_back(swapChainImages[i].GetImageView());
+            }
 
             VkFramebufferCreateInfo framebufferInfo {};
             framebufferInfo.sType           = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -1084,6 +1132,12 @@ namespace sckz
     void Vulkan::SetFPS(int32_t fps)
     {
         this->fps = fps;
+        RebuildSwapChain();
+    }
+
+    void Vulkan::SetMSAA(VkSampleCountFlagBits targetMsaaSamples)
+    {
+        this->targetMsaaSamples = targetMsaaSamples;
         RebuildSwapChain();
     }
 } // namespace sckz
