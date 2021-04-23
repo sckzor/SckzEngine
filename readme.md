@@ -38,7 +38,7 @@ All Code in this library is (c) Sckzor 2021, All rights reserved!
 - [x] Batched Rendering.
 - [x] Add sub-allocated buffers.
 - [ ] FBO filters.
-- [ ] Add an options for on-demand changes to the swap chain like locked refresh rate and stuff like that.
+- [x] Add an options for on-demand changes to the swap chain like locked refresh rate and stuff like that.
 - [ ] Particles.
 - [ ] Finish the _vulkan_ memory manager.
 - [ ] Optimize, Optimize, Optimize.
