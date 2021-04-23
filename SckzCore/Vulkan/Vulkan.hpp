@@ -45,7 +45,7 @@ namespace sckz
         VkSurfaceKHR             surface;
         VkPhysicalDevice         physicalDevice    = VK_NULL_HANDLE;
         VkSampleCountFlagBits    msaaSamples       = VK_SAMPLE_COUNT_1_BIT;
-        VkSampleCountFlagBits    targetMsaaSamples = VK_SAMPLE_COUNT_1_BIT;
+        int32_t                  targetMsaaSamples = 1;
         VkDevice                 device;
         VkQueue                  graphicsQueue;
         VkQueue                  presentQueue;
@@ -113,12 +113,13 @@ namespace sckz
     private: // Private helper functions
         std::vector<const char *>          GetRequiredExtensions();
         VkDebugUtilsMessengerCreateInfoEXT MakeDebugMessengerCreateInfo();
-        VkSampleCountFlagBits              GetMaxUsableSampleCount(VkSampleCountFlagBits targetSampleCount);
+        VkSampleCountFlagBits              GetTargetSampleCount(int32_t targetSampleCountt);
         bool                               CheckValidationLayerSupport();
         QueueFamilyIndices                 FindQueueFamilies(VkPhysicalDevice device);
         bool                               CheckDeviceExtensionSupport(VkPhysicalDevice device);
         SwapChainSupportDetails            QuerySwapChainSupport(VkPhysicalDevice device);
         bool                               IsDeviceSuitable(VkPhysicalDevice device);
+
         VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> & availableFormats);
         VkPresentModeKHR   ChooseSwapPresentMode(const std::vector<VkPresentModeKHR> & availablePresentModes);
         VkExtent2D         ChooseSwapExtent(const VkSurfaceCapabilitiesKHR & capabilities);
@@ -163,11 +164,14 @@ namespace sckz
         void CreateVulkan(Window & window);
         void DestroyVulkan();
 
-        void  Update();
-        void  Render(Camera & camera);
-        float GetDeltaT();
-        void  SetFPS(int32_t fps);
-        void  SetMSAA(VkSampleCountFlagBits targetMsaaSamples);
+        void Update();
+        void Render(Camera & camera);
+
+        void SetFPS(int32_t fps);
+        void SetMSAA(int32_t targetSampleCount);
+
+        uint32_t GetMaximumSampleCount();
+        float    GetDeltaT();
 
     public:
         GraphicsPipeline & CreatePipeline(const char * vertexFile, const char * fragmentFile);

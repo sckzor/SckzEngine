@@ -15,7 +15,7 @@ int main()
     sckz::Entity &           e1   = vkan.CreateEntity(m1);
     sckz::Camera &           cam1 = vkan.CreateCamera(45, 0.1, 10);
 
-    vkan.SetMSAA(VK_SAMPLE_COUNT_8_BIT);
+    vkan.SetMSAA(-1);
 
     e1.SetShine(1, 10);
     e1.SetRotation(90, 0, 0);
@@ -97,9 +97,15 @@ int main()
         {
             vkan.SetFPS(20);
         }
+
         if (win.QueryKey('l'))
         {
             vkan.SetFPS(-1);
+        }
+
+        if (win.QueryKey('g'))
+        {
+            vkan.SetMSAA(16);
         }
 
         if (win.QueryKey(GLFW_KEY_LEFT_SHIFT))

@@ -71,8 +71,7 @@ namespace sckz
         return createInfo;
     }
 
-    VkSampleCountFlagBits Vulkan::GetMaxUsableSampleCount(
-        VkSampleCountFlagBits targetSampleCount) // TODO: make this mutable
+    VkSampleCountFlagBits Vulkan::GetTargetSampleCount(int32_t targetSampleCount) // TODO: make this mutable
     {
         VkPhysicalDeviceProperties physicalDeviceProperties;
         vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
@@ -80,47 +79,88 @@ namespace sckz
         VkSampleCountFlags counts = physicalDeviceProperties.limits.framebufferColorSampleCounts
                                   & physicalDeviceProperties.limits.framebufferDepthSampleCounts;
 
-        std::cout << counts << " " << targetSampleCount << std::endl;
-        while (1) { }
+        VkSampleCountFlagBits targetSampleBits;
 
-        if (counts < targetSampleCount)
+        if (targetSampleCount == -1)
+        {
+            targetSampleCount = GetMaximumSampleCount();
+        }
+
+        switch (targetSampleCount)
+        {
+            case VK_SAMPLE_COUNT_64_BIT:
+                targetSampleBits = VK_SAMPLE_COUNT_64_BIT;
+                break;
+
+            case VK_SAMPLE_COUNT_32_BIT:
+                targetSampleBits = VK_SAMPLE_COUNT_32_BIT;
+                break;
+            case VK_SAMPLE_COUNT_16_BIT:
+                targetSampleBits = VK_SAMPLE_COUNT_16_BIT;
+                break;
+
+            case VK_SAMPLE_COUNT_8_BIT:
+                targetSampleBits = VK_SAMPLE_COUNT_8_BIT;
+                break;
+
+            case VK_SAMPLE_COUNT_4_BIT:
+                targetSampleBits = VK_SAMPLE_COUNT_4_BIT;
+                break;
+
+            case VK_SAMPLE_COUNT_2_BIT:
+                targetSampleBits = VK_SAMPLE_COUNT_2_BIT;
+                break;
+
+            default:
+                targetSampleBits = VK_SAMPLE_COUNT_1_BIT;
+        }
+
+        if (targetSampleBits > counts)
         {
             // Max MSAA on this system is 8
 
-            std::cout << "[WARN] MSAA sample count too large for this system, falling back to a sample size of 1"
+            std::cout << "[WARN] MSAA sample count too large for this system, falling back to a sample size of 1!"
                       << std::endl;
 
             return VK_SAMPLE_COUNT_1_BIT;
         }
 
-        return targetSampleCount;
+        return targetSampleBits;
+    }
 
+    uint32_t Vulkan::GetMaximumSampleCount()
+    {
+        VkPhysicalDeviceProperties physicalDeviceProperties;
+        vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
+
+        VkSampleCountFlags counts = physicalDeviceProperties.limits.framebufferColorSampleCounts
+                                  & physicalDeviceProperties.limits.framebufferDepthSampleCounts;
         if (counts & VK_SAMPLE_COUNT_64_BIT)
         {
-            return VK_SAMPLE_COUNT_64_BIT;
+            return 64;
         }
         if (counts & VK_SAMPLE_COUNT_32_BIT)
         {
-            return VK_SAMPLE_COUNT_32_BIT;
+            return 32;
         }
         if (counts & VK_SAMPLE_COUNT_16_BIT)
         {
-            return VK_SAMPLE_COUNT_16_BIT;
+            return 16;
         }
         if (counts & VK_SAMPLE_COUNT_8_BIT)
         {
-            return VK_SAMPLE_COUNT_8_BIT;
+            return 8;
         }
         if (counts & VK_SAMPLE_COUNT_4_BIT)
         {
-            return VK_SAMPLE_COUNT_4_BIT;
+            return 4;
         }
         if (counts & VK_SAMPLE_COUNT_2_BIT)
         {
-            return VK_SAMPLE_COUNT_2_BIT;
+            return 2;
         }
 
-        return VK_SAMPLE_COUNT_1_BIT;
+        return 1;
     }
 
     bool Vulkan::CheckValidationLayerSupport()
@@ -426,7 +466,6 @@ namespace sckz
             if (IsDeviceSuitable(device))
             {
                 physicalDevice = device;
-                msaaSamples    = GetMaxUsableSampleCount(targetMsaaSamples);
                 break;
             }
         }
@@ -490,6 +529,7 @@ namespace sckz
 
     void Vulkan::CreateSwapChain()
     {
+        msaaSamples                              = GetTargetSampleCount(targetMsaaSamples);
         SwapChainSupportDetails swapChainSupport = QuerySwapChainSupport(physicalDevice);
 
         VkSurfaceFormatKHR surfaceFormat = ChooseSwapSurfaceFormat(swapChainSupport.formats);
@@ -1135,7 +1175,7 @@ namespace sckz
         RebuildSwapChain();
     }
 
-    void Vulkan::SetMSAA(VkSampleCountFlagBits targetMsaaSamples)
+    void Vulkan::SetMSAA(int32_t targetMsaaSamples)
     {
         this->targetMsaaSamples = targetMsaaSamples;
         RebuildSwapChain();
