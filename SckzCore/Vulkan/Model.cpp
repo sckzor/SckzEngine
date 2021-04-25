@@ -5,31 +5,31 @@
 
 namespace sckz
 {
-    void Model::CreateModel(const char *                 textureFileName,
-                            const char *                 modelFileName,
-                            VkCommandPool &              commandPool,
-                            VkRenderPass &               renderPass,
-                            VkDevice &                   device,
-                            VkPhysicalDevice &           physicalDevice,
-                            std::vector<VkFramebuffer> & swapChainFramebuffers,
-                            GraphicsPipeline *           pipeline,
-                            DescriptorPool &             descriptorPool,
-                            VkExtent2D                   swapChainExtent,
-                            Memory &                     memory,
-                            VkQueue &                    queue)
+    void Model::CreateModel(const char *       textureFileName,
+                            const char *       modelFileName,
+                            VkCommandPool &    commandPool,
+                            VkRenderPass &     renderPass,
+                            VkDevice &         device,
+                            VkPhysicalDevice & physicalDevice,
+                            VkFramebuffer &    framebuffer,
+                            GraphicsPipeline * pipeline,
+                            DescriptorPool &   descriptorPool,
+                            VkExtent2D         swapChainExtent,
+                            Memory &           memory,
+                            VkQueue &          queue)
     {
-        this->textureFileName       = textureFileName;
-        this->modelFileName         = modelFileName;
-        this->renderPass            = &renderPass;
-        this->device                = &device;
-        this->physicalDevice        = &physicalDevice;
-        this->commandPool           = &commandPool;
-        this->descriptorPool        = &descriptorPool;
-        this->pipeline              = pipeline;
-        this->swapChainFramebuffers = &swapChainFramebuffers;
-        this->swapChainExtent       = swapChainExtent;
-        this->queue                 = &queue;
-        this->memory                = &memory;
+        this->textureFileName = textureFileName;
+        this->modelFileName   = modelFileName;
+        this->renderPass      = &renderPass;
+        this->device          = &device;
+        this->physicalDevice  = &physicalDevice;
+        this->commandPool     = &commandPool;
+        this->descriptorPool  = &descriptorPool;
+        this->pipeline        = pipeline;
+        this->framebuffer     = &framebuffer;
+        this->swapChainExtent = swapChainExtent;
+        this->queue           = &queue;
+        this->memory          = &memory;
 
         this->hostLocalBuffer.CreateBuffer(*this->physicalDevice,
                                            *this->device,
@@ -174,117 +174,102 @@ namespace sckz
         this->descriptorPool  = &descriptorPool;
         this->swapChainExtent = swapChainExtent;
 
-        CreateCommandBuffers();
+        CreateCommandBuffer();
     }
 
-    void Model::CreateCommandBuffers()
+    void Model::CreateCommandBuffer()
     {
-        commandBuffers.resize(swapChainFramebuffers->size());
-
         VkCommandBufferAllocateInfo allocInfo {};
         allocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.commandPool        = *commandPool;
         allocInfo.level              = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
-        allocInfo.commandBufferCount = (uint32_t)commandBuffers.size();
+        allocInfo.commandBufferCount = 1;
 
-        if (vkAllocateCommandBuffers(*device, &allocInfo, commandBuffers.data()) != VK_SUCCESS)
+        if (vkAllocateCommandBuffers(*device, &allocInfo, &commandBuffer) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to allocate command buffers!");
         }
 
-        for (size_t i = 0; i < commandBuffers.size(); i++)
+        VkCommandBufferBeginInfo beginInfo {};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
+
+        VkCommandBufferInheritanceInfo inheritanceInfo {};
+        inheritanceInfo.sType      = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
+        inheritanceInfo.renderPass = *renderPass;
+        // Secondary command buffer also use the currently active framebuffer
+        inheritanceInfo.framebuffer = *framebuffer;
+
+        beginInfo.pInheritanceInfo = &inheritanceInfo;
+
+        if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
         {
-            VkCommandBufferBeginInfo beginInfo {};
-            beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-            beginInfo.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
+            throw std::runtime_error("failed to begin recording command buffer!");
+        }
 
-            VkCommandBufferInheritanceInfo inheritanceInfo {};
-            inheritanceInfo.sType      = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
-            inheritanceInfo.renderPass = *renderPass;
-            // Secondary command buffer also use the currently active framebuffer
-            inheritanceInfo.framebuffer = (*swapChainFramebuffers)[i];
+        VkRenderPassBeginInfo renderPassInfo {};
+        renderPassInfo.sType             = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        renderPassInfo.renderPass        = *renderPass;
+        renderPassInfo.framebuffer       = *framebuffer;
+        renderPassInfo.renderArea.offset = { 0, 0 };
+        renderPassInfo.renderArea.extent = swapChainExtent;
 
-            beginInfo.pInheritanceInfo = &inheritanceInfo;
+        std::array<VkClearValue, 2> clearValues {};
+        clearValues[0].color        = { 0.0f, 0.0f, 0.0f, 1.0f };
+        clearValues[1].depthStencil = { 1.0f, 0 };
 
-            if (vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS)
-            {
-                throw std::runtime_error("failed to begin recording command buffer!");
-            }
+        renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+        renderPassInfo.pClearValues    = clearValues.data();
 
-            VkRenderPassBeginInfo renderPassInfo {};
-            renderPassInfo.sType             = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            renderPassInfo.renderPass        = *renderPass;
-            renderPassInfo.framebuffer       = (*swapChainFramebuffers)[i];
-            renderPassInfo.renderArea.offset = { 0, 0 };
-            renderPassInfo.renderArea.extent = swapChainExtent;
+        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetPipeline());
 
-            std::array<VkClearValue, 2> clearValues {};
-            clearValues[0].color        = { 0.0f, 0.0f, 0.0f, 1.0f };
-            clearValues[1].depthStencil = { 1.0f, 0 };
+        VkBuffer     rawVertexBuffer[1];
+        VkDeviceSize offsets[1];
 
-            renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-            renderPassInfo.pClearValues    = clearValues.data();
+        rawVertexBuffer[0] = vertexBuffer->parent->buffer;
+        offsets[0]         = vertexBuffer->offset;
 
-            vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetPipeline());
+        vkCmdBindVertexBuffers(commandBuffer, 0, 1, rawVertexBuffer, offsets);
 
-            VkBuffer     rawVertexBuffer[1];
-            VkDeviceSize offsets[1];
+        vkCmdBindIndexBuffer(commandBuffer, indexBuffer->parent->buffer, indexBuffer->offset, VK_INDEX_TYPE_UINT32);
 
-            rawVertexBuffer[0] = vertexBuffer->parent->buffer;
-            offsets[0]         = vertexBuffer->offset;
+        for (uint32_t j = 0; j < entities.size(); j++)
+        {
+            vkCmdBindDescriptorSets(commandBuffer,
+                                    VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                    pipeline->GetPieplineLayout(),
+                                    0,
+                                    1,
+                                    &entities[j]->GetDescriptorSet(),
+                                    0,
+                                    nullptr);
 
-            vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, rawVertexBuffer, offsets);
+            vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+        }
 
-            vkCmdBindIndexBuffer(commandBuffers[i],
-                                 indexBuffer->parent->buffer,
-                                 indexBuffer->offset,
-                                 VK_INDEX_TYPE_UINT32);
-
-            for (uint32_t j = 0; j < entities.size(); j++)
-            {
-                vkCmdBindDescriptorSets(commandBuffers[i],
-                                        VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                        pipeline->GetPieplineLayout(),
-                                        0,
-                                        1,
-                                        &entities[j]->GetDescriptorSets()[i],
-                                        0,
-                                        nullptr);
-
-                vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
-            }
-
-            if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS)
-            {
-                throw std::runtime_error("failed to record command buffer!");
-            }
+        if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to record command buffer!");
         }
     }
 
-    std::vector<VkCommandBuffer> & Model::GetCommandBuffers()
+    VkCommandBuffer & Model::GetCommandBuffer()
     {
         if (!hasCommandBuffer)
         {
-            CreateCommandBuffers();
+            CreateCommandBuffer();
         }
 
         hasCommandBuffer = true;
-        return commandBuffers;
+        return commandBuffer;
     }
 
     Entity & Model::CreateEntity()
     {
         Entity * entity = new Entity();
-        entity->CreateEntity(*physicalDevice,
-                             *device,
-                             *queue,
-                             hostLocalBuffer,
-                             *descriptorPool,
-                             *pipeline,
-                             swapChainFramebuffers->size(),
-                             texture);
+        entity->CreateEntity(*physicalDevice, *device, *queue, hostLocalBuffer, *descriptorPool, *pipeline, texture);
         entities.push_back(entity);
-        CreateCommandBuffers();
+        CreateCommandBuffer();
 
         return *entity;
     }
@@ -295,11 +280,5 @@ namespace sckz
 
     uint32_t Model::GetNumIndices() { return static_cast<uint32_t>(indices.size()); }
 
-    void Model::DestroySwapResources()
-    {
-        vkFreeCommandBuffers(*device,
-                             *commandPool,
-                             static_cast<uint32_t>(commandBuffers.size()),
-                             commandBuffers.data());
-    }
+    void Model::DestroySwapResources() { vkFreeCommandBuffers(*device, *commandPool, 1, &commandBuffer); }
 } // namespace sckz

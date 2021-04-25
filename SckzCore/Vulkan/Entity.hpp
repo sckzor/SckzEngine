@@ -44,12 +44,11 @@ namespace sckz
         VkDevice *             device;
         DescriptorPool *       pool;
         GraphicsPipeline *     pipeline;
-        uint32_t               numFrameBuffers;
         Image *                texture;
         std::vector<Light *> * lights;
 
-        std::vector<std::array<Buffer::SubBlock, 2>> uniformBuffers;
-        std::vector<VkDescriptorSet>                 descriptorSets;
+        std::array<Buffer::SubBlock, 2> uniformBuffer;
+        VkDescriptorSet                 descriptorSet;
 
         glm::vec3 location;
         glm::vec3 rotation;
@@ -65,7 +64,6 @@ namespace sckz
                           Buffer &           hostLocalBuffer,
                           DescriptorPool &   pool,
                           GraphicsPipeline & pipeline,
-                          uint32_t           numFrameBuffers,
                           Image &            texture);
 
         void DestroyEntity();
@@ -90,6 +88,6 @@ namespace sckz
         glm::vec3 GetRotation();
         glm::vec3 GetScale();
 
-        std::vector<VkDescriptorSet> & GetDescriptorSets();
+        VkDescriptorSet & GetDescriptorSet();
     };
 } // namespace sckz

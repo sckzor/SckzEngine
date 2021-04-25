@@ -4,8 +4,8 @@ all: SckzCore.a
 
 # C++ based make information
 
-SckzCore.a:build/Buffer.o build/CommandBuffer.o build/Image.o build/Memory.o build/Model.o build/Entity.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o build/Light.o  build/Camera.o $(INCLUDE)
-	ar rvs SckzCore.a build/Buffer.o build/CommandBuffer.o build/Image.o build/Memory.o build/Model.o build/Entity.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o build/Camera.o build/Light.o
+SckzCore.a:build/Scene.o build/Buffer.o build/CommandBuffer.o build/Image.o build/Memory.o build/Model.o build/Entity.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o build/Light.o  build/Camera.o $(INCLUDE)
+	ar rvs SckzCore.a build/Buffer.o build/Scene.o build/CommandBuffer.o build/Image.o build/Memory.o build/Model.o build/Entity.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o build/Camera.o build/Light.o
 
 build/Buffer.o: $(VK_PATH)/Buffer.cpp $(VK_PATH)/Buffer.hpp $(VK_PATH)/Memory.hpp $(VK_PATH)/CommandBuffer.hpp $(INCLUDE)
 	g++ $(CFLAGS) -c $(VK_PATH)/Buffer.cpp -o build/Buffer.o $(LDFLAGS)
@@ -28,7 +28,7 @@ build/Entity.o: $(VK_PATH)/Entity.cpp $(VK_PATH)/Entity.hpp $(VK_PATH)/Buffer.hp
 build/GraphicsPipeline.o: $(VK_PATH)/GraphicsPipeline.cpp $(VK_PATH)/GraphicsPipeline.hpp $(INCLUDE)
 	g++ $(CFLAGS) -c $(VK_PATH)/GraphicsPipeline.cpp -o build/GraphicsPipeline.o $(LDFLAGS)
 
-build/Vulkan.o: $(VK_PATH)/Vulkan.cpp Window/Window.hpp $(VK_PATH)/Image.hpp $(VK_PATH)/Model.hpp $(VK_PATH)/GraphicsPipeline.hpp $(VK_PATH)/CommandBuffer.hpp $(INCLUDE)
+build/Vulkan.o: $(VK_PATH)/Vulkan.cpp Window/Window.hpp $(VK_PATH)/Image.hpp $(VK_PATH)/GraphicsPipeline.hpp $(VK_PATH)/CommandBuffer.hpp $(INCLUDE)
 	g++ $(CFLAGS) -c $(VK_PATH)/Vulkan.cpp -o build/Vulkan.o $(LDFLAGS)
 
 build/Window.o:Window/Window.cpp Window/Window.hpp $(INCLUDE)
@@ -42,6 +42,10 @@ build/Camera.o: $(VK_PATH)/Camera.cpp $(VK_PATH)/Camera.hpp $(INCLUDE)
 
 build/Light.o: $(VK_PATH)/Light.cpp $(VK_PATH)/Light.hpp $(INCLUDE)
 	g++ $(CFLAGS) -c $(VK_PATH)/Light.cpp -o build/Light.o $(LDFLAGS)
+
+build/Scene.o: $(VK_PATH)/Scene.cpp $(VK_PATH)/SckzCore.cpp $(VK_PATH)/Camera.hpp $(VK_PATH)/DescriptorPool.hpp $(VK_PATH)/CommandBuffer.hpp $(VK_PATH)/GraphicsPipeline.hpp $(VK_PATH)/Image.hpp $(VK_PATH)/Model $(INCLUDE)
+	g++ $(CFLAGS) -c $(VK_PATH)/Scene.cpp -o build/Scene.o $(LDFLAGS)
+
 
 # GLSL based make information
 

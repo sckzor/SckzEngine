@@ -8,7 +8,6 @@ namespace sckz
                               Buffer &           hostLocalBuffer,
                               DescriptorPool &   pool,
                               GraphicsPipeline & pipeline,
-                              uint32_t           numFrameBuffers,
                               Image &            texture)
     {
         this->physicalDevice  = &physicalDevice;
@@ -16,7 +15,6 @@ namespace sckz
         this->device          = &device;
         this->pool            = &pool;
         this->pipeline        = &pipeline;
-        this->numFrameBuffers = numFrameBuffers;
         this->texture         = &texture;
         this->hostLocalBuffer = &hostLocalBuffer;
 
@@ -73,88 +71,78 @@ namespace sckz
             }
         }
 
-        uniformBuffers[currentImage][0].CopyDataToBuffer(&Vubo, sizeof(Vubo));
-        uniformBuffers[currentImage][1].CopyDataToBuffer(&Fubo, sizeof(Fubo));
+        uniformBuffer[0].CopyDataToBuffer(&Vubo, sizeof(Vubo));
+        uniformBuffer[1].CopyDataToBuffer(&Fubo, sizeof(Fubo));
     }
 
     void Entity::CreateDescriptorSets()
     {
-        std::vector<VkDescriptorSetLayout> layouts(numFrameBuffers, pipeline->GetDescriptorSetLayout());
-        VkDescriptorSetAllocateInfo        allocInfo {};
+        VkDescriptorSetLayout       layout(pipeline->GetDescriptorSetLayout());
+        VkDescriptorSetAllocateInfo allocInfo {};
         allocInfo.sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
         allocInfo.descriptorPool     = pool->GetDescriptorPool();
-        allocInfo.descriptorSetCount = static_cast<uint32_t>(numFrameBuffers);
-        allocInfo.pSetLayouts        = layouts.data();
+        allocInfo.descriptorSetCount = 1;
+        allocInfo.pSetLayouts        = &layout;
 
-        descriptorSets.resize(numFrameBuffers);
-        if (vkAllocateDescriptorSets(*device, &allocInfo, descriptorSets.data()) != VK_SUCCESS)
+        if (vkAllocateDescriptorSets(*device, &allocInfo, &descriptorSet) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to allocate descriptor sets!");
         }
 
-        for (size_t i = 0; i < numFrameBuffers; i++)
-        {
-            VkDescriptorBufferInfo VInfo {};
-            VInfo.buffer = uniformBuffers[i][0].parent->buffer;
-            VInfo.offset = uniformBuffers[i][0].offset;
-            VInfo.range  = sizeof(VertexUniformBufferObject);
+        VkDescriptorBufferInfo VInfo {};
+        VInfo.buffer = uniformBuffer[0].parent->buffer;
+        VInfo.offset = uniformBuffer[0].offset;
+        VInfo.range  = sizeof(VertexUniformBufferObject);
 
-            VkDescriptorBufferInfo FInfo {};
-            FInfo.buffer = uniformBuffers[i][1].parent->buffer;
-            FInfo.offset = uniformBuffers[i][1].offset;
-            FInfo.range  = sizeof(FragmentUniformBufferObject);
+        VkDescriptorBufferInfo FInfo {};
+        FInfo.buffer = uniformBuffer[1].parent->buffer;
+        FInfo.offset = uniformBuffer[1].offset;
+        FInfo.range  = sizeof(FragmentUniformBufferObject);
 
-            VkDescriptorImageInfo imageInfo {};
-            imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            imageInfo.imageView   = texture->GetImageView();
-            imageInfo.sampler     = texture->GetSampler();
+        VkDescriptorImageInfo imageInfo {};
+        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        imageInfo.imageView   = texture->GetImageView();
+        imageInfo.sampler     = texture->GetSampler();
 
-            std::array<VkWriteDescriptorSet, 3> descriptorWrites {};
+        std::array<VkWriteDescriptorSet, 3> descriptorWrites {};
 
-            descriptorWrites[0].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            descriptorWrites[0].dstSet          = descriptorSets[i];
-            descriptorWrites[0].dstBinding      = 0;
-            descriptorWrites[0].dstArrayElement = 0;
-            descriptorWrites[0].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            descriptorWrites[0].descriptorCount = 1;
-            descriptorWrites[0].pBufferInfo     = &VInfo;
+        descriptorWrites[0].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrites[0].dstSet          = descriptorSet;
+        descriptorWrites[0].dstBinding      = 0;
+        descriptorWrites[0].dstArrayElement = 0;
+        descriptorWrites[0].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        descriptorWrites[0].descriptorCount = 1;
+        descriptorWrites[0].pBufferInfo     = &VInfo;
 
-            descriptorWrites[1].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            descriptorWrites[1].dstSet          = descriptorSets[i];
-            descriptorWrites[1].dstBinding      = 1;
-            descriptorWrites[1].dstArrayElement = 0;
-            descriptorWrites[1].descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-            descriptorWrites[1].descriptorCount = 1;
-            descriptorWrites[1].pImageInfo      = &imageInfo;
+        descriptorWrites[1].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrites[1].dstSet          = descriptorSet;
+        descriptorWrites[1].dstBinding      = 1;
+        descriptorWrites[1].dstArrayElement = 0;
+        descriptorWrites[1].descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        descriptorWrites[1].descriptorCount = 1;
+        descriptorWrites[1].pImageInfo      = &imageInfo;
 
-            descriptorWrites[2].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            descriptorWrites[2].dstSet          = descriptorSets[i];
-            descriptorWrites[2].dstBinding      = 2;
-            descriptorWrites[2].dstArrayElement = 0;
-            descriptorWrites[2].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            descriptorWrites[2].descriptorCount = 1;
-            descriptorWrites[2].pBufferInfo     = &FInfo;
+        descriptorWrites[2].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrites[2].dstSet          = descriptorSet;
+        descriptorWrites[2].dstBinding      = 2;
+        descriptorWrites[2].dstArrayElement = 0;
+        descriptorWrites[2].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        descriptorWrites[2].descriptorCount = 1;
+        descriptorWrites[2].pBufferInfo     = &FInfo;
 
-            vkUpdateDescriptorSets(*device,
-                                   static_cast<uint32_t>(descriptorWrites.size()),
-                                   descriptorWrites.data(),
-                                   0,
-                                   nullptr);
-        }
+        vkUpdateDescriptorSets(*device,
+                               static_cast<uint32_t>(descriptorWrites.size()),
+                               descriptorWrites.data(),
+                               0,
+                               nullptr);
     }
 
     void Entity::CreateUniformBuffers()
     {
         VkDeviceSize VuboSize = sizeof(VertexUniformBufferObject);
         VkDeviceSize FuboSize = sizeof(FragmentUniformBufferObject);
-
-        uniformBuffers.resize(numFrameBuffers);
-
-        for (size_t i = 0; i < numFrameBuffers; i++)
-        {
-            uniformBuffers[i][0] = hostLocalBuffer->GetBuffer(VuboSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
-            uniformBuffers[i][1] = hostLocalBuffer->GetBuffer(FuboSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
-        }
+        uniformBuffer[0]      = hostLocalBuffer->GetBuffer(VuboSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+        uniformBuffer[1]      = hostLocalBuffer->GetBuffer(FuboSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
     }
 
     void Entity::SetLocation(float x, float y, float z)
@@ -184,5 +172,5 @@ namespace sckz
     glm::vec3 Entity::GetRotation() { return rotation; }
     glm::vec3 Entity::GetScale() { return scale; }
 
-    std::vector<VkDescriptorSet> & Entity::GetDescriptorSets() { return descriptorSets; }
+    VkDescriptorSet & Entity::GetDescriptorSet() { return descriptorSet; }
 } // namespace sckz

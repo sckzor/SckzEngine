@@ -27,18 +27,18 @@ namespace sckz
         Buffer::SubBlock * indexBuffer;
         Buffer::SubBlock * vertexBuffer;
 
-        std::vector<VkCommandBuffer> commandBuffers;
+        VkCommandBuffer commandBuffer;
 
-        VkDevice *                   device;
-        VkPhysicalDevice *           physicalDevice;
-        VkCommandPool *              commandPool;
-        DescriptorPool *             descriptorPool;
-        GraphicsPipeline *           pipeline;
-        std::vector<VkFramebuffer> * swapChainFramebuffers;
-        VkExtent2D                   swapChainExtent;
-        VkQueue *                    queue;
-        VkRenderPass *               renderPass;
-        bool                         hasCommandBuffer;
+        VkDevice *         device;
+        VkPhysicalDevice * physicalDevice;
+        VkCommandPool *    commandPool;
+        DescriptorPool *   descriptorPool;
+        GraphicsPipeline * pipeline;
+        VkFramebuffer *    framebuffer;
+        VkExtent2D         swapChainExtent;
+        VkQueue *          queue;
+        VkRenderPass *     renderPass;
+        bool               hasCommandBuffer;
 
         const char * textureFileName;
         const char * modelFileName;
@@ -46,18 +46,18 @@ namespace sckz
         std::vector<Entity *> entities;
 
     public:
-        void CreateModel(const char *                 textureFileName,
-                         const char *                 modelFileName,
-                         VkCommandPool &              commandPool,
-                         VkRenderPass &               renderPass,
-                         VkDevice &                   device,
-                         VkPhysicalDevice &           physicalDevice,
-                         std::vector<VkFramebuffer> & swapChainFramebuffers,
-                         GraphicsPipeline *           pipeline,
-                         DescriptorPool &             descriptorPool,
-                         VkExtent2D                   swapChainExtent,
-                         Memory &                     memory,
-                         VkQueue &                    queue);
+        void CreateModel(const char *       textureFileName,
+                         const char *       modelFileName,
+                         VkCommandPool &    commandPool,
+                         VkRenderPass &     renderPass,
+                         VkDevice &         device,
+                         VkPhysicalDevice & physicalDevice,
+                         VkFramebuffer &    swapChainFramebuffers,
+                         GraphicsPipeline * pipeline,
+                         DescriptorPool &   descriptorPool,
+                         VkExtent2D         swapChainExtent,
+                         Memory &           memory,
+                         VkQueue &          queue);
 
         void DestroyModel();
 
@@ -67,7 +67,7 @@ namespace sckz
 
         Entity & CreateEntity();
 
-        void CreateCommandBuffers();
+        void CreateCommandBuffer();
 
     public:
         void LoadModel();
@@ -75,10 +75,10 @@ namespace sckz
         void CreateIndexBuffer();
 
     public:
-        std::vector<VkCommandBuffer> & GetCommandBuffers();
-        Buffer::SubBlock               GetIndexBuffer();
-        Buffer::SubBlock               GetVertexBuffer();
-        uint32_t                       GetNumIndices();
+        VkCommandBuffer & GetCommandBuffer();
+        Buffer::SubBlock  GetIndexBuffer();
+        Buffer::SubBlock  GetVertexBuffer();
+        uint32_t          GetNumIndices();
 
     private:
         void DestroySwapResources();

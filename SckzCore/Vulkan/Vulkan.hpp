@@ -5,8 +5,10 @@
 #include "CommandBuffer.hpp"
 #include "DescriptorPool.hpp"
 #include "GraphicsPipeline.hpp"
+#include "HelperMethods.hpp"
 #include "Image.hpp"
 #include "Model.hpp"
+#include "Scene.hpp"
 
 namespace sckz
 {
@@ -14,14 +16,6 @@ namespace sckz
     class Vulkan
     {
     private: // Private Structures
-        struct QueueFamilyIndices
-        {
-            std::optional<uint32_t> graphicsFamily;
-            std::optional<uint32_t> presentFamily;
-
-            bool isComplete() { return graphicsFamily.has_value() && presentFamily.has_value(); }
-        };
-
         struct SwapChainSupportDetails
         {
             VkSurfaceCapabilitiesKHR        capabilities;
@@ -36,64 +30,57 @@ namespace sckz
         const bool enableValidationLayers = true;
 #endif
 
-        static const int MAX_FRAMES_IN_FLIGHT = 2;
+        static const int MAX_FRAMES_IN_FLIGHT = 2; // Stays
 
-        Window * window;
+        Window * window; // Stays
 
-        VkInstance               instance;
-        VkDebugUtilsMessengerEXT debugMessenger;
-        VkSurfaceKHR             surface;
-        VkPhysicalDevice         physicalDevice    = VK_NULL_HANDLE;
-        VkSampleCountFlagBits    msaaSamples       = VK_SAMPLE_COUNT_1_BIT;
-        int32_t                  targetMsaaSamples = 1;
-        VkDevice                 device;
-        VkQueue                  graphicsQueue;
-        VkQueue                  presentQueue;
+        VkInstance               instance;                        // Stays
+        VkDebugUtilsMessengerEXT debugMessenger;                  // Stays
+        VkSurfaceKHR             surface;                         // Stays
+        VkPhysicalDevice         physicalDevice = VK_NULL_HANDLE; // Stays
+        VkDevice                 device;                          // Stays
+        VkQueue                  graphicsQueue;                   // Stays
+        VkQueue                  presentQueue;                    // Stays
 
         Memory memory;
 
-        VkSwapchainKHR             swapChain;
-        std::vector<Image>         swapChainImages;
-        VkExtent2D                 swapChainExtent;
-        std::vector<VkFramebuffer> swapChainFramebuffers;
+        VkSwapchainKHR             swapChain;             // Stays
+        std::vector<Image>         swapChainImages;       // Stays
+        VkExtent2D                 swapChainExtent;       // Stays
+        std::vector<VkFramebuffer> swapChainFramebuffers; // Stays
 
-        std::vector<VkCommandBuffer> primaryCmdBuffers;
+        std::vector<VkCommandBuffer> commandBuffers; // Duplicated
 
-        VkRenderPass renderPass;
+        VkRenderPass renderPass; // Duplicated
 
-        DescriptorPool descriptorPool;
-        VkCommandPool  commandPool;
+        DescriptorPool descriptorPool; // Duplicated
+        VkCommandPool  commandPool;    // Duplicated
 
-        Image colorImage;
-        Image depthImage;
+        Image colorImage; // Duplicated
+        Image depthImage; // Duplicated
 
-        std::vector<Light *> lights;
+        std::vector<VkSemaphore> imageAvailableSemaphores; // Duplicated
+        std::vector<VkSemaphore> renderFinishedSemaphores; // Duplicated
+        std::vector<VkFence>     inFlightFences;           // Duplicated
+        std::vector<VkFence>     imagesInFlight;           // Duplicated
 
-        std::vector<GraphicsPipeline *> pipelines;
-        std::vector<Model *>            models;
-        std::vector<Camera *>           cameras;
+        const std::vector<const char *> validationLayers = { "VK_LAYER_KHRONOS_validation" };   // Stays
+        const std::vector<const char *> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME }; // Stays
+        size_t                          currentFrame     = 0;                                   // Stays
 
-        std::vector<VkSemaphore> imageAvailableSemaphores;
-        std::vector<VkSemaphore> renderFinishedSemaphores;
-        std::vector<VkFence>     inFlightFences;
-        std::vector<VkFence>     imagesInFlight;
-
-        const std::vector<const char *> validationLayers = { "VK_LAYER_KHRONOS_validation" };
-        const std::vector<const char *> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
-        size_t                          currentFrame     = 0;
-
-        std::chrono::time_point<std::chrono::high_resolution_clock> lastTime;
-        std::chrono::time_point<std::chrono::high_resolution_clock> currentTime;
-        float                                                       deltaTime;
+        std::chrono::time_point<std::chrono::high_resolution_clock> lastTime;    // Stays
+        std::chrono::time_point<std::chrono::high_resolution_clock> currentTime; // Stays
+        float                                                       deltaTime;   // Stays
 
         std::chrono::system_clock::time_point point1
             = std::chrono::system_clock::now(); // Used to add delay to the loop accurately for limiting FPS, we cant
                                                 // use deltaTime because it will keep increaseing
-        std::chrono::system_clock::time_point point2 = std::chrono::system_clock::now();
+                                                // Stays
+        std::chrono::system_clock::time_point point2 = std::chrono::system_clock::now(); // Stays
 
-        bool framebufferResized = false;
+        bool framebufferResized = false; // Stays
 
-        int32_t fps = 0;
+        int32_t fps = 0; // Stays
 
     public: // Public static functions
         static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -115,7 +102,6 @@ namespace sckz
         VkDebugUtilsMessengerCreateInfoEXT MakeDebugMessengerCreateInfo();
         VkSampleCountFlagBits              GetTargetSampleCount(int32_t targetSampleCountt);
         bool                               CheckValidationLayerSupport();
-        QueueFamilyIndices                 FindQueueFamilies(VkPhysicalDevice device);
         bool                               CheckDeviceExtensionSupport(VkPhysicalDevice device);
         SwapChainSupportDetails            QuerySwapChainSupport(VkPhysicalDevice device);
         bool                               IsDeviceSuitable(VkPhysicalDevice device);
@@ -123,22 +109,22 @@ namespace sckz
         VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> & availableFormats);
         VkPresentModeKHR   ChooseSwapPresentMode(const std::vector<VkPresentModeKHR> & availablePresentModes);
         VkExtent2D         ChooseSwapExtent(const VkSurfaceCapabilitiesKHR & capabilities);
-        VkFormat           FindDepthFormat();
-        VkFormat           FindSupportedFormat(const std::vector<VkFormat> & candidates,
-                                               VkImageTiling                 tiling,
-                                               VkFormatFeatureFlags          features);
 
     private: // Private creation functions
+        // Stays here
         void CreateInstance();
         void SetupDebugMessenger();
         void CreateSurface();
         void PickPhysicalDevice();
         void CreateLogicalDevice();
         void CreateSwapChain();
+
+        // Duplicated in the scene class
+
         void CreateImageViews();
         void CreateRenderPass();
         void CreateCommandPool();
-        void CreatePrimaryCmdBuffers();
+        void CreateCommandBuffers();
         void CreateColorResources();
         void CreateDepthResources();
         void CreateFramebuffers();
@@ -149,11 +135,15 @@ namespace sckz
         void DestroySwapResources();
 
     private: // Private destruction functions
+        // Stays here
         void DestroyInstance();
         void DestroyDebugMessenger();
         void DestroySurface();
         void DestroyLogicalDevice();
         void DestroySwapChain();
+
+        // Goes to the scene class
+
         void DestroyImageViews();
         void DestroyRenderPass();
         void DestroyCommandPool();
@@ -161,11 +151,11 @@ namespace sckz
         void DestroySyncObjects();
 
     public: // Public member functions
+        // Stays here
         void CreateVulkan(Window & window);
         void DestroyVulkan();
 
         void Update();
-        void Render(Camera & camera);
 
         void SetFPS(int32_t fps);
         void SetMSAA(int32_t targetSampleCount);
@@ -173,11 +163,6 @@ namespace sckz
         uint32_t GetMaximumSampleCount();
         float    GetDeltaT();
 
-    public:
-        GraphicsPipeline & CreatePipeline(const char * vertexFile, const char * fragmentFile);
-        Model &            CreateModel(const char * modelFile, const char * textureFile, GraphicsPipeline & pipeline);
-        Camera &           CreateCamera(float fov, float near, float far);
-        Entity &           CreateEntity(Model & model);
-        Light &            CreateLight();
+        void Present(Scene & scene);
     };
 } // namespace sckz

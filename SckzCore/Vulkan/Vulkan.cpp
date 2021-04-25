@@ -71,63 +71,6 @@ namespace sckz
         return createInfo;
     }
 
-    VkSampleCountFlagBits Vulkan::GetTargetSampleCount(int32_t targetSampleCount) // TODO: make this mutable
-    {
-        VkPhysicalDeviceProperties physicalDeviceProperties;
-        vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
-
-        VkSampleCountFlags counts = physicalDeviceProperties.limits.framebufferColorSampleCounts
-                                  & physicalDeviceProperties.limits.framebufferDepthSampleCounts;
-
-        VkSampleCountFlagBits targetSampleBits;
-
-        if (targetSampleCount == -1)
-        {
-            targetSampleCount = GetMaximumSampleCount();
-        }
-
-        switch (targetSampleCount)
-        {
-            case VK_SAMPLE_COUNT_64_BIT:
-                targetSampleBits = VK_SAMPLE_COUNT_64_BIT;
-                break;
-
-            case VK_SAMPLE_COUNT_32_BIT:
-                targetSampleBits = VK_SAMPLE_COUNT_32_BIT;
-                break;
-            case VK_SAMPLE_COUNT_16_BIT:
-                targetSampleBits = VK_SAMPLE_COUNT_16_BIT;
-                break;
-
-            case VK_SAMPLE_COUNT_8_BIT:
-                targetSampleBits = VK_SAMPLE_COUNT_8_BIT;
-                break;
-
-            case VK_SAMPLE_COUNT_4_BIT:
-                targetSampleBits = VK_SAMPLE_COUNT_4_BIT;
-                break;
-
-            case VK_SAMPLE_COUNT_2_BIT:
-                targetSampleBits = VK_SAMPLE_COUNT_2_BIT;
-                break;
-
-            default:
-                targetSampleBits = VK_SAMPLE_COUNT_1_BIT;
-        }
-
-        if (targetSampleBits > counts)
-        {
-            // Max MSAA on this system is 8
-
-            std::cout << "[WARN] MSAA sample count too large for this system, falling back to a sample size of 1!"
-                      << std::endl;
-
-            return VK_SAMPLE_COUNT_1_BIT;
-        }
-
-        return targetSampleBits;
-    }
-
     uint32_t Vulkan::GetMaximumSampleCount()
     {
         VkPhysicalDeviceProperties physicalDeviceProperties;
@@ -193,43 +136,6 @@ namespace sckz
         return true;
     }
 
-    Vulkan::QueueFamilyIndices Vulkan::FindQueueFamilies(VkPhysicalDevice device)
-    {
-        QueueFamilyIndices indices;
-
-        uint32_t queueFamilyCount = 0;
-        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
-
-        std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
-        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
-
-        int i = 0;
-        for (const auto & queueFamily : queueFamilies)
-        {
-            if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
-            {
-                indices.graphicsFamily = i;
-            }
-
-            VkBool32 presentSupport = false;
-            vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
-
-            if (presentSupport)
-            {
-                indices.presentFamily = i;
-            }
-
-            if (indices.isComplete())
-            {
-                break;
-            }
-
-            i++;
-        }
-
-        return indices;
-    }
-
     bool Vulkan::CheckDeviceExtensionSupport(VkPhysicalDevice device)
     {
         uint32_t extensionCount;
@@ -277,7 +183,7 @@ namespace sckz
 
     bool Vulkan::IsDeviceSuitable(VkPhysicalDevice device)
     {
-        QueueFamilyIndices indices = FindQueueFamilies(device);
+        HelperMethods::QueueFamilyIndices indices = HelperMethods::FindQueueFamilies(device, surface);
 
         bool extensionsSupported = CheckDeviceExtensionSupport(device);
 
@@ -351,35 +257,6 @@ namespace sckz
 
             return actualExtent;
         }
-    }
-
-    VkFormat Vulkan::FindDepthFormat()
-    {
-        return FindSupportedFormat({ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
-                                   VK_IMAGE_TILING_OPTIMAL,
-                                   VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
-    }
-
-    VkFormat Vulkan::FindSupportedFormat(const std::vector<VkFormat> & candidates,
-                                         VkImageTiling                 tiling,
-                                         VkFormatFeatureFlags          features)
-    {
-        for (VkFormat format : candidates)
-        {
-            VkFormatProperties props;
-            vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &props);
-
-            if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features)
-            {
-                return format;
-            }
-            else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features)
-            {
-                return format;
-            }
-        }
-
-        throw std::runtime_error("failed to find supported format!");
     }
 
     void Vulkan::CreateInstance()
@@ -478,7 +355,7 @@ namespace sckz
 
     void Vulkan::CreateLogicalDevice()
     {
-        QueueFamilyIndices indices = FindQueueFamilies(physicalDevice);
+        HelperMethods::QueueFamilyIndices indices = HelperMethods::FindQueueFamilies(physicalDevice, surface);
 
         std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
         std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value() };
@@ -529,7 +406,6 @@ namespace sckz
 
     void Vulkan::CreateSwapChain()
     {
-        msaaSamples                              = GetTargetSampleCount(targetMsaaSamples);
         SwapChainSupportDetails swapChainSupport = QuerySwapChainSupport(physicalDevice);
 
         VkSurfaceFormatKHR surfaceFormat = ChooseSwapSurfaceFormat(swapChainSupport.formats);
@@ -553,8 +429,8 @@ namespace sckz
         createInfo.imageArrayLayers = 1;
         createInfo.imageUsage       = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-        QueueFamilyIndices indices              = FindQueueFamilies(physicalDevice);
-        uint32_t           queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
+        HelperMethods::QueueFamilyIndices indices = HelperMethods::FindQueueFamilies(physicalDevice, surface);
+        uint32_t queueFamilyIndices[]             = { indices.graphicsFamily.value(), indices.presentFamily.value() };
 
         if (indices.graphicsFamily != indices.presentFamily)
         {
@@ -622,7 +498,7 @@ namespace sckz
         }
 
         VkAttachmentDescription depthAttachment {};
-        depthAttachment.format         = FindDepthFormat();
+        depthAttachment.format         = HelperMethods::FindDepthFormat(physicalDevice);
         depthAttachment.samples        = msaaSamples;
         depthAttachment.loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;
         depthAttachment.storeOp        = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -699,7 +575,8 @@ namespace sckz
 
     void Vulkan::CreateCommandPool()
     {
-        QueueFamilyIndices queueFamilyIndices = FindQueueFamilies(physicalDevice);
+        HelperMethods::QueueFamilyIndices queueFamilyIndices
+            = HelperMethods::FindQueueFamilies(physicalDevice, surface);
 
         VkCommandPoolCreateInfo poolInfo {};
         poolInfo.sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -732,7 +609,7 @@ namespace sckz
 
     void Vulkan::CreateDepthResources()
     {
-        VkFormat depthFormat = FindDepthFormat();
+        VkFormat depthFormat = HelperMethods::FindDepthFormat(physicalDevice);
 
         depthImage.CreateImage(swapChainExtent.width,
                                swapChainExtent.height,
@@ -932,7 +809,7 @@ namespace sckz
         {
             models[i]->RebuildSwapResources(descriptorPool, swapChainExtent);
         }
-        CreatePrimaryCmdBuffers();
+        CreateCommandBuffers();
 
         for (int i = 0; i < cameras.size(); i++)
         {
@@ -957,59 +834,27 @@ namespace sckz
         descriptorPool.DestroyDescriptorPool();
     }
 
-    GraphicsPipeline & Vulkan::CreatePipeline(const char * vertexFile, const char * fragmentFile)
+    void Vulkan::CreateCommandBuffers()
     {
-        pipelines.push_back(new GraphicsPipeline());
-        pipelines.back()->CreatePipeline(device, swapChainExtent, renderPass, msaaSamples, vertexFile, fragmentFile);
-        return *pipelines.back();
-    }
-
-    Model & Vulkan::CreateModel(const char * modelFile, const char * textureFile, GraphicsPipeline & pipeline)
-    {
-        models.push_back(new Model());
-        models.back()->CreateModel(textureFile,
-                                   modelFile,
-                                   commandPool,
-                                   renderPass,
-                                   device,
-                                   physicalDevice,
-                                   swapChainFramebuffers,
-                                   &pipeline,
-                                   descriptorPool,
-                                   swapChainExtent,
-                                   memory,
-                                   graphicsQueue);
-        return *models.back();
-    }
-
-    Camera & Vulkan::CreateCamera(float fov, float near, float far)
-    {
-        cameras.push_back(new Camera());
-        cameras.back()->CreateCamera(fov, near, far, swapChainExtent);
-        return *cameras.back();
-    }
-
-    void Vulkan::CreatePrimaryCmdBuffers()
-    {
-        primaryCmdBuffers.resize(swapChainFramebuffers.size());
+        commandBuffers.resize(swapChainFramebuffers.size());
 
         VkCommandBufferAllocateInfo allocInfo {};
         allocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.commandPool        = commandPool;
         allocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandBufferCount = (uint32_t)primaryCmdBuffers.size();
+        allocInfo.commandBufferCount = (uint32_t)commandBuffers.size();
 
-        if (vkAllocateCommandBuffers(device, &allocInfo, primaryCmdBuffers.data()) != VK_SUCCESS)
+        if (vkAllocateCommandBuffers(device, &allocInfo, commandBuffers.data()) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to allocate command buffers!");
         }
 
-        for (size_t i = 0; i < primaryCmdBuffers.size(); i++)
+        for (size_t i = 0; i < commandBuffers.size(); i++)
         {
             VkCommandBufferBeginInfo beginInfo {};
             beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-            if (vkBeginCommandBuffer(primaryCmdBuffers[i], &beginInfo) != VK_SUCCESS)
+            if (vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS)
             {
                 throw std::runtime_error("failed to begin recording command buffer!");
             }
@@ -1028,25 +873,22 @@ namespace sckz
             renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
             renderPassInfo.pClearValues    = clearValues.data();
 
-            vkCmdBeginRenderPass(primaryCmdBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
-            std::vector<VkCommandBuffer> correctBuffers;
-            for (size_t j = 0; j < models.size(); j++)
-            {
-                correctBuffers.push_back((models[j]->GetCommandBuffers())[i]);
-            }
+            vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
 
-            vkCmdExecuteCommands(primaryCmdBuffers[i], correctBuffers.size(), correctBuffers.data());
+            // ADD THE COMMANDS FOR RENDERING HERE
 
-            vkCmdEndRenderPass(primaryCmdBuffers[i]);
+            vkCmdExecuteCommands(commandBuffers[i], correctBuffers.size(), correctBuffers.data());
 
-            if (vkEndCommandBuffer(primaryCmdBuffers[i]) != VK_SUCCESS)
+            vkCmdEndRenderPass(commandBuffers[i]);
+
+            if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS)
             {
                 throw std::runtime_error("failed to record command buffer!");
             }
         }
     }
 
-    void Vulkan::Render(Camera & camera)
+    void Vulkan::Present(Scene & scene)
     {
         vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
@@ -1068,11 +910,6 @@ namespace sckz
             throw std::runtime_error("failed to acquire swap chain image!");
         }
 
-        for (int i = 0; i < models.size(); i++)
-        {
-            models[i]->Update(imageIndex, camera);
-        }
-
         if (imagesInFlight[imageIndex] != VK_NULL_HANDLE)
         {
             vkWaitForFences(device, 1, &imagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
@@ -1089,7 +926,7 @@ namespace sckz
         submitInfo.pWaitDstStageMask          = waitStages;
 
         submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers    = &primaryCmdBuffers[imageIndex];
+        submitInfo.pCommandBuffers    = &commandBuffers[imageIndex];
 
         VkSemaphore signalSemaphores[]  = { renderFinishedSemaphores[currentFrame] };
         submitInfo.signalSemaphoreCount = 1;
@@ -1154,20 +991,6 @@ namespace sckz
     void Vulkan::Update() { }
 
     float Vulkan::GetDeltaT() { return deltaTime; }
-
-    Entity & Vulkan::CreateEntity(Model & model)
-    {
-        Entity & entity = model.CreateEntity();
-        CreatePrimaryCmdBuffers();
-        entity.LoadLights(lights);
-        return entity;
-    }
-
-    Light & Vulkan::CreateLight()
-    {
-        lights.push_back(new Light());
-        return *lights.back();
-    }
 
     void Vulkan::SetFPS(int32_t fps)
     {
