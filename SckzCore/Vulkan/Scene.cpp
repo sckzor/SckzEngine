@@ -3,6 +3,101 @@
 namespace sckz
 {
 
+    void Scene::CreateScene(VkSurfaceKHR &     surface,
+                            VkPhysicalDevice & physicalDevice,
+                            VkDevice &         device,
+                            VkQueue &          graphicsQueue)
+    {
+        this->surface        = &surface;
+        this->physicalDevice = &physicalDevice;
+        this->device         = &device;
+        this->graphicsQueue  = &graphicsQueue;
+
+        renderedImage.CreateImage();
+
+        memory.CreateMemory(device, physicalDevice, 0xFFFFFFF);
+        CreateImageViews();
+        CreateRenderPass();
+        CreateCommandPool();
+        CreateColorResources();
+        CreateDepthResources();
+        CreateFramebuffers();
+        descriptorPool.CreateDescriptorPool(device, 1);
+        CreateSyncObjects();
+    }
+
+    void Scene::DestroyScene()
+    {
+        DestroySwapResources();
+
+        for (int i = 0; i < models.size(); i++)
+        {
+            models[i]->DestroyModel();
+            delete models[i];
+        }
+
+        for (int i = 0; i < cameras.size(); i++)
+        {
+            cameras[i]->DestroyCamera();
+            delete cameras[i];
+        }
+
+        DestroySyncObjects();
+        DestroyCommandPool();
+        memory.FreeMemory();
+        memory.DestroyMemory();
+
+        for (int i = 0; i < pipelines.size(); i++)
+        {
+            delete pipelines[i];
+        }
+        for (int i = 0; i < lights.size(); i++)
+        {
+            lights[i]->DestroyLight();
+            delete lights[i];
+        }
+    }
+
+    void Scene::RebuildSwapResources()
+    {
+        DestroySwapResources();
+
+        CreateImageViews();
+        CreateRenderPass();
+        for (int i = 0; i < pipelines.size(); i++)
+        {
+            pipelines[i]->CreatePipeline(*device, swapChainExtent, renderPass, msaaSamples);
+        }
+        CreateColorResources();
+        CreateDepthResources();
+        CreateFramebuffers();
+        descriptorPool.CreateDescriptorPool(*device, 1);
+        for (int i = 0; i < models.size(); i++)
+        {
+            models[i]->RebuildSwapResources(descriptorPool, swapChainExtent);
+        }
+        CreateCommandBuffer();
+
+        for (int i = 0; i < cameras.size(); i++)
+        {
+            cameras[i]->UpdateExtent(swapChainExtent);
+        }
+    }
+
+    void Scene::DestroySwapResources()
+    {
+        depthImage.DestroyImage();
+        colorImage.DestroyImage();
+        DestroyFramebuffers();
+        for (int i = 0; i < pipelines.size(); i++)
+        {
+            pipelines[i]->DestroyPipeline();
+        }
+        DestroyRenderPass();
+        DestroyImageViews();
+        descriptorPool.DestroyDescriptorPool();
+    }
+
     void Scene::CreateImageViews() { renderedImage.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT); }
 
     void Scene::CreateRenderPass()
@@ -205,7 +300,7 @@ namespace sckz
         }
     }
 
-    void Scene::CreatePrimaryCmdBuffers()
+    void Scene::CreateCommandBuffer()
     {
         VkCommandBufferAllocateInfo allocInfo {};
         allocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -317,7 +412,7 @@ namespace sckz
     Entity & Scene::CreateEntity(Model & model)
     {
         Entity & entity = model.CreateEntity();
-        CreatePrimaryCmdBuffers();
+        CreateCommandBuffer();
         entity.LoadLights(lights);
         return entity;
     }
@@ -358,5 +453,11 @@ namespace sckz
         cameras.push_back(new Camera());
         cameras.back()->CreateCamera(fov, near, far, swapChainExtent);
         return *cameras.back();
+    }
+
+    void Scene::SetMSAA(int32_t targetMsaaSamples)
+    {
+        this->targetMsaaSamples = targetMsaaSamples;
+        RebuildSwapResources();
     }
 } // namespace sckz

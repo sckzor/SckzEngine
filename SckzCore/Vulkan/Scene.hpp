@@ -11,13 +11,10 @@ namespace sckz
     class Scene
     {
     private:
-        VkInstance *               instance;       // Stays
-        VkDebugUtilsMessengerEXT * debugMessenger; // Stays
-        VkSurfaceKHR *             surface;        // Stays
-        VkPhysicalDevice *         physicalDevice; // Stays
-        VkDevice *                 device;         // Stays
-        VkQueue *                  graphicsQueue;  // Stays
-        VkSurfaceKHR *             surface;
+        VkSurfaceKHR *     surface;        // Stays
+        VkPhysicalDevice * physicalDevice; // Stays
+        VkDevice *         device;         // Stays
+        VkQueue *          graphicsQueue;  // Stays
 
         VkCommandBuffer primaryCmdBuffer; // Duplicated
 
@@ -50,11 +47,20 @@ namespace sckz
         int32_t               targetMsaaSamples = 1;
 
     public:
+        void CreateScene(VkSurfaceKHR &     surface,
+                         VkPhysicalDevice & physicalDevice,
+                         VkDevice &         device,
+                         VkQueue &          graphicsQueue);
+
+        void DestroyScene();
+
+        void RebuildSwapResources();
+
     private:
         void CreateImageViews();
         void CreateRenderPass();
         void CreateCommandPool();
-        void CreatePrimaryCmdBuffers(); // Missing implementation
+        void CreateCommandBuffer(); // Missing implementation
         void CreateColorResources();
         void CreateDepthResources();
         void CreateFramebuffers();
@@ -64,14 +70,21 @@ namespace sckz
         void DestroyImageViews();
         void DestroyRenderPass();
         void DestroyCommandPool();
+        void DestroyCommandBuffer(); // Missing implementation
+        void DestroyColorResources();
+        void DestroyDepthResources();
         void DestroyFramebuffers();
         void DestroySyncObjects();
+
+    private:
+        void DestroySwapResources();
 
     private:
         VkSampleCountFlagBits GetTargetSampleCount(int32_t targetSampleCount);
 
     public:
         void Render(Camera & camera);
+        void SetMSAA(int32_t targetMsaaSamples);
 
     public:
         GraphicsPipeline & CreatePipeline(const char * vertexFile, const char * fragmentFile);

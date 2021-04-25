@@ -480,7 +480,7 @@ namespace sckz
         VkAttachmentDescription colorAttachment {};
         colorAttachment.format = swapChainImages[0].GetFormat();
 
-        colorAttachment.samples = msaaSamples;
+        colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
 
         colorAttachment.loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;
         colorAttachment.storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
@@ -488,18 +488,11 @@ namespace sckz
         colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         colorAttachment.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
 
-        if (msaaSamples == VK_SAMPLE_COUNT_1_BIT)
-        {
-            colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-        }
-        else
-        {
-            colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        }
+        colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
         VkAttachmentDescription depthAttachment {};
         depthAttachment.format         = HelperMethods::FindDepthFormat(physicalDevice);
-        depthAttachment.samples        = msaaSamples;
+        depthAttachment.samples        = VK_SAMPLE_COUNT_1_BIT;
         depthAttachment.loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;
         depthAttachment.storeOp        = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         depthAttachment.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -534,10 +527,6 @@ namespace sckz
         subpass.colorAttachmentCount    = 1;
         subpass.pColorAttachments       = &colorAttachmentRef;
         subpass.pDepthStencilAttachment = &depthAttachmentRef;
-        if (msaaSamples != VK_SAMPLE_COUNT_1_BIT)
-        {
-            subpass.pResolveAttachments = &colorAttachmentResolveRef;
-        }
 
         VkSubpassDependency dependency {};
         dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
@@ -550,11 +539,6 @@ namespace sckz
         dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
         std::vector<VkAttachmentDescription> attachments = { colorAttachment, depthAttachment };
-
-        if (msaaSamples != VK_SAMPLE_COUNT_1_BIT)
-        {
-            attachments.push_back(colorAttachmentResolve);
-        }
 
         VkRenderPassCreateInfo renderPassInfo {};
         renderPassInfo.sType           = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
@@ -595,7 +579,7 @@ namespace sckz
         colorImage.CreateImage(swapChainExtent.width,
                                swapChainExtent.height,
                                1,
-                               msaaSamples,
+                               VK_SAMPLE_COUNT_1_BIT,
                                colorFormat,
                                VK_IMAGE_TILING_OPTIMAL,
                                VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
@@ -614,7 +598,7 @@ namespace sckz
         depthImage.CreateImage(swapChainExtent.width,
                                swapChainExtent.height,
                                1,
-                               msaaSamples,
+                               VK_SAMPLE_COUNT_1_BIT,
                                depthFormat,
                                VK_IMAGE_TILING_OPTIMAL,
                                VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
@@ -634,17 +618,8 @@ namespace sckz
         {
             std::vector<VkImageView> attachments;
 
-            if (msaaSamples == VK_SAMPLE_COUNT_1_BIT)
-            {
-                attachments.push_back(swapChainImages[i].GetImageView());
-                attachments.push_back(depthImage.GetImageView());
-            }
-            else
-            {
-                attachments.push_back(colorImage.GetImageView());
-                attachments.push_back(depthImage.GetImageView());
-                attachments.push_back(swapChainImages[i].GetImageView());
-            }
+            attachments.push_back(swapChainImages[i].GetImageView());
+            attachments.push_back(depthImage.GetImageView());
 
             VkFramebufferCreateInfo framebufferInfo {};
             framebufferInfo.sType           = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -757,19 +732,6 @@ namespace sckz
     void Vulkan::DestroyVulkan()
     {
         DestroySwapResources();
-
-        for (int i = 0; i < models.size(); i++)
-        {
-            models[i]->DestroyModel();
-            delete models[i];
-        }
-
-        for (int i = 0; i < cameras.size(); i++)
-        {
-            cameras[i]->DestroyCamera();
-            delete cameras[i];
-        }
-
         DestroySyncObjects();
         DestroyCommandPool();
         memory.FreeMemory();
@@ -778,16 +740,6 @@ namespace sckz
         DestroyDebugMessenger();
         DestroySurface();
         DestroyInstance();
-
-        for (int i = 0; i < pipelines.size(); i++)
-        {
-            delete pipelines[i];
-        }
-        for (int i = 0; i < lights.size(); i++)
-        {
-            lights[i]->DestroyLight();
-            delete lights[i];
-        }
     }
 
     void Vulkan::RebuildSwapChain()
@@ -797,24 +749,11 @@ namespace sckz
         CreateSwapChain();
         CreateImageViews();
         CreateRenderPass();
-        for (int i = 0; i < pipelines.size(); i++)
-        {
-            pipelines[i]->CreatePipeline(device, swapChainExtent, renderPass, msaaSamples);
-        }
         CreateColorResources();
         CreateDepthResources();
         CreateFramebuffers();
         descriptorPool.CreateDescriptorPool(device, swapChainImages.size());
-        for (int i = 0; i < models.size(); i++)
-        {
-            models[i]->RebuildSwapResources(descriptorPool, swapChainExtent);
-        }
         CreateCommandBuffers();
-
-        for (int i = 0; i < cameras.size(); i++)
-        {
-            cameras[i]->UpdateExtent(swapChainExtent);
-        }
     }
 
     void Vulkan::DestroySwapResources()
@@ -824,10 +763,6 @@ namespace sckz
         depthImage.DestroyImage();
         colorImage.DestroyImage();
         DestroyFramebuffers();
-        for (int i = 0; i < pipelines.size(); i++)
-        {
-            pipelines[i]->DestroyPipeline();
-        }
         DestroyRenderPass();
         DestroyImageViews();
         DestroySwapChain();
@@ -876,8 +811,6 @@ namespace sckz
             vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
 
             // ADD THE COMMANDS FOR RENDERING HERE
-
-            vkCmdExecuteCommands(commandBuffers[i], correctBuffers.size(), correctBuffers.data());
 
             vkCmdEndRenderPass(commandBuffers[i]);
 
@@ -995,12 +928,6 @@ namespace sckz
     void Vulkan::SetFPS(int32_t fps)
     {
         this->fps = fps;
-        RebuildSwapChain();
-    }
-
-    void Vulkan::SetMSAA(int32_t targetMsaaSamples)
-    {
-        this->targetMsaaSamples = targetMsaaSamples;
         RebuildSwapChain();
     }
 } // namespace sckz
