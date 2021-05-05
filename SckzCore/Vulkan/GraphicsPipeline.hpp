@@ -17,6 +17,7 @@ namespace sckz
         VkSampleCountFlagBits msaaSamples;
         const char *          vertexFile;
         const char *          fragmentFile;
+        bool                  isFBO;
 
     private:
         static std::vector<char> ReadFile(const std::string & filename);
@@ -32,17 +33,20 @@ namespace sckz
                             VkRenderPass &        renderPass,
                             VkSampleCountFlagBits msaaSamples,
                             const char *          vertexFile,
-                            const char *          fragmentFile);
+                            const char *          fragmentFile,
+                            bool                  isFBO);
+
         void CreatePipeline(VkDevice &            device,
                             VkExtent2D            extent,
                             VkRenderPass &        renderPass,
-                            VkSampleCountFlagBits msaaSamples);
+                            VkSampleCountFlagBits msaaSamples,
+                            bool                  isFBO);
         void DestroyPipeline();
 
     public:
-        VkDescriptorSetLayout GetDescriptorSetLayout();
-        VkPipeline            GetPipeline();
-        VkPipelineLayout      GetPieplineLayout();
+        VkDescriptorSetLayout & GetDescriptorSetLayout();
+        VkPipeline &            GetPipeline();
+        VkPipelineLayout &      GetPieplineLayout();
 
     public:
         bool operator==(GraphicsPipeline & otherObject);

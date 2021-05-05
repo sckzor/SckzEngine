@@ -1,3 +1,4 @@
+#pragma once
 #include "../Include.hpp"
 #include "Camera.hpp"
 #include "DescriptorPool.hpp"
@@ -11,7 +12,6 @@ namespace sckz
     class Scene
     {
     private:
-        VkSurfaceKHR *     surface;        // Stays
         VkPhysicalDevice * physicalDevice; // Stays
         VkDevice *         device;         // Stays
         VkQueue *          graphicsQueue;  // Stays
@@ -47,10 +47,10 @@ namespace sckz
         int32_t               targetMsaaSamples = 1;
 
     public:
-        void CreateScene(VkSurfaceKHR &     surface,
-                         VkPhysicalDevice & physicalDevice,
+        void CreateScene(VkPhysicalDevice & physicalDevice,
                          VkDevice &         device,
-                         VkQueue &          graphicsQueue);
+                         VkQueue &          graphicsQueue,
+                         VkFormat &         imageFormant);
 
         void DestroyScene();
 

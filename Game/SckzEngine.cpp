@@ -8,12 +8,14 @@ int main()
     sckz::Vulkan vkan;
     vkan.CreateVulkan(win);
 
-    sckz::GraphicsPipeline & p1   = vkan.CreatePipeline("Resources/simple_vertex.spv", "Resources/simple_fragment.spv");
-    sckz::Model &            m1   = vkan.CreateModel("Resources/room.obj", "Resources/RoomTextureAtlas.png", p1);
-    sckz::Light &            l1   = vkan.CreateLight();
-    sckz::Light &            l2   = vkan.CreateLight();
-    sckz::Entity &           e1   = vkan.CreateEntity(m1);
-    sckz::Camera &           cam1 = vkan.CreateCamera(45, 0.1, 10);
+    sckz::Scene & scene = vkan.CreateScene();
+
+    sckz::GraphicsPipeline & p1 = scene.CreatePipeline("Resources/simple_vertex.spv", "Resources/simple_fragment.spv");
+    sckz::Model &            m1 = scene.CreateModel("Resources/room.obj", "Resources/RoomTextureAtlas.png", p1);
+    sckz::Light &            l1 = scene.CreateLight();
+    sckz::Light &            l2 = scene.CreateLight();
+    sckz::Entity &           e1 = scene.CreateEntity(m1);
+    sckz::Camera &           cam1 = scene.CreateCamera(45, 0.1, 10);
 
     vkan.SetMSAA(-1);
 
@@ -121,7 +123,9 @@ int main()
         win.Update();
         vkan.Update();
 
-        vkan.Render(cam1);
+        scene.Render(cam1);
+
+        vkan.Present(scene);
     }
 
     vkan.DestroyVulkan();

@@ -39,7 +39,7 @@ namespace sckz
         this->shineDamper  = shineDamper;
     }
 
-    void Entity::Update(uint32_t currentImage, Camera & camera)
+    void Entity::Update(Camera & camera)
     {
         VertexUniformBufferObject   Vubo {};
         FragmentUniformBufferObject Fubo {};

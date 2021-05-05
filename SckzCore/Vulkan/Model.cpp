@@ -75,12 +75,12 @@ namespace sckz
         texture.DestroyImage();
     }
 
-    void Model::Update(uint32_t currentImage, Camera & camera)
+    void Model::Update(Camera & camera)
     {
 
         for (uint32_t i = 0; i < entities.size(); i++)
         {
-            entities[i]->Update(currentImage, camera);
+            entities[i]->Update(camera);
         }
     }
 

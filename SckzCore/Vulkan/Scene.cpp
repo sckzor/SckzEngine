@@ -3,17 +3,27 @@
 namespace sckz
 {
 
-    void Scene::CreateScene(VkSurfaceKHR &     surface,
-                            VkPhysicalDevice & physicalDevice,
+    void Scene::CreateScene(VkPhysicalDevice & physicalDevice,
                             VkDevice &         device,
-                            VkQueue &          graphicsQueue)
+                            VkQueue &          graphicsQueue,
+                            VkFormat &         imageFormat)
     {
-        this->surface        = &surface;
         this->physicalDevice = &physicalDevice;
         this->device         = &device;
         this->graphicsQueue  = &graphicsQueue;
 
-        renderedImage.CreateImage();
+        renderedImage.CreateImage(swapChainExtent.width,
+                                  swapChainExtent.height,
+                                  1,
+                                  VK_SAMPLE_COUNT_1_BIT,
+                                  imageFormat,
+                                  VK_IMAGE_TILING_OPTIMAL,
+                                  VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+                                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                                  device,
+                                  physicalDevice,
+                                  memory,
+                                  graphicsQueue);
 
         memory.CreateMemory(device, physicalDevice, 0xFFFFFFF);
         CreateImageViews();
@@ -66,7 +76,7 @@ namespace sckz
         CreateRenderPass();
         for (int i = 0; i < pipelines.size(); i++)
         {
-            pipelines[i]->CreatePipeline(*device, swapChainExtent, renderPass, msaaSamples);
+            pipelines[i]->CreatePipeline(*device, swapChainExtent, renderPass, msaaSamples, false);
         }
         CreateColorResources();
         CreateDepthResources();
@@ -200,8 +210,7 @@ namespace sckz
 
     void Scene::CreateCommandPool()
     {
-        HelperMethods::QueueFamilyIndices queueFamilyIndices
-            = HelperMethods::FindQueueFamilies(*physicalDevice, *surface);
+        HelperMethods::QueueFamilyIndices queueFamilyIndices = HelperMethods::FindQueueFamilies(*physicalDevice);
 
         VkCommandPoolCreateInfo poolInfo {};
         poolInfo.sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -336,13 +345,13 @@ namespace sckz
         renderPassInfo.pClearValues    = clearValues.data();
 
         vkCmdBeginRenderPass(primaryCmdBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
-        std::vector<VkCommandBuffer> correctBuffers;
+        std::vector<VkCommandBuffer> buffers;
         for (size_t j = 0; j < models.size(); j++)
         {
-            correctBuffers.push_back((models[j]->GetCommandBuffer()));
+            buffers.push_back((models[j]->GetCommandBuffer()));
         }
 
-        vkCmdExecuteCommands(primaryCmdBuffer, correctBuffers.size(), correctBuffers.data());
+        vkCmdExecuteCommands(primaryCmdBuffer, buffers.size(), buffers.data());
 
         vkCmdEndRenderPass(primaryCmdBuffer);
 
@@ -426,7 +435,8 @@ namespace sckz
     GraphicsPipeline & Scene::CreatePipeline(const char * vertexFile, const char * fragmentFile)
     {
         pipelines.push_back(new GraphicsPipeline());
-        pipelines.back()->CreatePipeline(*device, swapChainExtent, renderPass, msaaSamples, vertexFile, fragmentFile);
+        pipelines.back()
+            ->CreatePipeline(*device, swapChainExtent, renderPass, msaaSamples, vertexFile, fragmentFile, false);
         return *pipelines.back();
     }
 
@@ -460,4 +470,44 @@ namespace sckz
         this->targetMsaaSamples = targetMsaaSamples;
         RebuildSwapResources();
     }
+
+    void Scene::Render(Camera & camera)
+    {
+        vkWaitForFences(*device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
+
+        for (int i = 0; i < models.size(); i++)
+        {
+            models[i]->Update(camera);
+        }
+
+        if (imagesInFlight != VK_NULL_HANDLE)
+        {
+            vkWaitForFences(*device, 1, &imagesInFlight, VK_TRUE, UINT64_MAX);
+        }
+        imagesInFlight = inFlightFence;
+
+        VkSubmitInfo submitInfo {};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+        VkSemaphore          waitSemaphores[] = { imageAvailableSemaphore };
+        VkPipelineStageFlags waitStages[]     = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+        submitInfo.waitSemaphoreCount         = 1;
+        submitInfo.pWaitSemaphores            = waitSemaphores;
+        submitInfo.pWaitDstStageMask          = waitStages;
+
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers    = &primaryCmdBuffer;
+
+        VkSemaphore signalSemaphores[]  = { renderFinishedSemaphore };
+        submitInfo.signalSemaphoreCount = 1;
+        submitInfo.pSignalSemaphores    = signalSemaphores;
+
+        vkResetFences(*device, 1, &inFlightFence);
+
+        if (vkQueueSubmit(*graphicsQueue, 1, &submitInfo, inFlightFence) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to submit draw command buffer!");
+        }
+    }
+
 } // namespace sckz

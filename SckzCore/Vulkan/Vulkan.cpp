@@ -727,6 +727,14 @@ namespace sckz
         CreateFramebuffers();
         descriptorPool.CreateDescriptorPool(device, swapChainImages.size());
         CreateSyncObjects();
+
+        FBOPipeline.CreatePipeline(device,
+                                   swapChainExtent,
+                                   renderPass,
+                                   VK_SAMPLE_COUNT_1_BIT,
+                                   "Resources/fbo_vertex.spv",
+                                   "Resources/fbo_fragment.spv",
+                                   true);
     }
 
     void Vulkan::DestroyVulkan()
@@ -810,7 +818,12 @@ namespace sckz
 
             vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
 
-            // ADD THE COMMANDS FOR RENDERING HERE
+            vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, FBOPipeline.GetPipeline());
+            vkCmdDraw(commandBuffers[i],
+                      3,
+                      1,
+                      0,
+                      0); // Uses the wacky shader from Sascha to draw the image to the screen
 
             vkCmdEndRenderPass(commandBuffers[i]);
 
@@ -929,5 +942,13 @@ namespace sckz
     {
         this->fps = fps;
         RebuildSwapChain();
+    }
+
+    Scene & Vulkan::CreateScene()
+    {
+        scenes.push_back(new Scene());
+        VkFormat colorFormat = swapChainImages[0].GetFormat();
+        scenes.back()->CreateScene(physicalDevice, device, graphicsQueue, colorFormat); // poggers moment lmao!
+        return *scenes.back();
     }
 } // namespace sckz

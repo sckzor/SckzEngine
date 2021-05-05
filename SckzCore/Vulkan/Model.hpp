@@ -61,7 +61,7 @@ namespace sckz
 
         void DestroyModel();
 
-        void Update(uint32_t currentImage, Camera & camera);
+        void Update(Camera & camera);
 
         void RebuildSwapResources(DescriptorPool & descriptorPool, VkExtent2D swapChainExtent);
 

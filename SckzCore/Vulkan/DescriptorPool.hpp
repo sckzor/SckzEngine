@@ -9,7 +9,7 @@ namespace sckz
         uint32_t              allocatedPools = 0;
         static const uint32_t size_inc       = 2;
 
-        std::pmr::vector<VkDescriptorPool *> pools;
+        std::vector<VkDescriptorPool *> pools;
 
     private:
         uint32_t   numSwapChainImages;

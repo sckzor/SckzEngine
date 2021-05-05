@@ -9,7 +9,7 @@ namespace sckz
         glm::vec3 normal;
         glm::vec2 texCoord;
 
-        static VkVertexInputBindingDescription getBindingDescription()
+        static VkVertexInputBindingDescription GetBindingDescription()
         {
             VkVertexInputBindingDescription bindingDescription {};
 
@@ -20,7 +20,7 @@ namespace sckz
             return bindingDescription;
         }
 
-        static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions()
+        static std::array<VkVertexInputAttributeDescription, 3> GetAttributeDescriptions()
         {
             std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions {};
 

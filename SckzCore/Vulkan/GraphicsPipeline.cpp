@@ -7,7 +7,8 @@ namespace sckz
                                           VkRenderPass &        renderPass,
                                           VkSampleCountFlagBits msaaSamples,
                                           const char *          vertexFile,
-                                          const char *          fragmentFile)
+                                          const char *          fragmentFile,
+                                          bool                  isFBO)
     {
         this->device       = &device;
         this->extent       = extent;
@@ -15,6 +16,7 @@ namespace sckz
         this->msaaSamples  = msaaSamples;
         this->vertexFile   = vertexFile;
         this->fragmentFile = fragmentFile;
+        this->isFBO        = isFBO;
         CreateDescriptorSetLayout();
         CreateGraphicsPipeline();
     }
@@ -22,12 +24,14 @@ namespace sckz
     void GraphicsPipeline::CreatePipeline(VkDevice &            device,
                                           VkExtent2D            extent,
                                           VkRenderPass &        renderPass,
-                                          VkSampleCountFlagBits msaaSamples)
+                                          VkSampleCountFlagBits msaaSamples,
+                                          bool                  isFBO)
     {
         this->device      = &device;
         this->extent      = extent;
         this->renderPass  = &renderPass;
         this->msaaSamples = msaaSamples;
+        this->isFBO       = isFBO;
         if (vertexFile == nullptr || fragmentFile == nullptr)
         {
             throw std::runtime_error(
@@ -142,13 +146,23 @@ namespace sckz
         VkPipelineVertexInputStateCreateInfo vertexInputInfo {};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 
-        auto bindingDescription    = Vertex::getBindingDescription();
-        auto attributeDescriptions = Vertex::getAttributeDescriptions();
+        if (isFBO)
+        {
+            vertexInputInfo.vertexBindingDescriptionCount   = 0;
+            vertexInputInfo.vertexAttributeDescriptionCount = 0;
+            vertexInputInfo.pVertexBindingDescriptions      = nullptr;
+            vertexInputInfo.pVertexAttributeDescriptions    = nullptr;
+        }
+        else
+        {
+            auto bindingDescription    = Vertex::GetBindingDescription();
+            auto attributeDescriptions = Vertex::GetAttributeDescriptions();
 
-        vertexInputInfo.vertexBindingDescriptionCount   = 1;
-        vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
-        vertexInputInfo.pVertexBindingDescriptions      = &bindingDescription;
-        vertexInputInfo.pVertexAttributeDescriptions    = attributeDescriptions.data();
+            vertexInputInfo.vertexBindingDescriptionCount   = 1;
+            vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+            vertexInputInfo.pVertexBindingDescriptions      = &bindingDescription;
+            vertexInputInfo.pVertexAttributeDescriptions    = attributeDescriptions.data();
+        }
 
         VkPipelineInputAssemblyStateCreateInfo inputAssembly {};
         inputAssembly.sType                  = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -180,9 +194,16 @@ namespace sckz
         rasterizer.rasterizerDiscardEnable = VK_FALSE;
         rasterizer.polygonMode             = VK_POLYGON_MODE_FILL;
         rasterizer.lineWidth               = 1.0f;
-        rasterizer.cullMode                = VK_CULL_MODE_BACK_BIT;
-        rasterizer.frontFace               = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-        rasterizer.depthBiasEnable         = VK_FALSE;
+        if (isFBO)
+        {
+            rasterizer.cullMode = VK_CULL_MODE_FRONT_BIT;
+        }
+        else
+        {
+            rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+        }
+        rasterizer.frontFace       = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+        rasterizer.depthBiasEnable = VK_FALSE;
 
         VkPipelineMultisampleStateCreateInfo multisampling {};
         multisampling.sType                = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
@@ -248,11 +269,11 @@ namespace sckz
         vkDestroyShaderModule(*device, vertShaderModule, nullptr);
     }
 
-    VkDescriptorSetLayout GraphicsPipeline::GetDescriptorSetLayout() { return descriptorSetLayout; }
+    VkDescriptorSetLayout & GraphicsPipeline::GetDescriptorSetLayout() { return descriptorSetLayout; }
 
-    VkPipeline GraphicsPipeline::GetPipeline() { return pipeline; }
+    VkPipeline & GraphicsPipeline::GetPipeline() { return pipeline; }
 
-    VkPipelineLayout GraphicsPipeline::GetPieplineLayout() { return pipelineLayout; }
+    VkPipelineLayout & GraphicsPipeline::GetPieplineLayout() { return pipelineLayout; }
 
     bool GraphicsPipeline::operator==(GraphicsPipeline & otherObject)
     {

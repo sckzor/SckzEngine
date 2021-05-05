@@ -1,3 +1,4 @@
+#pragma once
 #include "../Include.hpp"
 
 namespace sckz
@@ -16,6 +17,7 @@ namespace sckz
     private:
     public:
         static QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice & device, VkSurfaceKHR & surface);
+        static QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice & device);
         static VkFormat           FindDepthFormat(VkPhysicalDevice & physicalDevice);
         static VkFormat           FindSupportedFormat(const std::vector<VkFormat> & candidates,
                                                       VkImageTiling                 tiling,

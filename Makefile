@@ -1,14 +1,27 @@
 CFLAGS  = -std=c++17 -O2 -g
 LDFLAGS = -lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
 INCLUDE = Include.hpp
-MFLAGS = -j16
+MFLAGS = -j16 -d
 
 export CFLAGS LDFLAGS INCLUDE
 
 all:
+	echo "Making core:"
 	$(MAKE) $(MFLAGS) -C SckzCore -f SckzCore.mk
-	$(MAKE) $(MFLAGS) -C Game -f Game.mk
+	echo "Making shaders:"
 	$(MAKE) $(MFLAGS) -C Shaders -f Shaders.mk
+	echo "Making game:"
+	$(MAKE) $(MFLAGS) -C Game -f Game.mk
+
+core:
+	$(MAKE) $(MFLAGS) -C SckzCore -f SckzCore.mk
+
+game:
+	$(MAKE) $(MFLAGS) -C Game -f Game.mk
+
+shaders:
+	$(MAKE) $(MFLAGS) -C Shaders -f Shaders.mk
+
 
 clean:
 	$(MAKE) $(MFLAGS) -C SckzCore -f SckzCore.mk clean

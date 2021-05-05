@@ -69,7 +69,7 @@ namespace sckz
         void DestroyEntity();
 
         void RebuildSwapResources();
-        void Update(uint32_t currentImage, Camera & camera);
+        void Update(Camera & camera);
 
     private:
         void CreateUniformBuffers();
