@@ -37,11 +37,6 @@ namespace sckz
         std::vector<Camera *>           cameras;   // Goes
         std::vector<Light *>            lights;
 
-        VkSemaphore imageAvailableSemaphore; // Duplicated
-        VkSemaphore renderFinishedSemaphore; // Duplicated
-        VkFence     inFlightFence;           // Duplicated
-        VkFence     imagesInFlight;          // Duplicated
-
         VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT; // Goes
         VkSampleCountFlagBits maxMsaaSamples;
         int32_t               targetMsaaSamples = 1;
@@ -50,7 +45,8 @@ namespace sckz
         void CreateScene(VkPhysicalDevice & physicalDevice,
                          VkDevice &         device,
                          VkQueue &          graphicsQueue,
-                         VkFormat &         imageFormant);
+                         VkFormat &         imageFormant,
+                         VkExtent2D         swapChainExtent);
 
         void DestroyScene();
 
@@ -85,6 +81,8 @@ namespace sckz
     public:
         void Render(Camera & camera);
         void SetMSAA(int32_t targetMsaaSamples);
+
+        Image & GetRenderedImage();
 
     public:
         GraphicsPipeline & CreatePipeline(const char * vertexFile, const char * fragmentFile);

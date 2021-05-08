@@ -816,9 +816,23 @@ namespace sckz
             renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
             renderPassInfo.pClearValues    = clearValues.data();
 
-            vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
+            vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
             vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, FBOPipeline.GetPipeline());
+
+            VkDescriptorSet ds;
+
+            FBOPipeline.BindImage(scenes[0]->GetRenderedImage(), descriptorPool, &ds);
+
+            vkCmdBindDescriptorSets(commandBuffers[i],
+                                    VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                    FBOPipeline.GetPieplineLayout(),
+                                    0,
+                                    1,
+                                    &ds,
+                                    0,
+                                    nullptr);
+
             vkCmdDraw(commandBuffers[i],
                       3,
                       1,
@@ -948,7 +962,12 @@ namespace sckz
     {
         scenes.push_back(new Scene());
         VkFormat colorFormat = swapChainImages[0].GetFormat();
-        scenes.back()->CreateScene(physicalDevice, device, graphicsQueue, colorFormat); // poggers moment lmao!
+        scenes.back()->CreateScene(physicalDevice,
+                                   device,
+                                   graphicsQueue,
+                                   colorFormat,
+                                   swapChainExtent); // poggers moment lmao!
+        CreateCommandBuffers();
         return *scenes.back();
     }
 } // namespace sckz

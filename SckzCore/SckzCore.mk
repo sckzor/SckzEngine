@@ -52,7 +52,7 @@ build/Light.o: $(VK_PATH)/Light.cpp $(VK_PATH)/Light.hpp $(INCLUDE)
 	echo "Made it to Light"
 	g++ $(CFLAGS) -c $(VK_PATH)/Light.cpp -o build/Light.o $(LDFLAGS)
 
-build/Scene.o: $(VK_PATH)/Scene.cpp $(VK_PATH)/Camera.hpp $(VK_PATH)/DescriptorPool.hpp $(VK_PATH)/CommandBuffer.hpp $(VK_PATH)/GraphicsPipeline.hpp $(VK_PATH)/Image.hpp $(VK_PATH)/Model $(INCLUDE)
+build/Scene.o: $(VK_PATH)/Scene.cpp $(VK_PATH)/Camera.hpp $(VK_PATH)/DescriptorPool.hpp $(VK_PATH)/CommandBuffer.hpp $(VK_PATH)/GraphicsPipeline.hpp $(VK_PATH)/Image.hpp $(VK_PATH)/Model.hpp $(INCLUDE)
 	echo "Made it to Scene"
 	g++ $(CFLAGS) -c $(VK_PATH)/Scene.cpp -o build/Scene.o $(LDFLAGS)
 

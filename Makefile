@@ -1,7 +1,7 @@
 CFLAGS  = -std=c++17 -O2 -g
 LDFLAGS = -lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
 INCLUDE = Include.hpp
-MFLAGS = -j16 -d
+MFLAGS = -j16
 
 export CFLAGS LDFLAGS INCLUDE
 

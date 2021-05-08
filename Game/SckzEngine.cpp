@@ -17,7 +17,7 @@ int main()
     sckz::Entity &           e1 = scene.CreateEntity(m1);
     sckz::Camera &           cam1 = scene.CreateCamera(45, 0.1, 10);
 
-    vkan.SetMSAA(-1);
+    scene.SetMSAA(-1);
 
     e1.SetShine(1, 10);
     e1.SetRotation(90, 0, 0);
@@ -107,7 +107,7 @@ int main()
 
         if (win.QueryKey('g'))
         {
-            vkan.SetMSAA(16);
+            scene.SetMSAA(16);
         }
 
         if (win.QueryKey(GLFW_KEY_LEFT_SHIFT))

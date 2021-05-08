@@ -162,7 +162,6 @@ namespace sckz
         void Update();
 
         void SetFPS(int32_t fps);
-        void SetMSAA(int32_t targetSampleCount);
 
         uint32_t GetMaximumSampleCount();
         float    GetDeltaT();

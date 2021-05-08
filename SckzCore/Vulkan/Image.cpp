@@ -18,12 +18,13 @@ namespace sckz
                             Memory &              memory,
                             VkQueue &             queue)
     {
-        this->device    = &device;
-        this->format    = format;
-        this->queue     = &queue;
-        this->mipLevels = mipLevels;
-        this->sampler   = VK_NULL_HANDLE;
-        holdsRealImage  = true;
+        this->device         = &device;
+        this->physicalDevice = &physicalDevice;
+        this->format         = format;
+        this->queue          = &queue;
+        this->mipLevels      = mipLevels;
+        this->sampler        = VK_NULL_HANDLE;
+        holdsRealImage       = true;
 
         VkImageCreateInfo imageInfo {};
         imageInfo.sType         = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;

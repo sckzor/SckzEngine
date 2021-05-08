@@ -6,11 +6,16 @@ namespace sckz
     void Scene::CreateScene(VkPhysicalDevice & physicalDevice,
                             VkDevice &         device,
                             VkQueue &          graphicsQueue,
-                            VkFormat &         imageFormat)
+                            VkFormat &         imageFormat,
+                            VkExtent2D         swapChainExtent)
     {
-        this->physicalDevice = &physicalDevice;
-        this->device         = &device;
-        this->graphicsQueue  = &graphicsQueue;
+        this->physicalDevice  = &physicalDevice;
+        this->device          = &device;
+        this->graphicsQueue   = &graphicsQueue;
+        this->swapChainExtent = swapChainExtent;
+        this->msaaSamples     = VK_SAMPLE_COUNT_1_BIT;
+
+        memory.CreateMemory(device, physicalDevice, 0xFFFFFFF);
 
         renderedImage.CreateImage(swapChainExtent.width,
                                   swapChainExtent.height,
@@ -18,14 +23,14 @@ namespace sckz
                                   VK_SAMPLE_COUNT_1_BIT,
                                   imageFormat,
                                   VK_IMAGE_TILING_OPTIMAL,
-                                  VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+                                  VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
                                   VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
                                   device,
-                                  physicalDevice,
+                                  *this->physicalDevice,
                                   memory,
                                   graphicsQueue);
 
-        memory.CreateMemory(device, physicalDevice, 0xFFFFFFF);
+        renderedImage.CreateTextureSampler();
         CreateImageViews();
         CreateRenderPass();
         CreateCommandPool();
@@ -107,6 +112,12 @@ namespace sckz
         DestroyImageViews();
         descriptorPool.DestroyDescriptorPool();
     }
+
+    void Scene::DestroyFramebuffers() { }
+    void Scene::DestroyRenderPass() { }
+    void Scene::DestroySyncObjects() { }
+    void Scene::DestroyCommandPool() { }
+    void Scene::DestroyImageViews() { }
 
     void Scene::CreateImageViews() { renderedImage.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT); }
 
@@ -293,6 +304,7 @@ namespace sckz
 
     void Scene::CreateSyncObjects()
     {
+        /*
         VkSemaphoreCreateInfo semaphoreInfo {};
         semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
@@ -307,6 +319,7 @@ namespace sckz
             throw std::runtime_error("failed to create synchronization objects for a "
                                      "frame!");
         }
+        */
     }
 
     void Scene::CreateCommandBuffer()
@@ -473,41 +486,29 @@ namespace sckz
 
     void Scene::Render(Camera & camera)
     {
-        vkWaitForFences(*device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
-
         for (int i = 0; i < models.size(); i++)
         {
             models[i]->Update(camera);
         }
 
-        if (imagesInFlight != VK_NULL_HANDLE)
-        {
-            vkWaitForFences(*device, 1, &imagesInFlight, VK_TRUE, UINT64_MAX);
-        }
-        imagesInFlight = inFlightFence;
-
         VkSubmitInfo submitInfo {};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-        VkSemaphore          waitSemaphores[] = { imageAvailableSemaphore };
-        VkPipelineStageFlags waitStages[]     = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-        submitInfo.waitSemaphoreCount         = 1;
-        submitInfo.pWaitSemaphores            = waitSemaphores;
-        submitInfo.pWaitDstStageMask          = waitStages;
+        VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+        submitInfo.waitSemaphoreCount     = 0;
+        submitInfo.pWaitDstStageMask      = waitStages;
 
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers    = &primaryCmdBuffer;
 
-        VkSemaphore signalSemaphores[]  = { renderFinishedSemaphore };
-        submitInfo.signalSemaphoreCount = 1;
-        submitInfo.pSignalSemaphores    = signalSemaphores;
+        submitInfo.signalSemaphoreCount = 0;
 
-        vkResetFences(*device, 1, &inFlightFence);
-
-        if (vkQueueSubmit(*graphicsQueue, 1, &submitInfo, inFlightFence) != VK_SUCCESS)
+        if (vkQueueSubmit(*graphicsQueue, 1, &submitInfo, nullptr) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to submit draw command buffer!");
         }
     }
+
+    Image & Scene::GetRenderedImage() { return renderedImage; }
 
 } // namespace sckz

@@ -1,5 +1,7 @@
 #pragma once
 #include "../Include.hpp"
+#include "DescriptorPool.hpp"
+#include "Image.hpp"
 #include "Vertex.hpp"
 
 namespace sckz
@@ -47,6 +49,7 @@ namespace sckz
         VkDescriptorSetLayout & GetDescriptorSetLayout();
         VkPipeline &            GetPipeline();
         VkPipelineLayout &      GetPieplineLayout();
+        void                    BindImage(Image & texture, DescriptorPool & pool, VkDescriptorSet * descriptorSet);
 
     public:
         bool operator==(GraphicsPipeline & otherObject);
