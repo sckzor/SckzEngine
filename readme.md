@@ -2,7 +2,7 @@
 
 #### A Vulkan games engine by Sckzor
 
-All Code in this library is (c) Sckzor 2021, All rights reserved!
+All code in this repository is copyright Charles Sands 2021. All rights reserved!
 
 ## Goals for the engine
 
@@ -14,7 +14,7 @@ All Code in this library is (c) Sckzor 2021, All rights reserved!
 
 - June '21 - Have the basic engine working including more advanced lighting and animation
 
-  - April 30, '21 - FBOs / Swapchain
+  - ~~April 30, '21 - FBOs / Swapchain~~
   - May 31, '21 - Memory Manager / GUIs / Particles
   - June 31, '21 - Animation / More Lighting
 
@@ -37,7 +37,7 @@ All Code in this library is (c) Sckzor 2021, All rights reserved!
 - [x] Simple Lighting.
 - [x] Batched Rendering.
 - [x] Add sub-allocated buffers.
-- [ ] FBO filters.
+- [x] FBO filters.
 - [x] Add an options for on-demand changes to the swap chain like locked refresh rate and stuff like that.
 - [ ] Particles.
 - [ ] Finish the _vulkan_ memory manager.

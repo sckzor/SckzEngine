@@ -43,6 +43,7 @@ namespace sckz
 
     void GraphicsPipeline::DestroyPipeline()
     {
+        std::cout << "destroying pipeline" << std::endl;
         vkDestroyDescriptorSetLayout(*this->device, this->descriptorSetLayout, nullptr);
         vkDestroyPipeline(*this->device, this->pipeline, nullptr);
         vkDestroyPipelineLayout(*this->device, this->pipelineLayout, nullptr);

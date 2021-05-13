@@ -44,6 +44,7 @@ namespace sckz
     void Scene::DestroyScene()
     {
         DestroySwapResources();
+        renderedImage.DestroyImage();
 
         for (int i = 0; i < models.size(); i++)
         {
@@ -64,6 +65,7 @@ namespace sckz
 
         for (int i = 0; i < pipelines.size(); i++)
         {
+            std::cout << pipelines[i]->GetPipeline() << std::endl;
             delete pipelines[i];
         }
         for (int i = 0; i < lights.size(); i++)
@@ -101,6 +103,8 @@ namespace sckz
 
     void Scene::DestroySwapResources()
     {
+        vkQueueWaitIdle(*graphicsQueue);
+
         depthImage.DestroyImage();
         colorImage.DestroyImage();
         DestroyFramebuffers();
@@ -109,15 +113,13 @@ namespace sckz
             pipelines[i]->DestroyPipeline();
         }
         DestroyRenderPass();
-        DestroyImageViews();
         descriptorPool.DestroyDescriptorPool();
     }
 
-    void Scene::DestroyFramebuffers() { }
-    void Scene::DestroyRenderPass() { }
-    void Scene::DestroySyncObjects() { }
-    void Scene::DestroyCommandPool() { }
-    void Scene::DestroyImageViews() { }
+    void Scene::DestroyFramebuffers() { vkDestroyFramebuffer(*device, renderedImageFrameBuffer, nullptr); }
+    void Scene::DestroyRenderPass() { vkDestroyRenderPass(*device, renderPass, nullptr); }
+    void Scene::DestroySyncObjects() { vkDestroyFence(*device, inFlightFence, nullptr); }
+    void Scene::DestroyCommandPool() { vkDestroyCommandPool(*device, commandPool, nullptr); }
 
     void Scene::CreateImageViews() { renderedImage.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT); }
 
@@ -134,14 +136,7 @@ namespace sckz
         colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         colorAttachment.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
 
-        if (msaaSamples == VK_SAMPLE_COUNT_1_BIT)
-        {
-            colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-        }
-        else
-        {
-            colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        }
+        colorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
         VkAttachmentDescription depthAttachment {};
         depthAttachment.format         = HelperMethods::FindDepthFormat(*physicalDevice);
@@ -304,22 +299,14 @@ namespace sckz
 
     void Scene::CreateSyncObjects()
     {
-        /*
-        VkSemaphoreCreateInfo semaphoreInfo {};
-        semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
         VkFenceCreateInfo fenceInfo {};
         fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
         fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-        if (vkCreateSemaphore(*device, &semaphoreInfo, nullptr, &imageAvailableSemaphore) != VK_SUCCESS
-            || vkCreateSemaphore(*device, &semaphoreInfo, nullptr, &renderFinishedSemaphore) != VK_SUCCESS
-            || vkCreateFence(*device, &fenceInfo, nullptr, &inFlightFence) != VK_SUCCESS)
+        if (vkCreateFence(*device, &fenceInfo, nullptr, &inFlightFence) != VK_SUCCESS)
         {
-            throw std::runtime_error("failed to create synchronization objects for a "
-                                     "frame!");
+            throw std::runtime_error("failed to create synchronization objects for a frame!");
         }
-        */
     }
 
     void Scene::CreateCommandBuffer()
@@ -486,6 +473,9 @@ namespace sckz
 
     void Scene::Render(Camera & camera)
     {
+        vkWaitForFences(*device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
+        vkResetFences(*device, 1, &inFlightFence);
+
         for (int i = 0; i < models.size(); i++)
         {
             models[i]->Update(camera);
@@ -496,17 +486,21 @@ namespace sckz
 
         VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
         submitInfo.waitSemaphoreCount     = 0;
-        submitInfo.pWaitDstStageMask      = waitStages;
+        // submitInfo.pWaitSemaphores        = waitSemaphores;
+        submitInfo.pWaitDstStageMask = waitStages;
 
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers    = &primaryCmdBuffer;
 
         submitInfo.signalSemaphoreCount = 0;
+        // submitInfo.pSignalSemaphores    = signalSemaphores;
 
-        if (vkQueueSubmit(*graphicsQueue, 1, &submitInfo, nullptr) != VK_SUCCESS)
+        if (vkQueueSubmit(*graphicsQueue, 1, &submitInfo, inFlightFence) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to submit draw command buffer!");
         }
+
+        vkQueueWaitIdle(*graphicsQueue);
     }
 
     Image & Scene::GetRenderedImage() { return renderedImage; }

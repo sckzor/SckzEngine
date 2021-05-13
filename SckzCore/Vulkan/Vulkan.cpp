@@ -767,6 +767,7 @@ namespace sckz
     void Vulkan::DestroySwapResources()
     {
         vkDeviceWaitIdle(device);
+        vkQueueWaitIdle(graphicsQueue);
 
         depthImage.DestroyImage();
         colorImage.DestroyImage();

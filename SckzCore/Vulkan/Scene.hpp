@@ -37,6 +37,8 @@ namespace sckz
         std::vector<Camera *>           cameras;   // Goes
         std::vector<Light *>            lights;
 
+        VkFence inFlightFence;
+
         VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT; // Goes
         VkSampleCountFlagBits maxMsaaSamples;
         int32_t               targetMsaaSamples = 1;
@@ -63,7 +65,6 @@ namespace sckz
         void CreateSyncObjects();
 
     private:
-        void DestroyImageViews();
         void DestroyRenderPass();
         void DestroyCommandPool();
         void DestroyCommandBuffer(); // Missing implementation

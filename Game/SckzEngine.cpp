@@ -128,6 +128,7 @@ int main()
         vkan.Present(scene);
     }
 
+    scene.DestroyScene();
     vkan.DestroyVulkan();
     win.DestroyWindow();
 
