@@ -30,6 +30,8 @@ namespace sckz
         Image colorImage; // Duplicated
         Image depthImage; // Duplicated
 
+        VkFormat format;
+
         Memory memory;
 
         std::vector<GraphicsPipeline *> pipelines; // Goes
@@ -52,7 +54,7 @@ namespace sckz
 
         void DestroyScene();
 
-        void RebuildSwapResources();
+        void RebuildSwapResources(VkExtent2D newExtent);
 
     private:
         void CreateImageViews();

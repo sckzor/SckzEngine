@@ -64,7 +64,8 @@ namespace sckz
         std::vector<VkFence>     inFlightFences;           // Duplicated
         std::vector<VkFence>     imagesInFlight;           // Duplicated
 
-        GraphicsPipeline FBOPipeline;
+        std::vector<GraphicsPipeline *> fboPipelines;
+        std::vector<Scene *>            scenes;
 
         const std::vector<const char *> validationLayers = { "VK_LAYER_KHRONOS_validation" };   // Stays
         const std::vector<const char *> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME }; // Stays
@@ -84,7 +85,8 @@ namespace sckz
 
         int32_t fps = 0; // Stays
 
-        std::vector<Scene *> scenes;
+        Scene *            lastRenderedScene;
+        GraphicsPipeline * lastRenderedPipeline;
 
     public: // Public static functions
         static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -128,7 +130,7 @@ namespace sckz
         void CreateImageViews();
         void CreateRenderPass();
         void CreateCommandPool();
-        void CreateCommandBuffers();
+        void CreateCommandBuffers(Scene * scene, GraphicsPipeline * pipeline);
         void CreateColorResources();
         void CreateDepthResources();
         void CreateFramebuffers();
@@ -166,9 +168,11 @@ namespace sckz
         uint32_t GetMaximumSampleCount();
         float    GetDeltaT();
 
-        void Present(Scene & scene);
+        void Present(Scene & scene, GraphicsPipeline & pipeline);
 
     public:
         Scene & CreateScene();
+
+        GraphicsPipeline & CreateFBOPipeline(const char * fragShader);
     };
 } // namespace sckz

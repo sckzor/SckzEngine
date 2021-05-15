@@ -43,7 +43,6 @@ namespace sckz
 
     void GraphicsPipeline::DestroyPipeline()
     {
-        std::cout << "destroying pipeline" << std::endl;
         vkDestroyDescriptorSetLayout(*this->device, this->descriptorSetLayout, nullptr);
         vkDestroyPipeline(*this->device, this->pipeline, nullptr);
         vkDestroyPipelineLayout(*this->device, this->pipelineLayout, nullptr);
@@ -176,22 +175,13 @@ namespace sckz
         auto bindingDescription    = Vertex::GetBindingDescription();
         auto attributeDescriptions = Vertex::GetAttributeDescriptions();
 
-        if (isFBO)
-        {
-            std::cout << "[INFO] Setting up a pipleline with an empty input assembly." << std::endl;
-        }
-        else
+        if (!isFBO)
         {
             vertexInputInfo.vertexBindingDescriptionCount   = 1;
             vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
             vertexInputInfo.pVertexBindingDescriptions      = &bindingDescription;
             vertexInputInfo.pVertexAttributeDescriptions    = attributeDescriptions.data();
         }
-
-        std::cout << "[INFO] Binding count: " << vertexInputInfo.vertexBindingDescriptionCount << std::endl;
-        std::cout << "[INFO] Binding: " << vertexInputInfo.pVertexBindingDescriptions << std::endl;
-        std::cout << "[INFO] Attribute count: " << vertexInputInfo.vertexAttributeDescriptionCount << std::endl;
-        std::cout << "[INFO] Attribute: " << vertexInputInfo.pVertexAttributeDescriptions << std::endl;
 
         VkPipelineInputAssemblyStateCreateInfo inputAssembly {};
         inputAssembly.sType                  = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;

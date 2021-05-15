@@ -36,7 +36,7 @@ namespace sckz
                                                          const VkDebugUtilsMessengerCallbackDataEXT * pCallbackData,
                                                          void *                                       pUserData)
     {
-        std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
+        std::cerr << "[Validation Layer] " << pCallbackData->pMessage << std::endl;
 
         return VK_FALSE;
     }
@@ -681,9 +681,9 @@ namespace sckz
 
     void Vulkan::DestroyImageViews()
     {
-        for (auto image : swapChainImages)
+        for (int i = 0; i < swapChainImages.size(); i++)
         {
-            image.DestroyImage();
+            swapChainImages[i].DestroyImage();
         }
     }
 
@@ -727,14 +727,6 @@ namespace sckz
         CreateFramebuffers();
         descriptorPool.CreateDescriptorPool(device, swapChainImages.size());
         CreateSyncObjects();
-
-        FBOPipeline.CreatePipeline(device,
-                                   swapChainExtent,
-                                   renderPass,
-                                   VK_SAMPLE_COUNT_1_BIT,
-                                   "Resources/fbo_vertex.spv",
-                                   "Resources/fbo_fragment.spv",
-                                   true);
     }
 
     void Vulkan::DestroyVulkan()
@@ -752,6 +744,11 @@ namespace sckz
 
     void Vulkan::RebuildSwapChain()
     {
+        for (uint32_t i = 0; i < scenes.size(); i++)
+        {
+            scenes[i]->RebuildSwapResources(swapChainExtent);
+        }
+
         DestroySwapResources();
 
         CreateSwapChain();
@@ -761,7 +758,10 @@ namespace sckz
         CreateDepthResources();
         CreateFramebuffers();
         descriptorPool.CreateDescriptorPool(device, swapChainImages.size());
-        CreateCommandBuffers();
+        for (uint32_t i = 0; i < fboPipelines.size(); i++)
+        {
+            fboPipelines[i]->CreatePipeline(device, swapChainExtent, renderPass, VK_SAMPLE_COUNT_1_BIT, true);
+        }
     }
 
     void Vulkan::DestroySwapResources()
@@ -776,9 +776,13 @@ namespace sckz
         DestroyImageViews();
         DestroySwapChain();
         descriptorPool.DestroyDescriptorPool();
+        for (uint32_t i = 0; i < fboPipelines.size(); i++)
+        {
+            fboPipelines[i]->DestroyPipeline();
+        }
     }
 
-    void Vulkan::CreateCommandBuffers()
+    void Vulkan::CreateCommandBuffers(Scene * scene, GraphicsPipeline * pipeline)
     {
         commandBuffers.resize(swapChainFramebuffers.size());
 
@@ -819,15 +823,15 @@ namespace sckz
 
             vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-            vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, FBOPipeline.GetPipeline());
+            vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetPipeline());
 
             VkDescriptorSet ds;
 
-            FBOPipeline.BindImage(scenes[0]->GetRenderedImage(), descriptorPool, &ds);
+            pipeline->BindImage(scene->GetRenderedImage(), descriptorPool, &ds);
 
             vkCmdBindDescriptorSets(commandBuffers[i],
                                     VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                    FBOPipeline.GetPieplineLayout(),
+                                    pipeline->GetPieplineLayout(),
                                     0,
                                     1,
                                     &ds,
@@ -849,9 +853,17 @@ namespace sckz
         }
     }
 
-    void Vulkan::Present(Scene & scene)
+    void Vulkan::Present(Scene & scene, GraphicsPipeline & pipeline)
     {
         vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+
+        if (lastRenderedScene != &scene || lastRenderedPipeline != &pipeline)
+        {
+            CreateCommandBuffers(&scene, &pipeline);
+
+            lastRenderedPipeline = &pipeline;
+            lastRenderedScene    = &scene;
+        }
 
         uint32_t imageIndex;
         VkResult result = vkAcquireNextImageKHR(device,
@@ -968,7 +980,20 @@ namespace sckz
                                    graphicsQueue,
                                    colorFormat,
                                    swapChainExtent); // poggers moment lmao!
-        CreateCommandBuffers();
         return *scenes.back();
+    }
+
+    GraphicsPipeline & Vulkan::CreateFBOPipeline(const char * fragShader)
+    {
+        fboPipelines.push_back(new GraphicsPipeline());
+        fboPipelines.back()->CreatePipeline(device,
+                                            swapChainExtent,
+                                            renderPass,
+                                            VK_SAMPLE_COUNT_1_BIT,
+                                            "Resources/fbo_vertex.spv",
+                                            fragShader,
+                                            true);
+
+        return *fboPipelines.back();
     }
 } // namespace sckz

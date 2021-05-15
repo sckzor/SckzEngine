@@ -8,91 +8,100 @@ int main()
     sckz::Vulkan vkan;
     vkan.CreateVulkan(win);
 
-    sckz::Scene & scene = vkan.CreateScene();
+    sckz::Scene & s1 = vkan.CreateScene();
+    sckz::Scene & s2 = vkan.CreateScene();
 
-    sckz::GraphicsPipeline & p1 = scene.CreatePipeline("Resources/simple_vertex.spv", "Resources/simple_fragment.spv");
-    sckz::Model &            m1 = scene.CreateModel("Resources/room.obj", "Resources/RoomTextureAtlas.png", p1);
-    sckz::Light &            l1 = scene.CreateLight();
-    sckz::Light &            l2 = scene.CreateLight();
-    sckz::Entity &           e1 = scene.CreateEntity(m1);
-    sckz::Camera &           cam1 = scene.CreateCamera(45, 0.1, 10);
+    sckz::GraphicsPipeline & f2 = vkan.CreateFBOPipeline("Resources/fbo_fragment_invert.spv");
+    sckz::GraphicsPipeline & f1 = vkan.CreateFBOPipeline("Resources/fbo_fragment_normal.spv");
 
-    scene.SetMSAA(-1);
+    sckz::GraphicsPipeline & p1 = s1.CreatePipeline("Resources/simple_vertex.spv", "Resources/simple_fragment.spv");
+    sckz::Model &            m1 = s1.CreateModel("Resources/room.obj", "Resources/RoomTextureAtlas.png", p1);
+    sckz::Light &            l1 = s1.CreateLight();
+
+    sckz::GraphicsPipeline & p2 = s2.CreatePipeline("Resources/simple_vertex.spv", "Resources/simple_fragment.spv");
+    sckz::Model &            m2 = s2.CreateModel("Resources/room.obj", "Resources/RoomTextureAtlas.png", p1);
+    sckz::Light &            l2 = s2.CreateLight();
+
+    sckz::Entity & e1 = s1.CreateEntity(m1);
+    sckz::Camera & c1 = s1.CreateCamera(45, 0.1, 10);
+
+    sckz::Entity & e2 = s2.CreateEntity(m2);
+    sckz::Camera & c2 = s2.CreateCamera(45, 0.1, 10);
+
+    // s1.SetMSAA(-1);
 
     e1.SetShine(1, 10);
     e1.SetRotation(90, 0, 0);
     e1.SetLocation(0, 1, 0);
 
-    l1.SetColor(0.2, 0.2, 0.2);
-    l1.SetLocation(1, 1, 1);
+    l1.SetColor(1, 1, 0);
+    l1.SetLocation(0, 0, 0);
     l1.SetAttenuation(1, 0.01, 0.002);
 
-    l2.SetColor(1, 1, 0);
-    l2.SetLocation(0, 0, 0);
+    e2.SetShine(1, 10);
+    e2.SetRotation(90, 0, 0);
+    e2.SetLocation(0, 1, 0);
+
+    l2.SetColor(0.2, 0.2, 0.2);
+    l2.SetLocation(1, 1, 1);
     l2.SetAttenuation(1, 0.01, 0.002);
 
-    cam1.SetLocation(0, 5, 0);
-    cam1.SetRotation(-90, 0, 0);
+    c1.SetLocation(0, 5, 0);
+    c1.SetRotation(-90, 0, 0);
+    c2.SetLocation(0, 5, 0);
+    c2.SetRotation(-90, 0, 0);
 
     while (!win.QueryClose())
     {
 
-        if (win.QueryKey('y'))
-        {
-            e1.SetRotation(e1.GetRotation().x, e1.GetRotation().y + (40 * vkan.GetDeltaT()), e1.GetRotation().z);
-        }
-
-        if (win.QueryKey('t'))
-        {
-            e1.SetRotation(e1.GetRotation().x, e1.GetRotation().y - (40 * vkan.GetDeltaT()), e1.GetRotation().z);
-        }
-
         if (win.QueryKey('w'))
         {
-            cam1.SetLocation(cam1.GetLocation().x, cam1.GetLocation().y - (1 * vkan.GetDeltaT()), cam1.GetLocation().z);
+            c1.SetLocation(c1.GetLocation().x, c1.GetLocation().y - (1 * vkan.GetDeltaT()), c1.GetLocation().z);
         }
 
         if (win.QueryKey('S'))
         {
-            cam1.SetLocation(cam1.GetLocation().x, cam1.GetLocation().y + (1 * vkan.GetDeltaT()), cam1.GetLocation().z);
+            c1.SetLocation(c1.GetLocation().x, c1.GetLocation().y + (1 * vkan.GetDeltaT()), c1.GetLocation().z);
         }
 
         if (win.QueryKey('a'))
         {
-            cam1.SetLocation(cam1.GetLocation().x + (1 * vkan.GetDeltaT()), cam1.GetLocation().y, cam1.GetLocation().z);
+            c1.SetLocation(c1.GetLocation().x + (1 * vkan.GetDeltaT()), c1.GetLocation().y, c1.GetLocation().z);
         }
 
         if (win.QueryKey('d'))
         {
-            cam1.SetLocation(cam1.GetLocation().x - (1 * vkan.GetDeltaT()), cam1.GetLocation().y, cam1.GetLocation().z);
+            c1.SetLocation(c1.GetLocation().x - (1 * vkan.GetDeltaT()), c1.GetLocation().y, c1.GetLocation().z);
         }
 
         if (win.QueryKey('z'))
         {
-            cam1.SetRotation(cam1.GetRotation().x,
-                             cam1.GetRotation().y,
-                             cam1.GetRotation().z - (10 * vkan.GetDeltaT()));
+            c1.SetRotation(c1.GetRotation().x, c1.GetRotation().y, c1.GetRotation().z - (10 * vkan.GetDeltaT()));
         }
 
         if (win.QueryKey('c'))
         {
-            cam1.SetRotation(cam1.GetRotation().x,
-                             cam1.GetRotation().y,
-                             cam1.GetRotation().z + (10 * vkan.GetDeltaT()));
+            c1.SetRotation(c1.GetRotation().x, c1.GetRotation().y, c1.GetRotation().z + (10 * vkan.GetDeltaT()));
         }
 
         if (win.QueryKey('q'))
         {
-            cam1.SetRotation(cam1.GetRotation().x - (10 * vkan.GetDeltaT()),
-                             cam1.GetRotation().y,
-                             cam1.GetRotation().z);
+            c1.SetRotation(c1.GetRotation().x - (10 * vkan.GetDeltaT()), c1.GetRotation().y, c1.GetRotation().z);
         }
 
         if (win.QueryKey('e'))
         {
-            cam1.SetRotation(cam1.GetRotation().x + (10 * vkan.GetDeltaT()),
-                             cam1.GetRotation().y,
-                             cam1.GetRotation().z);
+            c1.SetRotation(c1.GetRotation().x + (10 * vkan.GetDeltaT()), c1.GetRotation().y, c1.GetRotation().z);
+        }
+
+        if (win.QueryKey(GLFW_KEY_LEFT_SHIFT))
+        {
+            c1.SetLocation(c1.GetLocation().x, c1.GetLocation().y, c1.GetLocation().z + (1 * vkan.GetDeltaT()));
+        }
+
+        if (win.QueryKey(GLFW_KEY_SPACE))
+        {
+            c1.SetLocation(c1.GetLocation().x, c1.GetLocation().y, c1.GetLocation().z - (1 * vkan.GetDeltaT()));
         }
 
         if (win.QueryKey('p'))
@@ -107,28 +116,43 @@ int main()
 
         if (win.QueryKey('g'))
         {
-            scene.SetMSAA(16);
-        }
-
-        if (win.QueryKey(GLFW_KEY_LEFT_SHIFT))
-        {
-            cam1.SetLocation(cam1.GetLocation().x, cam1.GetLocation().y, cam1.GetLocation().z + (1 * vkan.GetDeltaT()));
-        }
-
-        if (win.QueryKey(GLFW_KEY_SPACE))
-        {
-            cam1.SetLocation(cam1.GetLocation().x, cam1.GetLocation().y, cam1.GetLocation().z - (1 * vkan.GetDeltaT()));
+            s1.SetMSAA(8);
+            s2.SetMSAA(8);
         }
 
         win.Update();
         vkan.Update();
 
-        scene.Render(cam1);
+        if (win.QueryKey('u'))
+        {
+            s2.Render(c2);
 
-        vkan.Present(scene);
+            if (win.QueryKey('y'))
+            {
+                vkan.Present(s2, f1);
+            }
+            else
+            {
+                vkan.Present(s2, f2);
+            }
+        }
+        else
+        {
+            s1.Render(c1);
+
+            if (win.QueryKey('y'))
+            {
+                vkan.Present(s1, f1);
+            }
+            else
+            {
+                vkan.Present(s1, f2);
+            }
+        }
     }
 
-    scene.DestroyScene();
+    s1.DestroyScene();
+    s2.DestroyScene();
     vkan.DestroyVulkan();
     win.DestroyWindow();
 

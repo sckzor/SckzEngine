@@ -13,7 +13,7 @@ namespace sckz
         this->device          = &device;
         this->graphicsQueue   = &graphicsQueue;
         this->swapChainExtent = swapChainExtent;
-        this->msaaSamples     = VK_SAMPLE_COUNT_1_BIT;
+        this->format          = imageFormat;
 
         memory.CreateMemory(device, physicalDevice, 0xFFFFFFF);
 
@@ -21,14 +21,14 @@ namespace sckz
                                   swapChainExtent.height,
                                   1,
                                   VK_SAMPLE_COUNT_1_BIT,
-                                  imageFormat,
+                                  this->format,
                                   VK_IMAGE_TILING_OPTIMAL,
                                   VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
                                   VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                                  device,
+                                  *this->device,
                                   *this->physicalDevice,
                                   memory,
-                                  graphicsQueue);
+                                  *this->graphicsQueue);
 
         renderedImage.CreateTextureSampler();
         CreateImageViews();
@@ -44,7 +44,6 @@ namespace sckz
     void Scene::DestroyScene()
     {
         DestroySwapResources();
-        renderedImage.DestroyImage();
 
         for (int i = 0; i < models.size(); i++)
         {
@@ -65,7 +64,6 @@ namespace sckz
 
         for (int i = 0; i < pipelines.size(); i++)
         {
-            std::cout << pipelines[i]->GetPipeline() << std::endl;
             delete pipelines[i];
         }
         for (int i = 0; i < lights.size(); i++)
@@ -75,9 +73,24 @@ namespace sckz
         }
     }
 
-    void Scene::RebuildSwapResources()
+    void Scene::RebuildSwapResources(VkExtent2D newExtent)
     {
+        swapChainExtent = newExtent;
         DestroySwapResources();
+
+        renderedImage.CreateImage(swapChainExtent.width,
+                                  swapChainExtent.height,
+                                  1,
+                                  VK_SAMPLE_COUNT_1_BIT,
+                                  this->format,
+                                  VK_IMAGE_TILING_OPTIMAL,
+                                  VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+                                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                                  *this->device,
+                                  *this->physicalDevice,
+                                  memory,
+                                  *this->graphicsQueue);
+        renderedImage.CreateTextureSampler();
 
         CreateImageViews();
         CreateRenderPass();
@@ -88,6 +101,7 @@ namespace sckz
         CreateColorResources();
         CreateDepthResources();
         CreateFramebuffers();
+
         descriptorPool.CreateDescriptorPool(*device, 1);
         for (int i = 0; i < models.size(); i++)
         {
@@ -105,8 +119,6 @@ namespace sckz
     {
         vkQueueWaitIdle(*graphicsQueue);
 
-        depthImage.DestroyImage();
-        colorImage.DestroyImage();
         DestroyFramebuffers();
         for (int i = 0; i < pipelines.size(); i++)
         {
@@ -114,6 +126,10 @@ namespace sckz
         }
         DestroyRenderPass();
         descriptorPool.DestroyDescriptorPool();
+        depthImage.DestroyImage();
+        colorImage.DestroyImage();
+
+        renderedImage.DestroyImage();
     }
 
     void Scene::DestroyFramebuffers() { vkDestroyFramebuffer(*device, renderedImageFrameBuffer, nullptr); }
@@ -126,17 +142,21 @@ namespace sckz
     void Scene::CreateRenderPass()
     {
         VkAttachmentDescription colorAttachment {};
-        colorAttachment.format = renderedImage.GetFormat();
-
-        colorAttachment.samples = msaaSamples;
-
+        colorAttachment.format         = renderedImage.GetFormat();
+        colorAttachment.samples        = msaaSamples;
         colorAttachment.loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;
         colorAttachment.storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
         colorAttachment.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         colorAttachment.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
-
-        colorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        if (msaaSamples == VK_SAMPLE_COUNT_1_BIT)
+        {
+            colorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        }
+        else
+        {
+            colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        }
 
         VkAttachmentDescription depthAttachment {};
         depthAttachment.format         = HelperMethods::FindDepthFormat(*physicalDevice);
@@ -156,7 +176,7 @@ namespace sckz
         colorAttachmentResolve.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         colorAttachmentResolve.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         colorAttachmentResolve.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
-        colorAttachmentResolve.finalLayout    = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        colorAttachmentResolve.finalLayout    = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
         VkAttachmentReference colorAttachmentRef {};
         colorAttachmentRef.attachment = 0;
@@ -467,8 +487,8 @@ namespace sckz
 
     void Scene::SetMSAA(int32_t targetMsaaSamples)
     {
-        this->targetMsaaSamples = targetMsaaSamples;
-        RebuildSwapResources();
+        this->msaaSamples = GetTargetSampleCount(targetMsaaSamples);
+        RebuildSwapResources(swapChainExtent);
     }
 
     void Scene::Render(Camera & camera)
@@ -486,14 +506,12 @@ namespace sckz
 
         VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
         submitInfo.waitSemaphoreCount     = 0;
-        // submitInfo.pWaitSemaphores        = waitSemaphores;
-        submitInfo.pWaitDstStageMask = waitStages;
+        submitInfo.pWaitDstStageMask      = waitStages;
 
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers    = &primaryCmdBuffer;
 
         submitInfo.signalSemaphoreCount = 0;
-        // submitInfo.pSignalSemaphores    = signalSemaphores;
 
         if (vkQueueSubmit(*graphicsQueue, 1, &submitInfo, inFlightFence) != VK_SUCCESS)
         {
