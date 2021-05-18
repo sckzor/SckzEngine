@@ -37,20 +37,31 @@ namespace sckz
         uint32_t memoryType = FindMemoryType(memoryRequirements.memoryTypeBits, properties, *physicalDevice);
         for (uint32_t i = 0; i < blocks.size(); i++)
         {
-            if (blocks[i]->remainingSize >= memoryRequirements.size && memoryType == blocks[i]->memoryType)
+            if (memoryType == blocks[i]->memoryType)
             {
-                SubBlock_t * lastBlock = blocks[i]->blocks.back();
-                blocks[i]->remainingSize -= memoryRequirements.size;
-                SubBlock_t * newSubBlock = new SubBlock_t();
+                for (int j = 0; j < blocks[i]->blocks.size(); j++)
+                {
+                    if (blocks[i]->blocks[j]->isFree && blocks[i]->blocks[j]->size >= memoryRequirements.size)
+                    {
+                        return *blocks[i]->blocks[j];
+                    }
+                }
 
-                newSubBlock->size   = memoryRequirements.size;
-                newSubBlock->offset = (lastBlock->offset + lastBlock->size)
-                                    + (memoryRequirements.alignment
-                                       - ((lastBlock->offset + lastBlock->size) % memoryRequirements.alignment));
-                newSubBlock->memory = &blocks[i]->memory;
+                if (blocks[i]->remainingSize >= memoryRequirements.size)
+                {
+                    SubBlock_t * lastBlock = blocks[i]->blocks.back();
+                    blocks[i]->remainingSize -= memoryRequirements.size;
+                    SubBlock_t * newSubBlock = new SubBlock_t();
 
-                blocks[i]->blocks.push_back(newSubBlock);
-                return *newSubBlock;
+                    newSubBlock->size   = memoryRequirements.size;
+                    newSubBlock->offset = (lastBlock->offset + lastBlock->size)
+                                        + (memoryRequirements.alignment
+                                           - ((lastBlock->offset + lastBlock->size) % memoryRequirements.alignment));
+                    newSubBlock->memory = &blocks[i]->memory;
+
+                    blocks[i]->blocks.push_back(newSubBlock);
+                    return *newSubBlock;
+                }
             }
         }
 
@@ -69,9 +80,15 @@ namespace sckz
         return AllocateMemory(memoryRequirements, properties);
     }
 
-    void Memory::DeallocateMemory(SubBlock_t & block) { }
+    void Memory::DeallocateMemory(SubBlock_t & block) { block.isFree = true; }
 
-    void Memory::FreeMemory() { }
+    void Memory::FreeMemory()
+    {
+        for (int i = 0; i < blocks.size(); i++)
+        {
+            vkFreeMemory(*device, memoryBlock.memory)
+        }
+    }
 
     void Memory::DestroyMemory() { }
 } // namespace sckz
