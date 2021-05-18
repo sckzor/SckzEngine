@@ -47,7 +47,7 @@ Time behind schedule: 2 weeks
 - [ ] Simple GUIs.
 - [ ] Advanced Lighting.
 - [ ] Animation.
-- [ ] Optimize, Optimize, Optimize.
+- [ ] Error handling (out the wazoo!)
 - [ ] Add custom _system_ memory managment
 - [ ] Add custom dynamic _system_ memory structures
 

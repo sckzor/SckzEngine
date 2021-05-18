@@ -13,20 +13,21 @@ namespace sckz
             uint32_t         offset;
             VkDeviceMemory * memory;
             uint32_t         size;
-            SubBlock *       next = nullptr;
             bool             isFree;
         } SubBlock_t;
 
         typedef struct Block
         {
-            VkDeviceMemory memory;
-            SubBlock_t *   beginning;
-            uint32_t       remainingSize;
-            uint32_t       memoryType;
+        public:
+            VkDeviceMemory            memory;
+            std::vector<SubBlock_t *> blocks;
+            uint32_t                  remainingSize;
+            uint32_t                  memoryType;
         } Block_t;
 
     private:
         std::vector<Block_t *> blocks;
+        Memory::SubBlock_t     memoryBlock;
         VkDevice *             device;
         VkPhysicalDevice *     physicalDevice;
         uint32_t               blockSize;
@@ -39,6 +40,7 @@ namespace sckz
     public:
         void         CreateMemory(VkDevice & device, VkPhysicalDevice & physicalDevice, uint32_t blockSize);
         SubBlock_t & AllocateMemory(VkMemoryRequirements memoryRequirements, VkMemoryPropertyFlags & properties);
+        void         DeallocateMemory(SubBlock_t & block);
         void         FreeMemory();
         void         Defrag();
         void         DestroyMemory();

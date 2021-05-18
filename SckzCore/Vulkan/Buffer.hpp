@@ -41,13 +41,13 @@ namespace sckz
         };
 
     private:
-        std::vector<Block *>  blocks;
-        Memory::SubBlock_t *  memoryBlock;
-        VkDevice *            device;
-        uint32_t              blockSize;
-        VkQueue *             queue;
-        Memory *              memory;
-        VkMemoryPropertyFlags memoryProperty;
+        std::vector<Block *>              blocks;
+        std::vector<Memory::SubBlock_t *> memoryBlocks;
+        VkDevice *                        device;
+        uint32_t                          blockSize;
+        VkQueue *                         queue;
+        Memory *                          memory;
+        VkMemoryPropertyFlags             memoryProperty;
 
     public:
         void CreateBuffer(VkPhysicalDevice &    physicalDevice,

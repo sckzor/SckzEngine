@@ -39,22 +39,17 @@ namespace sckz
         {
             if (blocks[i]->remainingSize >= memoryRequirements.size && memoryType == blocks[i]->memoryType)
             {
-                SubBlock_t * subBlock = blocks[i]->beginning;
-                while (subBlock->next != nullptr)
-                {
-                    subBlock = subBlock->next;
-                }
+                SubBlock_t * lastBlock = blocks[i]->blocks.back();
                 blocks[i]->remainingSize -= memoryRequirements.size;
                 SubBlock_t * newSubBlock = new SubBlock_t();
 
                 newSubBlock->size   = memoryRequirements.size;
-                newSubBlock->offset = (subBlock->offset + subBlock->size)
+                newSubBlock->offset = (lastBlock->offset + lastBlock->size)
                                     + (memoryRequirements.alignment
-                                       - ((subBlock->offset + subBlock->size) % memoryRequirements.alignment));
-                newSubBlock->next   = nullptr;
+                                       - ((lastBlock->offset + lastBlock->size) % memoryRequirements.alignment));
                 newSubBlock->memory = &blocks[i]->memory;
 
-                subBlock->next = newSubBlock;
+                blocks[i]->blocks.push_back(newSubBlock);
                 return *newSubBlock;
             }
         }
@@ -65,7 +60,6 @@ namespace sckz
         allocInfo.memoryTypeIndex = memoryType;
 
         Block_t * block      = new Block_t();
-        block->beginning     = new SubBlock_t();
         block->memoryType    = memoryType;
         block->remainingSize = blockSize;
         vkAllocateMemory(*this->device, &allocInfo, nullptr, &block->memory);
@@ -75,24 +69,9 @@ namespace sckz
         return AllocateMemory(memoryRequirements, properties);
     }
 
-    void Memory::FreeMemory()
-    {
-        for (uint32_t i = 0; i < blocks.size(); i++)
-        {
-            vkFreeMemory(*device, blocks[i]->memory, nullptr);
-            SubBlock_t * currentBlock = nullptr;
-            SubBlock_t * nextBlock    = blocks[i]->beginning;
+    void Memory::DeallocateMemory(SubBlock_t & block) { }
 
-            while (nextBlock != nullptr)
-            {
-                currentBlock = nextBlock;
-                nextBlock    = nextBlock->next;
-                delete currentBlock;
-            }
-
-            delete blocks[i];
-        }
-    }
+    void Memory::FreeMemory() { }
 
     void Memory::DestroyMemory() { }
 } // namespace sckz

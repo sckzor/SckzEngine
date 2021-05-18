@@ -23,6 +23,7 @@ namespace sckz
         this->format         = format;
         this->queue          = &queue;
         this->mipLevels      = mipLevels;
+        this->memory         = &memory;
         this->sampler        = VK_NULL_HANDLE;
         holdsRealImage       = true;
 
@@ -155,6 +156,8 @@ namespace sckz
 
         hostLocalBuffer.DestroyBuffer();
         deviceLocalBuffer.DestroyBuffer();
+
+        memory->DeallocateMemory(*block);
     }
 
     void Image::TransitionImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout, VkCommandPool & pool)
