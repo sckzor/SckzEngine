@@ -461,7 +461,7 @@ namespace sckz
 
         for (int i = 0; i < imageCount; i++)
         {
-            swapChainImages[i].CreateImage(device, rawSwapChainImages[i], surfaceFormat.format, 1);
+            swapChainImages[i].CreateImage(device, rawSwapChainImages[i], surfaceFormat.format, 1, memory);
         }
 
         swapChainExtent = extent;
@@ -734,7 +734,6 @@ namespace sckz
         DestroySwapResources();
         DestroySyncObjects();
         DestroyCommandPool();
-        memory.FreeMemory();
         memory.DestroyMemory();
         DestroyLogicalDevice();
         DestroyDebugMessenger();
@@ -909,7 +908,7 @@ namespace sckz
 
         if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS)
         {
-            throw std::runtime_error("failed to submit draw command buffer!");
+            throw std::runtime_error("failed to submit draw command buffer (vulkan)!");
         }
 
         VkPresentInfoKHR presentInfo {};

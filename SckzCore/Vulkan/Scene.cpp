@@ -59,7 +59,6 @@ namespace sckz
 
         DestroySyncObjects();
         DestroyCommandPool();
-        memory.FreeMemory();
         memory.DestroyMemory();
 
         for (int i = 0; i < pipelines.size(); i++)
@@ -90,6 +89,7 @@ namespace sckz
                                   *this->physicalDevice,
                                   memory,
                                   *this->graphicsQueue);
+
         renderedImage.CreateTextureSampler();
 
         CreateImageViews();
@@ -515,7 +515,7 @@ namespace sckz
 
         if (vkQueueSubmit(*graphicsQueue, 1, &submitInfo, inFlightFence) != VK_SUCCESS)
         {
-            throw std::runtime_error("failed to submit draw command buffer!");
+            throw std::runtime_error("failed to submit draw command buffer! (scene)");
         }
 
         vkQueueWaitIdle(*graphicsQueue);

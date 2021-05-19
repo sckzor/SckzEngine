@@ -51,14 +51,16 @@ namespace sckz
         vkGetImageMemoryRequirements(*this->device, image, &memRequirements);
 
         block = &memory.AllocateMemory(memRequirements, properties);
+        std::cout << "Got memory at: " << block->memory << " with offset " << block->offset << std::endl;
         vkBindImageMemory(*this->device, image, *block->memory, block->offset);
     }
 
-    void Image::CreateImage(VkDevice & device, VkImage & image, VkFormat & format, uint32_t mipLevels)
+    void Image::CreateImage(VkDevice & device, VkImage & image, VkFormat & format, uint32_t mipLevels, Memory & memory)
     {
         this->device    = &device;
         this->image     = image;
         this->format    = format;
+        this->memory    = &memory;
         this->mipLevels = mipLevels;
         this->sampler   = VK_NULL_HANDLE;
         holdsRealImage  = false;
@@ -81,6 +83,8 @@ namespace sckz
         {
             throw std::runtime_error("failed to create texture image view!");
         }
+
+        std::cout << "Image view: " << imageView << std::endl;
     }
 
     void Image::CreateTextureImage(const char *       fileName,
@@ -157,7 +161,10 @@ namespace sckz
         hostLocalBuffer.DestroyBuffer();
         deviceLocalBuffer.DestroyBuffer();
 
-        memory->DeallocateMemory(*block);
+        if (block != nullptr)
+        {
+            memory->DeallocateMemory(*block);
+        }
     }
 
     void Image::TransitionImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout, VkCommandPool & pool)

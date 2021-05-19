@@ -37,7 +37,11 @@ namespace sckz
                          Memory &              memory,
                          VkQueue &             queue);
 
-        void CreateImage(VkDevice & device, VkImage & image, VkFormat & imageFormat, uint32_t mipLevels);
+        void CreateImage(VkDevice & device,
+                         VkImage &  image,
+                         VkFormat & imageFormat,
+                         uint32_t   mipLevels,
+                         Memory &   memory);
 
         void DestroyImage();
 
