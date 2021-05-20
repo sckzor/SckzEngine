@@ -17,21 +17,7 @@ namespace sckz
 
         memory.CreateMemory(device, physicalDevice, 0xFFFFFFF);
 
-        renderedImage.CreateImage(swapChainExtent.width,
-                                  swapChainExtent.height,
-                                  1,
-                                  VK_SAMPLE_COUNT_1_BIT,
-                                  this->format,
-                                  VK_IMAGE_TILING_OPTIMAL,
-                                  VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-                                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                                  *this->device,
-                                  *this->physicalDevice,
-                                  memory,
-                                  *this->graphicsQueue);
-
-        renderedImage.CreateTextureSampler();
-        CreateImageViews();
+        CreateImage();
         CreateRenderPass();
         CreateCommandPool();
         CreateColorResources();
@@ -76,23 +62,10 @@ namespace sckz
     void Scene::RebuildSwapResources(VkExtent2D newExtent)
     {
         swapChainExtent = newExtent;
+        isUpdated       = true;
         DestroySwapResources();
 
-        renderedImage.CreateImage(swapChainExtent.width,
-                                  swapChainExtent.height,
-                                  1,
-                                  VK_SAMPLE_COUNT_1_BIT,
-                                  this->format,
-                                  VK_IMAGE_TILING_OPTIMAL,
-                                  VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-                                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                                  *this->device,
-                                  *this->physicalDevice,
-                                  memory,
-                                  *this->graphicsQueue);
-        renderedImage.CreateTextureSampler();
-
-        CreateImageViews();
+        CreateImage();
         CreateRenderPass();
         for (int i = 0; i < pipelines.size(); i++)
         {
@@ -137,7 +110,23 @@ namespace sckz
     void Scene::DestroySyncObjects() { vkDestroyFence(*device, inFlightFence, nullptr); }
     void Scene::DestroyCommandPool() { vkDestroyCommandPool(*device, commandPool, nullptr); }
 
-    void Scene::CreateImageViews() { renderedImage.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT); }
+    void Scene::CreateImage()
+    {
+        renderedImage.CreateImage(swapChainExtent.width,
+                                  swapChainExtent.height,
+                                  1,
+                                  VK_SAMPLE_COUNT_1_BIT,
+                                  this->format,
+                                  VK_IMAGE_TILING_OPTIMAL,
+                                  VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+                                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                                  *this->device,
+                                  *this->physicalDevice,
+                                  memory,
+                                  *this->graphicsQueue);
+        renderedImage.CreateTextureSampler();
+        renderedImage.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
+    }
 
     void Scene::CreateRenderPass()
     {
@@ -521,6 +510,12 @@ namespace sckz
         vkQueueWaitIdle(*graphicsQueue);
     }
 
-    Image & Scene::GetRenderedImage() { return renderedImage; }
+    bool Scene::IsUpdated() { return isUpdated; }
+
+    Image & Scene::GetRenderedImage()
+    {
+        return renderedImage;
+        isUpdated = false;
+    }
 
 } // namespace sckz

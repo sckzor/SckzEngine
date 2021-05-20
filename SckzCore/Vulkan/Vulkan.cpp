@@ -744,14 +744,15 @@ namespace sckz
 
     void Vulkan::RebuildSwapChain()
     {
+        DestroySwapResources();
+
+        CreateSwapChain();
+
         for (uint32_t i = 0; i < scenes.size(); i++)
         {
             scenes[i]->RebuildSwapResources(swapChainExtent);
         }
 
-        DestroySwapResources();
-
-        CreateSwapChain();
         CreateImageViews();
         CreateRenderPass();
         CreateColorResources();
@@ -857,7 +858,7 @@ namespace sckz
     {
         vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
-        if (lastRenderedScene != &scene || lastRenderedPipeline != &pipeline)
+        if (lastRenderedScene != &scene || lastRenderedPipeline != &pipeline || scene.IsUpdated())
         {
             CreateCommandBuffers(&scene, &pipeline);
 
