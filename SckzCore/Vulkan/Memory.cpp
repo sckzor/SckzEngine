@@ -30,123 +30,71 @@ namespace sckz
     Memory::SubBlock_t & Memory::AllocateMemory(VkMemoryRequirements    memoryRequirements,
                                                 VkMemoryPropertyFlags & properties)
     {
-        // std::cout << "allocation called of size: " << memoryRequirements.size << std::endl;
         if (memoryRequirements.size > blockSize)
         {
             throw std::runtime_error("Memory Allocation Size was too big!");
         }
-
         uint32_t memoryType = FindMemoryType(memoryRequirements.memoryTypeBits, properties, *physicalDevice);
-        auto     it         = blocks.find(memoryType);
-
-        if (it == blocks.end())
+        for (uint32_t i = 0; i < blocks.size(); i++)
         {
-            // std::cout << "Making a new bucket of type: " << memoryType << std::endl;
-            blocks.emplace(memoryType, new std::vector<Block_t *>);
-            it = blocks.find(memoryType);
-        }
-
-        std::vector<Block_t *> * items = it->second;
-
-        for (uint32_t i = 0; i < items->size(); i++)
-        {
-            /*
-            for (uint32_t j = 0; j < items->at(i)->blocks->size(); j++)
+            if (blocks[i]->remainingSize >= memoryRequirements.size && memoryType == blocks[i]->memoryType)
             {
-                if (items->at(i)->blocks->at(j)->isFree && items->at(i)->blocks->at(j)->size >= memoryRequirements.size)
+                SubBlock_t * subBlock = blocks[i]->beginning;
+                while (subBlock->next != nullptr)
                 {
-                    std::cout << "Reallocating old block" << std::endl;
-                    return *items->at(i)->blocks->at(j);
+                    subBlock = subBlock->next;
                 }
-            }
-            */
-
-            if (items->at(i)->remainingSize >= memoryRequirements.size)
-            {
-
+                blocks[i]->remainingSize -= memoryRequirements.size;
                 SubBlock_t * newSubBlock = new SubBlock_t();
-                if (items->at(i)->blocks->size() > 0)
-                {
-                    SubBlock_t * lastBlock = items->at(i)->blocks->back();
-                    newSubBlock->offset    = (lastBlock->offset + lastBlock->size)
-                                        + (memoryRequirements.alignment
-                                           - ((lastBlock->offset + lastBlock->size) % memoryRequirements.alignment));
-                    // std::cout << "offset is: " << newSubBlock->offset << std::endl;
-                }
-                else
-                {
-                    newSubBlock->offset = 0;
-                }
 
-                items->at(i)->remainingSize -= memoryRequirements.size;
+                newSubBlock->size   = memoryRequirements.size;
+                newSubBlock->offset = (subBlock->offset + subBlock->size)
+                                    + (memoryRequirements.alignment
+                                       - ((subBlock->offset + subBlock->size) % memoryRequirements.alignment));
+                newSubBlock->next   = nullptr;
+                newSubBlock->memory = &blocks[i]->memory;
 
-                newSubBlock->size      = memoryRequirements.size;
-                newSubBlock->alignment = memoryRequirements.alignment;
-                newSubBlock->isFree    = false;
-
-                newSubBlock->memory = &items->at(i)->memory;
-
-                items->at(i)->blocks->push_back(newSubBlock);
-
-                // std::cout << "Reusing the same block" << std::endl;
-
+                subBlock->next = newSubBlock;
                 return *newSubBlock;
             }
         }
 
-        Block_t * block = CreateBlock(memoryType);
-        // std::cout << "Generating a new block: " << items << std::endl;
-        items->emplace_back(block);
+        VkMemoryAllocateInfo allocInfo {};
+        allocInfo.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        allocInfo.allocationSize  = blockSize;
+        allocInfo.memoryTypeIndex = memoryType;
+
+        Block_t * block      = new Block_t();
+        block->beginning     = new SubBlock_t();
+        block->memoryType    = memoryType;
+        block->remainingSize = blockSize;
+        vkAllocateMemory(*this->device, &allocInfo, nullptr, &block->memory);
+
+        blocks.emplace_back(block);
 
         return AllocateMemory(memoryRequirements, properties);
     }
 
-    Memory::Block_t * Memory::CreateBlock(uint32_t type)
-    {
-        VkMemoryAllocateInfo allocInfo {};
-        allocInfo.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        allocInfo.allocationSize  = blockSize;
-        allocInfo.memoryTypeIndex = type;
+    void Memory::DeallocateMemory(SubBlock_t & block) { }
 
-        Block_t * block      = new Block_t();
-        block->blocks        = new std::vector<SubBlock_t *>();
-        block->remainingSize = blockSize;
-        vkAllocateMemory(*this->device, &allocInfo, nullptr, &block->memory);
-        return block;
-    }
-
-    void Memory::DeallocateMemory(SubBlock_t & block) { } // block.isFree = true; }
-
-    void Memory::Cleanup()
+    void Memory::FreeMemory()
     {
         for (uint32_t i = 0; i < blocks.size(); i++)
         {
-            for (uint32_t j = 0; j < blocks[i]->size(); j++)
+            vkFreeMemory(*device, blocks[i]->memory, nullptr);
+            SubBlock_t * currentBlock = nullptr;
+            SubBlock_t * nextBlock    = blocks[i]->beginning;
+
+            while (nextBlock != nullptr)
             {
-            restart:
-                for (uint32_t k = 0; k < blocks[i]->at(j)->blocks->size(); k++)
-                {
-                    if (!blocks[i]->at(i)->blocks->at(k))
-                    {
-                        goto restart;
-                    }
-                }
-                vkFreeMemory(*device, blocks[i]->at(i)->memory, nullptr);
+                currentBlock = nextBlock;
+                nextBlock    = nextBlock->next;
+                delete currentBlock;
             }
+
+            delete blocks[i];
         }
     }
 
-    std::unordered_map<uint32_t, std::vector<Memory::Block_t *> *> Memory::GetStructure() { return blocks; }
-
-    void Memory::DestroyMemory()
-    {
-        for (uint32_t i = 0; i < blocks.size(); i++)
-        {
-            // std::cout << blocks[2] << " " << blocks.size() << std::endl;
-            for (uint32_t j = 0; j < blocks[i]->size(); j++)
-            {
-                vkFreeMemory(*device, blocks[i]->at(j)->memory, nullptr);
-            }
-        }
-    }
+    void Memory::DestroyMemory() { FreeMemory(); }
 } // namespace sckz
