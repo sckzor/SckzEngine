@@ -30,7 +30,6 @@ namespace sckz
     Memory::SubBlock_t & Memory::AllocateMemory(VkMemoryRequirements    memoryRequirements,
                                                 VkMemoryPropertyFlags & properties)
     {
-        // std::cout << "allocation called of size: " << memoryRequirements.size << std::endl;
         if (memoryRequirements.size > blockSize)
         {
             throw std::runtime_error("Memory Allocation Size was too big!");
@@ -41,7 +40,6 @@ namespace sckz
 
         if (it == blocks.end())
         {
-            // std::cout << "Making a new bucket of type: " << memoryType << std::endl;
             blocks.emplace(memoryType, new std::vector<Block_t *>);
             it = blocks.find(memoryType);
         }
@@ -50,16 +48,15 @@ namespace sckz
 
         for (uint32_t i = 0; i < items->size(); i++)
         {
-            /*
+
             for (uint32_t j = 0; j < items->at(i)->blocks->size(); j++)
             {
                 if (items->at(i)->blocks->at(j)->isFree && items->at(i)->blocks->at(j)->size >= memoryRequirements.size)
                 {
-                    std::cout << "Reallocating old block" << std::endl;
+                    items->at(i)->blocks->at(j)->isFree = false;
                     return *items->at(i)->blocks->at(j);
                 }
             }
-            */
 
             if (items->at(i)->remainingSize >= memoryRequirements.size)
             {
@@ -71,7 +68,6 @@ namespace sckz
                     newSubBlock->offset    = (lastBlock->offset + lastBlock->size)
                                         + (memoryRequirements.alignment
                                            - ((lastBlock->offset + lastBlock->size) % memoryRequirements.alignment));
-                    // std::cout << "offset is: " << newSubBlock->offset << std::endl;
                 }
                 else
                 {
@@ -87,8 +83,6 @@ namespace sckz
                 newSubBlock->memory = &items->at(i)->memory;
 
                 items->at(i)->blocks->push_back(newSubBlock);
-
-                // std::cout << "Reusing the same block" << std::endl;
 
                 return *newSubBlock;
             }
@@ -115,7 +109,7 @@ namespace sckz
         return block;
     }
 
-    void Memory::DeallocateMemory(SubBlock_t & block) { } // block.isFree = true; }
+    void Memory::DeallocateMemory(SubBlock_t & block) { block.isFree = true; }
 
     void Memory::Cleanup()
     {
@@ -140,12 +134,11 @@ namespace sckz
 
     void Memory::DestroyMemory()
     {
-        for (uint32_t i = 0; i < blocks.size(); i++)
+        for (auto & x : blocks)
         {
-            // std::cout << blocks[2] << " " << blocks.size() << std::endl;
-            for (uint32_t j = 0; j < blocks[i]->size(); j++)
+            for (uint32_t j = 0; j < x.second->size(); j++)
             {
-                vkFreeMemory(*device, blocks[i]->at(j)->memory, nullptr);
+                vkFreeMemory(*device, x.second->at(j)->memory, nullptr);
             }
         }
     }

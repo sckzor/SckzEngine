@@ -51,7 +51,6 @@ namespace sckz
         vkGetImageMemoryRequirements(*this->device, image, &memRequirements);
 
         block = &memory.AllocateMemory(memRequirements, properties);
-        std::cout << "Got memory at: " << block->memory << " with offset " << block->offset << std::endl;
         vkBindImageMemory(*this->device, image, *block->memory, block->offset);
     }
 
@@ -83,8 +82,6 @@ namespace sckz
         {
             throw std::runtime_error("failed to create texture image view!");
         }
-
-        std::cout << "Image view: " << imageView << std::endl;
     }
 
     void Image::CreateTextureImage(const char *       fileName,
