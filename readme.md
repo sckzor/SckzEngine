@@ -79,14 +79,12 @@ Time behind schedule: 2 weeks
 ## Latest Valgrind results
 
 ```
-==10130== LEAK SUMMARY:
-==10130==    definitely lost: 55,600 bytes in 15 blocks
-==10130==    indirectly lost: 21,967 bytes in 308 blocks
-==10130==      possibly lost: 83,792 bytes in 2 blocks
-==10130==    still reachable: 184,876 bytes in 2,306 blocks
-==10130==         suppressed: 0 bytes in 0 blocks
-==10130==
-==10130== ERROR SUMMARY: 97 errors from 78 contexts (suppressed: 0 from 0)
+==15983== LEAK SUMMARY:
+==15983==    definitely lost: 58,608 bytes in 21 blocks
+==15983==    indirectly lost: 33,199 bytes in 366 blocks
+==15983==      possibly lost: 72,704 bytes in 1 blocks
+==15983==    still reachable: 184,876 bytes in 2,306 blocks
+==15983==         suppressed: 0 bytes in 0 blocks
 ```
 
 I believe that all of the memory leak is caused by strage behavior of the Vulkan library... The errors though,

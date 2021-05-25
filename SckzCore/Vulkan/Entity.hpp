@@ -12,31 +12,27 @@ namespace sckz
 {
     static const int MAX_LIGHTS = 4;
 
-    struct SpecialVec3
-    {
-        glm::vec3 vec[MAX_LIGHTS];
-    };
-
-    struct VertexUniformBufferObject
-    {
-        alignas(16) glm::mat4 model;
-        alignas(16) glm::mat4 view;
-        alignas(16) glm::mat4 proj;
-
-        alignas(16) glm::vec3 lightPosition[MAX_LIGHTS];
-    };
-
-    struct FragmentUniformBufferObject
-    {
-        alignas(16) glm::vec4 lightColor[MAX_LIGHTS];
-        alignas(16) glm::vec4 attenuation[MAX_LIGHTS];
-        // Use Vec4 instead of vec3 for alignment, it takes up the same amount of bytes as aligning it properly and
-        // this is easier
-        alignas(16) glm::vec2 reflectivity;
-    };
-
     class Entity
     {
+    private:
+        struct VertexUniformBufferObject
+        {
+            alignas(16) glm::mat4 model;
+            alignas(16) glm::mat4 view;
+            alignas(16) glm::mat4 proj;
+
+            alignas(16) glm::vec3 lightPosition[MAX_LIGHTS];
+        };
+
+        struct FragmentUniformBufferObject
+        {
+            alignas(16) glm::vec4 lightColor[MAX_LIGHTS];
+            alignas(16) glm::vec4 attenuation[MAX_LIGHTS];
+            // Use Vec4 instead of vec3 for alignment, it takes up the same amount of bytes as aligning it properly and
+            // this is easier
+            alignas(16) glm::vec2 reflectivity;
+        };
+
     private:
         VkPhysicalDevice *     physicalDevice;
         VkQueue *              queue;
