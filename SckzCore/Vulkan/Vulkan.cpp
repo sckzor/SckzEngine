@@ -996,4 +996,20 @@ namespace sckz
 
         return *fboPipelines.back();
     }
+
+    Gui & Vulkan::CreateGUI(const char * texture)
+    {
+        guis.push_back(new Gui());
+        guis.back()->CreateGUI(texture,
+                               commandPool,
+                               renderPass,
+                               device,
+                               physicalDevice,
+                               swapChainFramebuffers[0],
+                               guiPipeline, // ADD THIS IN VULKAN
+                               descriptorPool,
+                               swapChainExtent,
+                               memory,
+                               graphicsQueue)
+    }
 } // namespace sckz

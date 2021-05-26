@@ -5,6 +5,7 @@
 #include "CommandBuffer.hpp"
 #include "DescriptorPool.hpp"
 #include "GraphicsPipeline.hpp"
+#include "Gui.hpp"
 #include "HelperMethods.hpp"
 #include "Image.hpp"
 #include "Model.hpp"
@@ -66,6 +67,7 @@ namespace sckz
 
         std::vector<GraphicsPipeline *> fboPipelines;
         std::vector<Scene *>            scenes;
+        std::vector<Gui *>              guis;
 
         const std::vector<const char *> validationLayers = { "VK_LAYER_KHRONOS_validation" };   // Stays
         const std::vector<const char *> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME }; // Stays
@@ -172,6 +174,8 @@ namespace sckz
 
     public:
         Scene & CreateScene();
+
+        Gui & CreateGUI(const char * texture);
 
         GraphicsPipeline & CreateFBOPipeline(const char * fragShader);
     };

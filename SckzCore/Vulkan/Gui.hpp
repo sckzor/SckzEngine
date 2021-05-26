@@ -9,7 +9,7 @@ namespace sckz
     private:
         struct VertexUniformBufferObject
         {
-            alignas(16) glm::mat4 model;
+            alignas(16) glm::mat3 model;
         };
 
         struct FragmentUniformBufferObject
@@ -28,7 +28,10 @@ namespace sckz
         VkRenderPass *     renderPass;
         Memory *           memory;
 
-        Buffer hostLocalBuffer;
+        VkDescriptorSet                 descriptorSet;
+        VkCommandBuffer                 commandBuffer;
+        Buffer                          hostLocalBuffer;
+        std::array<Buffer::SubBlock, 2> uniformBuffer;
 
         const char * textureFileName;
         Image        texture;
@@ -49,17 +52,25 @@ namespace sckz
                        VkExtent2D         swapChainExtent,
                        Memory &           memory,
                        VkQueue &          queue);
+
         void DestroyGUI();
 
-        Image GetTexture();
+    private:
+        void CreateUniformBuffers();
+        void CreateDescriptorSets();
+        void CreateCommandBuffer();
 
     public:
-        void SetPosition(float x, float y);
+        void SetLocation(float x, float y);
         void SetRotation(float x);
         void SetScale(float x, float y);
 
-        glm::vec2 GetPosition();
+        glm::vec2 GetLocation();
         float     GetRotation();
         glm::vec2 GetScale();
+
+        void RebuildSwapResources();
+
+        VkCommandBuffer GetCommandBuffer();
     };
 } // namespace sckz

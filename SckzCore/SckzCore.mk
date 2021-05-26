@@ -4,7 +4,7 @@ all: SckzCore.a
 
 # C++ based make information
 
-SckzCore.a:build/Scene.o build/Buffer.o build/CommandBuffer.o build/HelperMethods.o build/Image.o build/Memory.o build/Model.o build/Entity.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o build/Light.o  build/Camera.o $(INCLUDE)
+SckzCore.a:build/Scene.o build/Gui.o build/Buffer.o build/CommandBuffer.o build/HelperMethods.o build/Image.o build/Memory.o build/Model.o build/Entity.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o build/Light.o  build/Camera.o $(INCLUDE)
 	ar rvs SckzCore.a build/Buffer.o build/Scene.o build/HelperMethods.o build/CommandBuffer.o build/Image.o build/Memory.o build/Model.o build/Entity.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o build/Camera.o build/Light.o
 
 build/Buffer.o: $(VK_PATH)/Buffer.cpp $(VK_PATH)/Buffer.hpp $(VK_PATH)/Memory.hpp $(VK_PATH)/CommandBuffer.hpp $(INCLUDE)
@@ -48,6 +48,9 @@ build/HelperMethods.o: $(VK_PATH)/HelperMethods.cpp $(VK_PATH)/HelperMethods.hpp
 
 build/Model.o: $(VK_PATH)/Model.cpp $(VK_PATH)/Model.hpp $(VK_PATH)/Entity.hpp $(VK_PATH)/Buffer.hpp $(VK_PATH)/Image.hpp $(VK_PATH)/Camera.hpp $(VK_PATH)/Vertex.hpp $(VK_PATH)/GraphicsPipeline.hpp $(INCLUDE)
 	g++ $(CFLAGS) -c $(VK_PATH)/Model.cpp -o build/Model.o $(LDFLAGS)
+
+build/Gui.o: $(VK_PATH)/Gui.cpp $(VK_PATH)/Gui.hpp $(VK_PATH)/Buffer.hpp $(VK_PATH)/Image.hpp $(VK_PATH)/GraphicsPipeline.hpp $(INCLUDE)
+	g++ $(CFLAGS) -c $(VK_PATH)/Gui.cpp -o build/Gui.o $(LDFLAGS)
 
 clean:
 	rm -f build/*.o

@@ -6,6 +6,8 @@ All code in this repository is copyright Charles Sands 2021. All rights reserved
 
 Time behind schedule: 2 weeks
 
+[Link to current branch's todo list](current-branch-todo.md)
+
 ## Goals for the engine
 
 1. Learn to write extremely high performance code
