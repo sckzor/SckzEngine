@@ -727,6 +727,14 @@ namespace sckz
         CreateFramebuffers();
         descriptorPool.CreateDescriptorPool(device, swapChainImages.size());
         CreateSyncObjects();
+
+        guiPipeline.CreatePipeline(device,
+                                   swapChainExtent,
+                                   renderPass,
+                                   VK_SAMPLE_COUNT_1_BIT,
+                                   "Resources/fbo_vertex.spv",
+                                   "Resources/fbo_fragment_normal.spv",
+                                   true);
     }
 
     void Vulkan::DestroyVulkan()
@@ -838,11 +846,19 @@ namespace sckz
                                     0,
                                     nullptr);
 
-            vkCmdDraw(commandBuffers[i],
-                      3,
-                      1,
-                      0,
-                      0); // Uses the wacky shader from Sascha to draw the image to the screen
+            vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
+            // Uses the wacky shader from Sascha to draw the image to the screen
+            vkCmdEndRenderPass(commandBuffers[i]);
+
+            vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
+
+            std::vector<VkCommandBuffer> buffers;
+            for (size_t j = 0; j < guis.size(); j++)
+            {
+                buffers.push_back((guis[j]->GetCommandBuffer(j)));
+            }
+
+            vkCmdExecuteCommands(commandBuffers[i], buffers.size(), buffers.data());
 
             vkCmdEndRenderPass(commandBuffers[i]);
 
@@ -1005,11 +1021,12 @@ namespace sckz
                                renderPass,
                                device,
                                physicalDevice,
-                               swapChainFramebuffers[0],
-                               guiPipeline, // ADD THIS IN VULKAN
+                               swapChainFramebuffers,
+                               guiPipeline,
                                descriptorPool,
                                swapChainExtent,
                                memory,
-                               graphicsQueue)
+                               graphicsQueue);
+        return *guis.back();
     }
 } // namespace sckz

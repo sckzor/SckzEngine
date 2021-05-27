@@ -17,19 +17,19 @@ namespace sckz
         };
 
     private:
-        VkDevice *         device;
-        VkPhysicalDevice * physicalDevice;
-        VkCommandPool *    commandPool;
-        DescriptorPool *   descriptorPool;
-        GraphicsPipeline * pipeline;
-        VkFramebuffer *    framebuffer;
-        VkExtent2D         swapChainExtent;
-        VkQueue *          queue;
-        VkRenderPass *     renderPass;
-        Memory *           memory;
+        VkDevice *                   device;
+        VkPhysicalDevice *           physicalDevice;
+        VkCommandPool *              commandPool;
+        DescriptorPool *             descriptorPool;
+        GraphicsPipeline *           pipeline;
+        std::vector<VkFramebuffer> * framebuffers;
+        VkExtent2D                   swapChainExtent;
+        VkQueue *                    queue;
+        VkRenderPass *               renderPass;
+        Memory *                     memory;
 
         VkDescriptorSet                 descriptorSet;
-        VkCommandBuffer                 commandBuffer;
+        std::vector<VkCommandBuffer>    commandBuffers;
         Buffer                          hostLocalBuffer;
         std::array<Buffer::SubBlock, 2> uniformBuffer;
 
@@ -40,24 +40,25 @@ namespace sckz
         glm::vec2    scale;
         glm::float32 rotation;
 
+        bool hasCommandBuffer;
+
     public:
-        void CreateGUI(const char *       textureFileName,
-                       VkCommandPool &    commandPool,
-                       VkRenderPass &     renderPass,
-                       VkDevice &         device,
-                       VkPhysicalDevice & physicalDevice,
-                       VkFramebuffer &    framebuffer,
-                       GraphicsPipeline * pipeline,
-                       DescriptorPool &   descriptorPool,
-                       VkExtent2D         swapChainExtent,
-                       Memory &           memory,
-                       VkQueue &          queue);
+        void CreateGUI(const char *                 textureFileName,
+                       VkCommandPool &              commandPool,
+                       VkRenderPass &               renderPass,
+                       VkDevice &                   device,
+                       VkPhysicalDevice &           physicalDevice,
+                       std::vector<VkFramebuffer> & framebuffer,
+                       GraphicsPipeline &           pipeline,
+                       DescriptorPool &             descriptorPool,
+                       VkExtent2D                   swapChainExtent,
+                       Memory &                     memory,
+                       VkQueue &                    queue);
 
         void DestroyGUI();
 
     private:
         void CreateUniformBuffers();
-        void CreateDescriptorSets();
         void CreateCommandBuffer();
 
     public:
@@ -71,6 +72,6 @@ namespace sckz
 
         void RebuildSwapResources();
 
-        VkCommandBuffer GetCommandBuffer();
+        VkCommandBuffer GetCommandBuffer(uint32_t index);
     };
 } // namespace sckz

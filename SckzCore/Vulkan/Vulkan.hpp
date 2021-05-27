@@ -66,6 +66,7 @@ namespace sckz
         std::vector<VkFence>     imagesInFlight;           // Duplicated
 
         std::vector<GraphicsPipeline *> fboPipelines;
+        GraphicsPipeline                guiPipeline;
         std::vector<Scene *>            scenes;
         std::vector<Gui *>              guis;
 

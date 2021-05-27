@@ -5,7 +5,7 @@ all: SckzCore.a
 # C++ based make information
 
 SckzCore.a:build/Scene.o build/Gui.o build/Buffer.o build/CommandBuffer.o build/HelperMethods.o build/Image.o build/Memory.o build/Model.o build/Entity.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o build/Light.o  build/Camera.o $(INCLUDE)
-	ar rvs SckzCore.a build/Buffer.o build/Scene.o build/HelperMethods.o build/CommandBuffer.o build/Image.o build/Memory.o build/Model.o build/Entity.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o build/Camera.o build/Light.o
+	ar rvs SckzCore.a build/Buffer.o build/Gui.o build/Scene.o build/HelperMethods.o build/CommandBuffer.o build/Image.o build/Memory.o build/Model.o build/Entity.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o build/Camera.o build/Light.o
 
 build/Buffer.o: $(VK_PATH)/Buffer.cpp $(VK_PATH)/Buffer.hpp $(VK_PATH)/Memory.hpp $(VK_PATH)/CommandBuffer.hpp $(INCLUDE)
 	g++ $(CFLAGS) -c $(VK_PATH)/Buffer.cpp -o build/Buffer.o $(LDFLAGS)

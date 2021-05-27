@@ -28,6 +28,8 @@ int main()
     sckz::Entity & e2 = s2.CreateEntity(m2);
     sckz::Camera & c2 = s2.CreateCamera(45, 0.1, 10);
 
+    sckz::Gui & gui = vkan.CreateGUI("Resources/cat.png");
+
     // s1.SetMSAA(-1);
 
     e1.SetShine(1, 10);
