@@ -6,11 +6,8 @@ MFLAGS = -j16
 export CFLAGS LDFLAGS INCLUDE
 
 all:
-	echo "Making core:"
 	$(MAKE) $(MFLAGS) -C SckzCore -f SckzCore.mk
-	echo "Making shaders:"
 	$(MAKE) $(MFLAGS) -C Shaders -f Shaders.mk
-	echo "Making game:"
 	$(MAKE) $(MFLAGS) -C Game -f Game.mk
 
 core:

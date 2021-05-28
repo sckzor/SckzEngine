@@ -1,5 +1,6 @@
 #pragma once
 #include "../Include.hpp"
+#include "../Loaders/stb_image.h"
 
 namespace sckz
 {
@@ -17,6 +18,7 @@ namespace sckz
         void         CreateWindow(const char * name, uint32_t length, uint32_t width);
         void         DestroyWindow();
         void         Update();
+        void         SetIcon(const char * fileName);
         bool         QueryClose();
         bool         QueryResize();
         bool         QueryKey(uint32_t key);

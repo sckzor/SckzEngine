@@ -8,6 +8,14 @@ namespace sckz
 {
     class GraphicsPipeline
     {
+    public:
+        enum class PipelineType
+        {
+            FBO_PIPELINE,
+            GUI_PIPELINE,
+            MODEL_PIPELINE
+        };
+
     private:
         VkDescriptorSetLayout descriptorSetLayout;
         VkPipelineLayout      pipelineLayout;
@@ -19,7 +27,7 @@ namespace sckz
         VkSampleCountFlagBits msaaSamples;
         const char *          vertexFile;
         const char *          fragmentFile;
-        bool                  isFBO;
+        PipelineType          type;
 
     private:
         static std::vector<char> ReadFile(const std::string & filename);
@@ -36,13 +44,12 @@ namespace sckz
                             VkSampleCountFlagBits msaaSamples,
                             const char *          vertexFile,
                             const char *          fragmentFile,
-                            bool                  isFBO);
+                            PipelineType          type);
 
         void CreatePipeline(VkDevice &            device,
                             VkExtent2D            extent,
                             VkRenderPass &        renderPass,
-                            VkSampleCountFlagBits msaaSamples,
-                            bool                  isFBO);
+                            VkSampleCountFlagBits msaaSamples);
         void DestroyPipeline();
 
     public:

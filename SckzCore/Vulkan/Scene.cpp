@@ -68,7 +68,7 @@ namespace sckz
         CreateRenderPass();
         for (int i = 0; i < pipelines.size(); i++)
         {
-            pipelines[i]->CreatePipeline(*device, swapChainExtent, renderPass, msaaSamples, false);
+            pipelines[i]->CreatePipeline(*device, swapChainExtent, renderPass, msaaSamples);
         }
         CreateColorResources();
         CreateDepthResources();
@@ -443,8 +443,13 @@ namespace sckz
     GraphicsPipeline & Scene::CreatePipeline(const char * vertexFile, const char * fragmentFile)
     {
         pipelines.push_back(new GraphicsPipeline());
-        pipelines.back()
-            ->CreatePipeline(*device, swapChainExtent, renderPass, msaaSamples, vertexFile, fragmentFile, false);
+        pipelines.back()->CreatePipeline(*device,
+                                         swapChainExtent,
+                                         renderPass,
+                                         msaaSamples,
+                                         vertexFile,
+                                         fragmentFile,
+                                         GraphicsPipeline::PipelineType::MODEL_PIPELINE);
         return *pipelines.back();
     }
 

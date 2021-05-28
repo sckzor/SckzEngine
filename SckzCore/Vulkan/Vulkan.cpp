@@ -268,9 +268,9 @@ namespace sckz
 
         VkApplicationInfo appInfo {};
         appInfo.sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.pApplicationName   = "Hello Triangle";
+        appInfo.pApplicationName   = "SckzEngine Tester";
         appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.pEngineName        = "No Engine";
+        appInfo.pEngineName        = "SckzEngine";
         appInfo.engineVersion      = VK_MAKE_VERSION(1, 0, 0);
         appInfo.apiVersion         = VK_API_VERSION_1_0;
 
@@ -732,14 +732,18 @@ namespace sckz
                                    swapChainExtent,
                                    renderPass,
                                    VK_SAMPLE_COUNT_1_BIT,
-                                   "Resources/fbo_vertex.spv",
-                                   "Resources/fbo_fragment_normal.spv",
-                                   true);
+                                   "Resources/fbo_vertex_small.spv",
+                                   "Resources/fbo_fragment_small.spv",
+                                   GraphicsPipeline::PipelineType::GUI_PIPELINE);
     }
 
     void Vulkan::DestroyVulkan()
     {
         DestroySwapResources();
+        for (uint32_t i = 0; i < guis.size(); i++)
+        {
+            guis[i]->DestroyGUI();
+        }
         DestroySyncObjects();
         DestroyCommandPool();
         memory.DestroyMemory();
@@ -766,9 +770,15 @@ namespace sckz
         CreateDepthResources();
         CreateFramebuffers();
         descriptorPool.CreateDescriptorPool(device, swapChainImages.size());
+        guiPipeline.CreatePipeline(device, swapChainExtent, renderPass, VK_SAMPLE_COUNT_1_BIT);
         for (uint32_t i = 0; i < fboPipelines.size(); i++)
         {
-            fboPipelines[i]->CreatePipeline(device, swapChainExtent, renderPass, VK_SAMPLE_COUNT_1_BIT, true);
+            fboPipelines[i]->CreatePipeline(device, swapChainExtent, renderPass, VK_SAMPLE_COUNT_1_BIT);
+        }
+
+        for (uint32_t i = 0; i < guis.size(); i++)
+        {
+            guis[i]->RebuildSwapResources(descriptorPool, swapChainExtent, renderPass, swapChainFramebuffers);
         }
     }
 
@@ -784,6 +794,7 @@ namespace sckz
         DestroyImageViews();
         DestroySwapChain();
         descriptorPool.DestroyDescriptorPool();
+        guiPipeline.DestroyPipeline();
         for (uint32_t i = 0; i < fboPipelines.size(); i++)
         {
             fboPipelines[i]->DestroyPipeline();
@@ -808,6 +819,7 @@ namespace sckz
         for (size_t i = 0; i < commandBuffers.size(); i++)
         {
             VkCommandBufferBeginInfo beginInfo {};
+            beginInfo.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
             beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
             VkCommandBufferInheritanceInfo inheritanceInfo {};
@@ -837,8 +849,6 @@ namespace sckz
             renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
             renderPassInfo.pClearValues    = clearValues.data();
 
-            // vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
             vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetPipeline());
 
             VkDescriptorSet ds;
@@ -857,8 +867,6 @@ namespace sckz
             vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
             // Uses the wacky shader from Sascha to draw the image to the screen
 
-            // vkCmdEndRenderPass(commandBuffers[i]);
-
             if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS)
             {
                 throw std::runtime_error("failed to record command buffer!");
@@ -869,12 +877,17 @@ namespace sckz
 
         allocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.commandPool        = commandPool;
-        allocInfo.level              = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
+        allocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         allocInfo.commandBufferCount = (uint32_t)primaryCommandBuffers.size();
 
-        if (vkAllocateCommandBuffers(device, &allocInfo, commandBuffers.data()) != VK_SUCCESS)
+        if (vkAllocateCommandBuffers(device, &allocInfo, primaryCommandBuffers.data()) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to allocate command buffers!");
+        }
+
+        for (uint32_t i = 0; i < guis.size(); i++)
+        {
+            guis[i]->Update();
         }
 
         for (size_t i = 0; i < primaryCommandBuffers.size(); i++)
@@ -904,14 +917,13 @@ namespace sckz
             vkCmdBeginRenderPass(primaryCommandBuffers[i],
                                  &renderPassInfo,
                                  VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
-
             std::vector<VkCommandBuffer> buffers;
+
+            buffers.push_back(commandBuffers[i]);
             for (size_t j = 0; j < guis.size(); j++)
             {
                 buffers.push_back((guis[j]->GetCommandBuffer(i)));
             }
-
-            buffers.push_back(commandBuffers[i]);
 
             vkCmdExecuteCommands(primaryCommandBuffers[i], buffers.size(), buffers.data());
 
@@ -970,7 +982,7 @@ namespace sckz
         submitInfo.pWaitDstStageMask          = waitStages;
 
         submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers    = &commandBuffers[imageIndex];
+        submitInfo.pCommandBuffers    = &primaryCommandBuffers[imageIndex];
 
         VkSemaphore signalSemaphores[]  = { renderFinishedSemaphores[currentFrame] };
         submitInfo.signalSemaphoreCount = 1;
@@ -1061,9 +1073,9 @@ namespace sckz
                                             swapChainExtent,
                                             renderPass,
                                             VK_SAMPLE_COUNT_1_BIT,
-                                            "Resources/fbo_vertex.spv",
+                                            "Resources/fbo_vertex_normal.spv",
                                             fragShader,
-                                            true);
+                                            GraphicsPipeline::PipelineType::FBO_PIPELINE);
 
         return *fboPipelines.back();
     }

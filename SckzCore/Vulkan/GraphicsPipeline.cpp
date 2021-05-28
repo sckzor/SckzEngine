@@ -8,7 +8,7 @@ namespace sckz
                                           VkSampleCountFlagBits msaaSamples,
                                           const char *          vertexFile,
                                           const char *          fragmentFile,
-                                          bool                  isFBO)
+                                          PipelineType          type)
     {
         this->device       = &device;
         this->extent       = extent;
@@ -16,7 +16,8 @@ namespace sckz
         this->msaaSamples  = msaaSamples;
         this->vertexFile   = vertexFile;
         this->fragmentFile = fragmentFile;
-        this->isFBO        = isFBO;
+        this->type         = type;
+
         CreateDescriptorSetLayout();
         CreateGraphicsPipeline();
     }
@@ -24,14 +25,12 @@ namespace sckz
     void GraphicsPipeline::CreatePipeline(VkDevice &            device,
                                           VkExtent2D            extent,
                                           VkRenderPass &        renderPass,
-                                          VkSampleCountFlagBits msaaSamples,
-                                          bool                  isFBO)
+                                          VkSampleCountFlagBits msaaSamples)
     {
         this->device      = &device;
         this->extent      = extent;
         this->renderPass  = &renderPass;
         this->msaaSamples = msaaSamples;
-        this->isFBO       = isFBO;
         if (vertexFile == nullptr || fragmentFile == nullptr)
         {
             throw std::runtime_error(
@@ -86,7 +85,7 @@ namespace sckz
 
     void GraphicsPipeline::CreateDescriptorSetLayout()
     {
-        if (isFBO)
+        if (this->type == PipelineType::FBO_PIPELINE)
         {
             VkDescriptorSetLayoutBinding samplerLayoutBinding {};
             samplerLayoutBinding.binding            = 0;
@@ -175,7 +174,7 @@ namespace sckz
         auto bindingDescription    = Vertex::GetBindingDescription();
         auto attributeDescriptions = Vertex::GetAttributeDescriptions();
 
-        if (!isFBO)
+        if (this->type == PipelineType::MODEL_PIPELINE)
         {
             vertexInputInfo.vertexBindingDescriptionCount   = 1;
             vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
@@ -213,7 +212,7 @@ namespace sckz
         rasterizer.rasterizerDiscardEnable = VK_FALSE;
         rasterizer.polygonMode             = VK_POLYGON_MODE_FILL;
         rasterizer.lineWidth               = 1.0f;
-        if (isFBO)
+        if (this->type == PipelineType::FBO_PIPELINE || this->type == PipelineType::GUI_PIPELINE)
         {
             rasterizer.cullMode = VK_CULL_MODE_FRONT_BIT;
         }
@@ -230,9 +229,17 @@ namespace sckz
         multisampling.rasterizationSamples = msaaSamples; // TODO: Make this extensable
 
         VkPipelineDepthStencilStateCreateInfo depthStencil {};
-        depthStencil.sType                 = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-        depthStencil.depthTestEnable       = VK_TRUE;
-        depthStencil.depthWriteEnable      = VK_TRUE;
+        depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+        if (type == PipelineType::GUI_PIPELINE)
+        {
+            depthStencil.depthTestEnable  = VK_FALSE;
+            depthStencil.depthWriteEnable = VK_FALSE;
+        }
+        else
+        {
+            depthStencil.depthTestEnable  = VK_TRUE;
+            depthStencil.depthWriteEnable = VK_TRUE;
+        }
         depthStencil.depthCompareOp        = VK_COMPARE_OP_LESS;
         depthStencil.depthBoundsTestEnable = VK_FALSE;
         depthStencil.stencilTestEnable     = VK_FALSE;
@@ -240,7 +247,20 @@ namespace sckz
         VkPipelineColorBlendAttachmentState colorBlendAttachment {};
         colorBlendAttachment.colorWriteMask
             = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-        colorBlendAttachment.blendEnable = VK_FALSE;
+        if (type == PipelineType::GUI_PIPELINE)
+        {
+            colorBlendAttachment.blendEnable = VK_TRUE;
+        }
+        else
+        {
+            colorBlendAttachment.blendEnable = VK_FALSE;
+        }
+        colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+        colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+        colorBlendAttachment.colorBlendOp        = VK_BLEND_OP_ADD;
+        colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+        colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+        colorBlendAttachment.alphaBlendOp        = VK_BLEND_OP_ADD;
 
         VkPipelineColorBlendStateCreateInfo colorBlending {};
         colorBlending.sType             = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;

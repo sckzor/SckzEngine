@@ -9,11 +9,13 @@ namespace sckz
     private:
         struct VertexUniformBufferObject
         {
-            alignas(16) glm::mat3 model;
+            alignas(16) glm::vec4 location;
+            alignas(16) glm::vec4 scale;
         };
 
         struct FragmentUniformBufferObject
         {
+            alignas(16) glm::vec4 dummy;
         };
 
     private:
@@ -48,18 +50,23 @@ namespace sckz
                        VkRenderPass &               renderPass,
                        VkDevice &                   device,
                        VkPhysicalDevice &           physicalDevice,
-                       std::vector<VkFramebuffer> & framebuffer,
+                       std::vector<VkFramebuffer> & framebuffers,
                        GraphicsPipeline &           pipeline,
                        DescriptorPool &             descriptorPool,
                        VkExtent2D                   swapChainExtent,
                        Memory &                     memory,
                        VkQueue &                    queue);
 
+        void Update();
+
         void DestroyGUI();
 
     private:
         void CreateUniformBuffers();
         void CreateCommandBuffer();
+
+        void DestroySwapResources();
+        void CreateDescriptorSets();
 
     public:
         void SetLocation(float x, float y);
@@ -70,7 +77,10 @@ namespace sckz
         float     GetRotation();
         glm::vec2 GetScale();
 
-        void RebuildSwapResources();
+        void RebuildSwapResources(DescriptorPool &             descriptorPool,
+                                  VkExtent2D                   swapChainExtent,
+                                  VkRenderPass &               renderPass,
+                                  std::vector<VkFramebuffer> & framebuffers);
 
         VkCommandBuffer GetCommandBuffer(uint32_t index);
     };

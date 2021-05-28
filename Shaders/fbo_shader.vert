@@ -1,8 +1,6 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-const int MAX_LIGHTS = 4;
-
 layout(location = 0) out vec2 fragTexCoord;
 
 
