@@ -51,6 +51,7 @@ namespace sckz
         std::vector<VkFramebuffer> swapChainFramebuffers; // Stays
 
         std::vector<VkCommandBuffer> commandBuffers; // Duplicated
+        std::vector<VkCommandBuffer> primaryCommandBuffers;
 
         VkRenderPass renderPass; // Duplicated
 

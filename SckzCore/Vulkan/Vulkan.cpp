@@ -797,7 +797,7 @@ namespace sckz
         VkCommandBufferAllocateInfo allocInfo {};
         allocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.commandPool        = commandPool;
-        allocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        allocInfo.level              = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
         allocInfo.commandBufferCount = (uint32_t)commandBuffers.size();
 
         if (vkAllocateCommandBuffers(device, &allocInfo, commandBuffers.data()) != VK_SUCCESS)
@@ -809,6 +809,14 @@ namespace sckz
         {
             VkCommandBufferBeginInfo beginInfo {};
             beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+            VkCommandBufferInheritanceInfo inheritanceInfo {};
+            inheritanceInfo.sType      = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
+            inheritanceInfo.renderPass = renderPass;
+            // Secondary command buffer also use the currently active framebuffer
+            inheritanceInfo.framebuffer = swapChainFramebuffers[i];
+
+            beginInfo.pInheritanceInfo = &inheritanceInfo;
 
             if (vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS)
             {
@@ -829,7 +837,7 @@ namespace sckz
             renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
             renderPassInfo.pClearValues    = clearValues.data();
 
-            vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+            // vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
             vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetPipeline());
 
@@ -848,21 +856,68 @@ namespace sckz
 
             vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
             // Uses the wacky shader from Sascha to draw the image to the screen
-            vkCmdEndRenderPass(commandBuffers[i]);
 
-            vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
+            // vkCmdEndRenderPass(commandBuffers[i]);
+
+            if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS)
+            {
+                throw std::runtime_error("failed to record command buffer!");
+            }
+        }
+
+        primaryCommandBuffers.resize(swapChainFramebuffers.size());
+
+        allocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocInfo.commandPool        = commandPool;
+        allocInfo.level              = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
+        allocInfo.commandBufferCount = (uint32_t)primaryCommandBuffers.size();
+
+        if (vkAllocateCommandBuffers(device, &allocInfo, commandBuffers.data()) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to allocate command buffers!");
+        }
+
+        for (size_t i = 0; i < primaryCommandBuffers.size(); i++)
+        {
+            VkCommandBufferBeginInfo beginInfo {};
+            beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+            if (vkBeginCommandBuffer(primaryCommandBuffers[i], &beginInfo) != VK_SUCCESS)
+            {
+                throw std::runtime_error("failed to begin recording command buffer!");
+            }
+
+            VkRenderPassBeginInfo renderPassInfo {};
+            renderPassInfo.sType             = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+            renderPassInfo.renderPass        = renderPass;
+            renderPassInfo.framebuffer       = (swapChainFramebuffers)[i];
+            renderPassInfo.renderArea.offset = { 0, 0 };
+            renderPassInfo.renderArea.extent = swapChainExtent;
+
+            std::array<VkClearValue, 2> clearValues {};
+            clearValues[0].color        = { 0.0f, 0.0f, 0.0f, 1.0f };
+            clearValues[1].depthStencil = { 1.0f, 0 };
+
+            renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+            renderPassInfo.pClearValues    = clearValues.data();
+
+            vkCmdBeginRenderPass(primaryCommandBuffers[i],
+                                 &renderPassInfo,
+                                 VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
 
             std::vector<VkCommandBuffer> buffers;
             for (size_t j = 0; j < guis.size(); j++)
             {
-                buffers.push_back((guis[j]->GetCommandBuffer(j)));
+                buffers.push_back((guis[j]->GetCommandBuffer(i)));
             }
 
-            vkCmdExecuteCommands(commandBuffers[i], buffers.size(), buffers.data());
+            buffers.push_back(commandBuffers[i]);
 
-            vkCmdEndRenderPass(commandBuffers[i]);
+            vkCmdExecuteCommands(primaryCommandBuffers[i], buffers.size(), buffers.data());
 
-            if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS)
+            vkCmdEndRenderPass(primaryCommandBuffers[i]);
+
+            if (vkEndCommandBuffer(primaryCommandBuffers[i]) != VK_SUCCESS)
             {
                 throw std::runtime_error("failed to record command buffer!");
             }
