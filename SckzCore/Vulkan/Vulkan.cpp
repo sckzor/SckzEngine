@@ -732,8 +732,8 @@ namespace sckz
                                    swapChainExtent,
                                    renderPass,
                                    VK_SAMPLE_COUNT_1_BIT,
-                                   "Resources/fbo_vertex_small.spv",
-                                   "Resources/fbo_fragment_small.spv",
+                                   "Resources/gui_vertex_normal.spv",
+                                   "Resources/gui_fragment_normal.spv",
                                    GraphicsPipeline::PipelineType::GUI_PIPELINE);
     }
 

@@ -44,9 +44,9 @@ Time behind schedule: 2 weeks
 - [x] FBO filters.
 - [x] Add an options for on-demand changes to the swap chain like locked refresh rate and stuff like that.
 - [ ] Particles.
-- [ ] Finish the _vulkan_ memory manager.
+- [x] Finish the _vulkan_ memory manager.
 - [ ] Optimize, Optimize, Optimize.
-- [ ] Simple GUIs.
+- [x] Simple GUIs.
 - [ ] Advanced Lighting.
 - [ ] Animation.
 - [ ] Error handling (out the wazoo!)
@@ -89,7 +89,7 @@ Time behind schedule: 2 weeks
 ==15983==         suppressed: 0 bytes in 0 blocks
 ```
 
-I believe that all of the memory leak is caused by strage behavior of the Vulkan library... The errors though,
+I believe that all of the "memory leak" is caused by strage behavior of the Vulkan library... The errors though,
 those were caused by me and I need to fix them at some point.
 
 ## Image of the Engine in action
