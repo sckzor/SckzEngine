@@ -11,6 +11,7 @@ namespace sckz
         {
             alignas(16) glm::vec4 location;
             alignas(16) glm::vec4 scale;
+            alignas(16) glm::vec4 rotation;
         };
 
         struct FragmentUniformBufferObject
@@ -40,6 +41,7 @@ namespace sckz
 
         glm::vec2    location;
         glm::vec2    scale;
+        glm::vec2    rotationPoint;
         glm::float32 rotation;
 
         bool hasCommandBuffer;
@@ -70,12 +72,14 @@ namespace sckz
 
     public:
         void SetLocation(float x, float y);
-        void SetRotation(float x);
         void SetScale(float x, float y);
+        void SetRotationPoint(float x, float y);
+        void SetRotation(float x);
 
         glm::vec2 GetLocation();
-        float     GetRotation();
         glm::vec2 GetScale();
+        glm::vec2 GetRotationPoint();
+        float     GetRotation();
 
         void RebuildSwapResources(DescriptorPool &             descriptorPool,
                                   VkExtent2D                   swapChainExtent,

@@ -3,7 +3,7 @@
 int main()
 {
     sckz::Window win;
-    win.CreateWindow("SckzEngine", 854, 480);
+    win.CreateWindow("SckzEngine", 700, 500);
 
     sckz::Vulkan vkan;
     vkan.CreateVulkan(win);
@@ -30,10 +30,11 @@ int main()
     sckz::Entity & e2 = s2.CreateEntity(m2);
     sckz::Camera & c2 = s2.CreateCamera(45, 0.1, 10);
 
-    sckz::Gui & gui = vkan.CreateGUI("Resources/icon.png");
+    sckz::Gui & gui = vkan.CreateGUI("Resources/circle.png");
 
     gui.SetScale(200, 200);
-    gui.SetLocation(-740, -380);
+    gui.SetLocation(0, 0);
+    gui.SetRotationPoint(100, 100);
 
     e1.SetShine(1, 10);
     e1.SetRotation(90, 0, 0);
@@ -60,6 +61,7 @@ int main()
     {
         if (win.QueryKey('w'))
         {
+            gui.SetRotation(gui.GetRotation() + 10);
             c1.SetLocation(c1.GetLocation().x, c1.GetLocation().y - (1 * vkan.GetDeltaT()), c1.GetLocation().z);
         }
 

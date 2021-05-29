@@ -224,6 +224,9 @@ namespace sckz
         Vubo.scale.y    = scale.y / swapChainExtent.height;
         Vubo.scale.z    = 0.0;
         Vubo.scale.w    = 0.0;
+        Vubo.rotation.x = rotationPoint.x / swapChainExtent.width;
+        Vubo.rotation.y = rotationPoint.y / swapChainExtent.height;
+        Vubo.rotation.z = glm::radians(rotation);
 
         Fubo.dummy = glm::vec4(0.0, 0.0, 0.0, 1.0);
 
@@ -238,7 +241,18 @@ namespace sckz
         Update();
     }
 
-    void Gui::SetRotation(float x) { this->rotation = rotation; }
+    void Gui::SetRotation(float rotation)
+    {
+        this->rotation = rotation;
+        Update();
+    }
+
+    void Gui::SetRotationPoint(float x, float y)
+    {
+        this->rotationPoint.x = x;
+        this->rotationPoint.y = y;
+        Update();
+    }
 
     void Gui::SetScale(float x, float y)
     {
@@ -248,6 +262,8 @@ namespace sckz
     }
 
     glm::vec2 Gui::GetLocation() { return location; }
+
+    glm::vec2 Gui::GetRotationPoint() { return rotationPoint; }
 
     float Gui::GetRotation() { return rotation; }
 

@@ -5,6 +5,7 @@ layout(binding = 0) uniform UniformBufferObject
 {
     vec4 location;
     vec4 scale;
+    vec4 rotation;
 }
 ubo;
 
@@ -16,8 +17,20 @@ layout(location = 0) out vec2 fragTexCoord;
 void main()
 {
     fragTexCoord = vec2((gl_VertexIndex << 1) & 2, gl_VertexIndex & 2);
-    gl_Position = vec4(fragTexCoord.x * ubo.scale.x - ubo.scale.x / 2 + ubo.location.x, 
-                       fragTexCoord.y * ubo.scale.y - ubo.scale.y / 2 + ubo.location.y, 
+
+    float centerX = (ubo.rotation.x + 1) / 2;
+    float centerY = (ubo.rotation.y + 1) / 2;
+
+    float rotatedX = cos(ubo.rotation.z) * (fragTexCoord.x - centerX)
+                   - sin(ubo.rotation.z) * (fragTexCoord.y - centerY)
+                   + centerX;
+
+    float rotatedY = sin(ubo.rotation.z) * (fragTexCoord.x - centerX)
+                   + cos(ubo.rotation.z) * (fragTexCoord.y - centerY)
+                   + centerY;
+
+    gl_Position = vec4(rotatedX * ubo.scale.x - ubo.scale.x / 2 + ubo.location.x, 
+                       rotatedY * ubo.scale.y - ubo.scale.y / 2 + ubo.location.y, 
                        0.0f, 
                        1.0f);
 }
