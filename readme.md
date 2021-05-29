@@ -50,6 +50,8 @@ Time behind schedule: 2 weeks
 - [ ] Optimize, Optimize, Optimize.
 - [x] Simple GUIs.
 - [ ] Advanced Lighting.
+- [ ] Bloom.
+- [ ] FBO Class / Extensible pipelines for unique UBOs
 - [ ] Animation.
 - [ ] Error handling (out the wazoo!)
 - [ ] Add custom _system_ memory managment
