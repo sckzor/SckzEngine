@@ -2,6 +2,7 @@
 
 namespace sckz
 {
+
     void GraphicsPipeline::CreatePipeline(VkDevice &            device,
                                           VkExtent2D            extent,
                                           VkRenderPass &        renderPass,
@@ -17,6 +18,22 @@ namespace sckz
         this->vertexFile   = vertexFile;
         this->fragmentFile = fragmentFile;
         this->type         = type;
+
+        switch (type) // Set the default number of UBOs and Samplers for each different type of pipeline
+        {
+            case PipelineType::FBO_PIPELINE:
+                vertexUboCount   = 0;
+                samplerCount     = 1;
+                fragmentUboCount = 0;
+                break;
+
+            case PipelineType::GUI_PIPELINE:
+            case PipelineType::MODEL_PIPELINE:
+                vertexUboCount   = 1;
+                samplerCount     = 1;
+                fragmentUboCount = 1;
+                break;
+        }
 
         CreateDescriptorSetLayout();
         CreateGraphicsPipeline();
@@ -85,44 +102,40 @@ namespace sckz
 
     void GraphicsPipeline::CreateDescriptorSetLayout()
     {
-        if (this->type == PipelineType::FBO_PIPELINE)
-        {
-            VkDescriptorSetLayoutBinding samplerLayoutBinding {};
-            samplerLayoutBinding.binding            = 0;
-            samplerLayoutBinding.descriptorCount    = 1;
-            samplerLayoutBinding.descriptorType     = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-            samplerLayoutBinding.pImmutableSamplers = nullptr;
-            samplerLayoutBinding.stageFlags         = VK_SHADER_STAGE_FRAGMENT_BIT;
+        std::vector<VkDescriptorSetLayoutBinding> bindings;
 
-            VkDescriptorSetLayoutCreateInfo layoutInfo {};
+        uint32_t currentBindingNumber = 0;
 
-            std::array<VkDescriptorSetLayoutBinding, 1> bindings = { samplerLayoutBinding };
-
-            layoutInfo.sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-            layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
-            layoutInfo.pBindings    = bindings.data();
-
-            if (vkCreateDescriptorSetLayout(*device, &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
-            {
-                throw std::runtime_error("failed to create descriptor set layout!");
-            }
-        }
-        else
+        for (uint32_t i = 0; i < vertexUboCount; i++)
         {
             VkDescriptorSetLayoutBinding vertUboLayoutBinding {};
-            vertUboLayoutBinding.binding            = 0;
+            vertUboLayoutBinding.binding            = currentBindingNumber;
             vertUboLayoutBinding.descriptorCount    = 1;
             vertUboLayoutBinding.descriptorType     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             vertUboLayoutBinding.pImmutableSamplers = nullptr;
             vertUboLayoutBinding.stageFlags         = VK_SHADER_STAGE_VERTEX_BIT;
 
+            bindings.push_back(vertUboLayoutBinding);
+
+            currentBindingNumber++;
+        }
+
+        for (uint32_t i = 0; i < samplerCount; i++)
+        {
             VkDescriptorSetLayoutBinding samplerLayoutBinding {};
-            samplerLayoutBinding.binding            = 1;
+            samplerLayoutBinding.binding            = currentBindingNumber;
             samplerLayoutBinding.descriptorCount    = 1;
             samplerLayoutBinding.descriptorType     = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
             samplerLayoutBinding.pImmutableSamplers = nullptr;
             samplerLayoutBinding.stageFlags         = VK_SHADER_STAGE_FRAGMENT_BIT;
 
+            bindings.push_back(samplerLayoutBinding);
+
+            currentBindingNumber++;
+        }
+
+        for (uint32_t i = 0; i < fragmentUboCount; i++)
+        {
             VkDescriptorSetLayoutBinding fragUboLayoutBinding {};
             fragUboLayoutBinding.binding            = 2;
             fragUboLayoutBinding.descriptorCount    = 1;
@@ -130,19 +143,20 @@ namespace sckz
             fragUboLayoutBinding.pImmutableSamplers = nullptr;
             fragUboLayoutBinding.stageFlags         = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-            VkDescriptorSetLayoutCreateInfo layoutInfo {};
+            bindings.push_back(fragUboLayoutBinding);
 
-            std::array<VkDescriptorSetLayoutBinding, 3> bindings
-                = { vertUboLayoutBinding, samplerLayoutBinding, fragUboLayoutBinding };
+            currentBindingNumber++;
+        }
 
-            layoutInfo.sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-            layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
-            layoutInfo.pBindings    = bindings.data();
+        VkDescriptorSetLayoutCreateInfo layoutInfo {};
 
-            if (vkCreateDescriptorSetLayout(*device, &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
-            {
-                throw std::runtime_error("failed to create descriptor set layout!");
-            }
+        layoutInfo.sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
+        layoutInfo.pBindings    = bindings.data();
+
+        if (vkCreateDescriptorSetLayout(*device, &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to create descriptor set layout!");
         }
     }
 
@@ -317,6 +331,76 @@ namespace sckz
     bool GraphicsPipeline::operator==(GraphicsPipeline & otherObject)
     {
         return (this->vertexFile == otherObject.vertexFile && this->fragmentFile == otherObject.fragmentFile);
+    }
+
+    void GraphicsPipeline::BindShaderData(VkDescriptorBufferInfo   vUboInfo[],
+                                          VkDescriptorImageInfo *  samplerInfo,
+                                          VkDescriptorBufferInfo * fUboInfo,
+                                          DescriptorPool &         pool,
+                                          VkDescriptorSet *        descriptorSet)
+    {
+        VkDescriptorSetLayout       layout(GetDescriptorSetLayout());
+        VkDescriptorSetAllocateInfo allocInfo {};
+        allocInfo.sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        allocInfo.descriptorPool     = pool.GetDescriptorPool();
+        allocInfo.descriptorSetCount = 1;
+        allocInfo.pSetLayouts        = &layout;
+
+        if (vkAllocateDescriptorSets(*device, &allocInfo, descriptorSet) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to allocate descriptor sets!");
+        }
+
+        std::cout << descriptorSet << std::endl;
+
+        std::vector<VkWriteDescriptorSet> descriptorWrites;
+        descriptorWrites.resize(vertexUboCount + samplerCount + fragmentUboCount);
+
+        uint32_t currentBindingNumber = 0;
+
+        for (uint32_t i = 0; i < vertexUboCount; i++)
+        {
+            descriptorWrites[currentBindingNumber].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[currentBindingNumber].dstSet          = *descriptorSet;
+            descriptorWrites[currentBindingNumber].dstBinding      = currentBindingNumber;
+            descriptorWrites[currentBindingNumber].dstArrayElement = 0;
+            descriptorWrites[currentBindingNumber].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            descriptorWrites[currentBindingNumber].descriptorCount = 1;
+            descriptorWrites[currentBindingNumber].pBufferInfo     = &vUboInfo[i];
+
+            currentBindingNumber++;
+        }
+
+        for (uint32_t i = 0; i < samplerCount; i++)
+        {
+            std::cout << descriptorSet << std::endl;
+            descriptorWrites[currentBindingNumber].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[currentBindingNumber].dstSet          = *descriptorSet;
+            descriptorWrites[currentBindingNumber].dstBinding      = currentBindingNumber;
+            descriptorWrites[currentBindingNumber].dstArrayElement = 0;
+            descriptorWrites[currentBindingNumber].descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            descriptorWrites[currentBindingNumber].descriptorCount = 1;
+            descriptorWrites[currentBindingNumber].pImageInfo      = &samplerInfo[i];
+        }
+
+        for (uint32_t i = 0; i < fragmentUboCount; i++)
+        {
+            descriptorWrites[currentBindingNumber].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[currentBindingNumber].dstSet          = *descriptorSet;
+            descriptorWrites[currentBindingNumber].dstBinding      = currentBindingNumber;
+            descriptorWrites[currentBindingNumber].dstArrayElement = 0;
+            descriptorWrites[currentBindingNumber].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            descriptorWrites[currentBindingNumber].descriptorCount = 1;
+            descriptorWrites[currentBindingNumber].pBufferInfo     = &fUboInfo[i];
+
+            currentBindingNumber++;
+        }
+
+        vkUpdateDescriptorSets(*device,
+                               static_cast<uint32_t>(descriptorWrites.size()),
+                               descriptorWrites.data(),
+                               0,
+                               nullptr);
     }
 
     void GraphicsPipeline::BindImage(Image & texture, DescriptorPool & pool, VkDescriptorSet * descriptorSet)

@@ -853,7 +853,12 @@ namespace sckz
 
             VkDescriptorSet ds;
 
-            pipeline->BindImage(scene->GetRenderedImage(), descriptorPool, &ds);
+            VkDescriptorImageInfo imageInfo {};
+            imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            imageInfo.imageView   = scene->GetRenderedImage().GetImageView();
+            imageInfo.sampler     = scene->GetRenderedImage().GetSampler();
+
+            pipeline->BindShaderData(nullptr, &imageInfo, nullptr, descriptorPool, &ds);
 
             vkCmdBindDescriptorSets(commandBuffers[i],
                                     VK_PIPELINE_BIND_POINT_GRAPHICS,

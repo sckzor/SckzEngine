@@ -29,6 +29,10 @@ namespace sckz
         const char *          fragmentFile;
         PipelineType          type;
 
+        uint32_t vertexUboCount   = -1;
+        uint32_t samplerCount     = -1;
+        uint32_t fragmentUboCount = -1;
+
     private:
         static std::vector<char> ReadFile(const std::string & filename);
         VkShaderModule           CreateShaderModule(const std::vector<char> & code);
@@ -57,6 +61,12 @@ namespace sckz
         VkPipeline &            GetPipeline();
         VkPipelineLayout &      GetPieplineLayout();
         void                    BindImage(Image & texture, DescriptorPool & pool, VkDescriptorSet * descriptorSet);
+
+        void BindShaderData(VkDescriptorBufferInfo   vUboInfo[],
+                            VkDescriptorImageInfo *  samplerInfo,
+                            VkDescriptorBufferInfo * fUboInfo,
+                            DescriptorPool &         pool,
+                            VkDescriptorSet *        descriptorSet);
 
     public:
         bool operator==(GraphicsPipeline & otherObject);
