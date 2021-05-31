@@ -92,9 +92,16 @@ namespace sckz
 
     public:
         GraphicsPipeline & CreatePipeline(const char * vertexFile, const char * fragmentFile);
-        Model &            CreateModel(const char * modelFile, const char * textureFile, GraphicsPipeline & pipeline);
-        Camera &           CreateCamera(float fov, float near, float far);
-        Entity &           CreateEntity(Model & model);
-        Light &            CreateLight();
+
+        Model & CreateModel(const char *       modelFile,
+                            const char *       colorFile,
+                            const char *       normalFile,
+                            const char *       specularFile,
+                            const char *       extraFile,
+                            GraphicsPipeline & pipeline);
+
+        Camera & CreateCamera(float fov, float near, float far);
+        Entity & CreateEntity(Model & model);
+        Light &  CreateLight();
     };
 } // namespace sckz

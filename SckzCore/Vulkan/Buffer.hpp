@@ -9,7 +9,7 @@ namespace sckz
     {
     public:
         class SubBlock;
-
+        // Block Struct
         class Block
         {
         public:

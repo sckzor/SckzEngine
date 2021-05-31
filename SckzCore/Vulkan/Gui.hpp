@@ -68,7 +68,6 @@ namespace sckz
         void CreateCommandBuffer();
 
         void DestroySwapResources();
-        void CreateDescriptorSets();
 
     public:
         void SetLocation(float x, float y);

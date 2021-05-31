@@ -32,13 +32,20 @@ namespace sckz
                                            0x7FFFFFF,
                                            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                                            *this->queue);
+
         texture.CreateTextureImage(textureFileName, *this->device, *this->physicalDevice, memory, commandPool, queue);
 
         texture.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
         texture.CreateTextureSampler();
 
         CreateUniformBuffers();
-        CreateDescriptorSets();
+        this->pipeline->BindShaderData(&uniformBuffer[0],
+                                       sizeof(VertexUniformBufferObject),
+                                       &texture,
+                                       &uniformBuffer[1],
+                                       sizeof(FragmentUniformBufferObject),
+                                       descriptorPool,
+                                       &descriptorSet);
 
         hasCommandBuffer = false;
     }
@@ -67,8 +74,13 @@ namespace sckz
         this->renderPass      = &renderPass;
 
         CreateUniformBuffers();
-        CreateDescriptorSets();
-        CreateCommandBuffer();
+        pipeline->BindShaderData(&uniformBuffer[0],
+                                 sizeof(VertexUniformBufferObject),
+                                 &texture,
+                                 &uniformBuffer[1],
+                                 sizeof(FragmentUniformBufferObject),
+                                 descriptorPool,
+                                 &descriptorSet);
         Update();
     }
 
@@ -78,68 +90,6 @@ namespace sckz
         VkDeviceSize FuboSize = sizeof(FragmentUniformBufferObject);
         uniformBuffer[0]      = hostLocalBuffer.GetBuffer(VuboSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
         uniformBuffer[1]      = hostLocalBuffer.GetBuffer(FuboSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
-    }
-
-    void Gui::CreateDescriptorSets()
-    {
-        VkDescriptorSetLayout       layout(pipeline->GetDescriptorSetLayout());
-        VkDescriptorSetAllocateInfo allocInfo {};
-        allocInfo.sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-        allocInfo.descriptorPool     = descriptorPool->GetDescriptorPool();
-        allocInfo.descriptorSetCount = 1;
-        allocInfo.pSetLayouts        = &layout;
-
-        if (vkAllocateDescriptorSets(*device, &allocInfo, &descriptorSet) != VK_SUCCESS)
-        {
-            throw std::runtime_error("failed to allocate descriptor sets!");
-        }
-
-        VkDescriptorBufferInfo VInfo {};
-        VInfo.buffer = uniformBuffer[0].parent->buffer;
-        VInfo.offset = uniformBuffer[0].offset;
-        VInfo.range  = sizeof(VertexUniformBufferObject);
-
-        VkDescriptorBufferInfo FInfo {};
-        FInfo.buffer = uniformBuffer[1].parent->buffer;
-        FInfo.offset = uniformBuffer[1].offset;
-        FInfo.range  = sizeof(FragmentUniformBufferObject);
-
-        VkDescriptorImageInfo imageInfo {};
-        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        imageInfo.imageView   = texture.GetImageView();
-        imageInfo.sampler     = texture.GetSampler();
-
-        std::array<VkWriteDescriptorSet, 3> descriptorWrites {};
-
-        descriptorWrites[0].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites[0].dstSet          = descriptorSet;
-        descriptorWrites[0].dstBinding      = 0;
-        descriptorWrites[0].dstArrayElement = 0;
-        descriptorWrites[0].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        descriptorWrites[0].descriptorCount = 1;
-        descriptorWrites[0].pBufferInfo     = &VInfo;
-
-        descriptorWrites[1].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites[1].dstSet          = descriptorSet;
-        descriptorWrites[1].dstBinding      = 1;
-        descriptorWrites[1].dstArrayElement = 0;
-        descriptorWrites[1].descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        descriptorWrites[1].descriptorCount = 1;
-        descriptorWrites[1].pImageInfo      = &imageInfo;
-
-        descriptorWrites[2].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites[2].dstSet          = descriptorSet;
-        descriptorWrites[2].dstBinding      = 2;
-        descriptorWrites[2].dstArrayElement = 0;
-        descriptorWrites[2].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        descriptorWrites[2].descriptorCount = 1;
-        descriptorWrites[2].pBufferInfo     = &FInfo;
-
-        vkUpdateDescriptorSets(*device,
-                               static_cast<uint32_t>(descriptorWrites.size()),
-                               descriptorWrites.data(),
-                               0,
-                               nullptr);
     }
 
     void Gui::CreateCommandBuffer()

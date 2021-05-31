@@ -54,6 +54,7 @@ namespace sckz
                             VkExtent2D            extent,
                             VkRenderPass &        renderPass,
                             VkSampleCountFlagBits msaaSamples);
+
         void DestroyPipeline();
 
     public:
@@ -62,11 +63,13 @@ namespace sckz
         VkPipelineLayout &      GetPieplineLayout();
         void                    BindImage(Image & texture, DescriptorPool & pool, VkDescriptorSet * descriptorSet);
 
-        void BindShaderData(VkDescriptorBufferInfo   vUboInfo[],
-                            VkDescriptorImageInfo *  samplerInfo,
-                            VkDescriptorBufferInfo * fUboInfo,
-                            DescriptorPool &         pool,
-                            VkDescriptorSet *        descriptorSet);
+        void BindShaderData(Buffer::SubBlock  vUboInfo[],
+                            size_t            vUboSize,
+                            Image             samplerInfo[],
+                            Buffer::SubBlock  fUboInfo[],
+                            size_t            fUboSize,
+                            DescriptorPool &  pool,
+                            VkDescriptorSet * descriptorSet);
 
     public:
         bool operator==(GraphicsPipeline & otherObject);

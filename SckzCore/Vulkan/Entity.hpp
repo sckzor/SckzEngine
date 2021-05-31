@@ -38,9 +38,9 @@ namespace sckz
         VkQueue *              queue;
         Buffer *               hostLocalBuffer;
         VkDevice *             device;
-        DescriptorPool *       pool;
+        DescriptorPool *       descriptorPool;
         GraphicsPipeline *     pipeline;
-        Image *                texture;
+        std::array<Image, 2> * textures;
         std::vector<Light *> * lights;
 
         std::array<Buffer::SubBlock, 2> uniformBuffer;
@@ -54,13 +54,13 @@ namespace sckz
         float reflectivity;
 
     public:
-        void CreateEntity(VkPhysicalDevice & physicalDevice,
-                          VkDevice &         device,
-                          VkQueue &          queue,
-                          Buffer &           hostLocalBuffer,
-                          DescriptorPool &   pool,
-                          GraphicsPipeline & pipeline,
-                          Image &            texture);
+        void CreateEntity(VkPhysicalDevice &     physicalDevice,
+                          VkDevice &             device,
+                          VkQueue &              queue,
+                          Buffer &               hostLocalBuffer,
+                          DescriptorPool &       pool,
+                          GraphicsPipeline &     pipeline,
+                          std::array<Image, 2> & textures);
 
         void DestroyEntity();
 
@@ -69,7 +69,6 @@ namespace sckz
 
     private:
         void CreateUniformBuffers();
-        void CreateDescriptorSets();
 
     public:
         void SetLocation(float x, float y, float z);

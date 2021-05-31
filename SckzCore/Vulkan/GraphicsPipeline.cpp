@@ -28,10 +28,21 @@ namespace sckz
                 break;
 
             case PipelineType::GUI_PIPELINE:
-            case PipelineType::MODEL_PIPELINE:
                 vertexUboCount   = 1;
                 samplerCount     = 1;
                 fragmentUboCount = 1;
+                break;
+
+            case PipelineType::MODEL_PIPELINE:
+                vertexUboCount   = 1;
+                samplerCount     = 2;
+                fragmentUboCount = 1;
+                break;
+
+            default:
+                vertexUboCount   = 0;
+                samplerCount     = 0;
+                fragmentUboCount = 0;
                 break;
         }
 
@@ -137,7 +148,7 @@ namespace sckz
         for (uint32_t i = 0; i < fragmentUboCount; i++)
         {
             VkDescriptorSetLayoutBinding fragUboLayoutBinding {};
-            fragUboLayoutBinding.binding            = 2;
+            fragUboLayoutBinding.binding            = currentBindingNumber;
             fragUboLayoutBinding.descriptorCount    = 1;
             fragUboLayoutBinding.descriptorType     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             fragUboLayoutBinding.pImmutableSamplers = nullptr;
@@ -333,11 +344,13 @@ namespace sckz
         return (this->vertexFile == otherObject.vertexFile && this->fragmentFile == otherObject.fragmentFile);
     }
 
-    void GraphicsPipeline::BindShaderData(VkDescriptorBufferInfo   vUboInfo[],
-                                          VkDescriptorImageInfo *  samplerInfo,
-                                          VkDescriptorBufferInfo * fUboInfo,
-                                          DescriptorPool &         pool,
-                                          VkDescriptorSet *        descriptorSet)
+    void GraphicsPipeline::BindShaderData(Buffer::SubBlock  vUboInfo[],
+                                          size_t            vUboSize,
+                                          Image             samplerInfo[],
+                                          Buffer::SubBlock  fUboInfo[],
+                                          size_t            fUboSize,
+                                          DescriptorPool &  pool,
+                                          VkDescriptorSet * descriptorSet)
     {
         VkDescriptorSetLayout       layout(GetDescriptorSetLayout());
         VkDescriptorSetAllocateInfo allocInfo {};
@@ -351,47 +364,81 @@ namespace sckz
             throw std::runtime_error("failed to allocate descriptor sets!");
         }
 
-        std::cout << descriptorSet << std::endl;
-
         std::vector<VkWriteDescriptorSet> descriptorWrites;
         descriptorWrites.resize(vertexUboCount + samplerCount + fragmentUboCount);
 
         uint32_t currentBindingNumber = 0;
 
+        std::vector<VkDescriptorBufferInfo> VInfo {};
+        std::vector<VkDescriptorBufferInfo> FInfo {};
+        std::vector<VkDescriptorImageInfo>  imageInfo {};
+
+        VInfo.resize(vertexUboCount);
+        FInfo.resize(fragmentUboCount);
+        imageInfo.resize(samplerCount);
+
         for (uint32_t i = 0; i < vertexUboCount; i++)
         {
+            if (&vUboInfo[i] == nullptr)
+            {
+                throw std::runtime_error("[FATAL] Not enough descriptors bound (vertex UBO)");
+            }
+
+            VInfo[i].buffer = vUboInfo[i].parent->buffer;
+            VInfo[i].offset = vUboInfo[i].offset;
+            VInfo[i].range  = vUboSize;
+
             descriptorWrites[currentBindingNumber].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[currentBindingNumber].dstSet          = *descriptorSet;
             descriptorWrites[currentBindingNumber].dstBinding      = currentBindingNumber;
             descriptorWrites[currentBindingNumber].dstArrayElement = 0;
             descriptorWrites[currentBindingNumber].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             descriptorWrites[currentBindingNumber].descriptorCount = 1;
-            descriptorWrites[currentBindingNumber].pBufferInfo     = &vUboInfo[i];
+            descriptorWrites[currentBindingNumber].pBufferInfo     = &VInfo[i];
 
             currentBindingNumber++;
         }
 
         for (uint32_t i = 0; i < samplerCount; i++)
         {
-            std::cout << descriptorSet << std::endl;
+            if (&samplerInfo[i] == nullptr)
+            {
+                throw std::runtime_error("[FATAL] Not enough descriptors bound (sampler)");
+            }
+
+            imageInfo[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            imageInfo[i].imageView   = samplerInfo[i].GetImageView();
+            imageInfo[i].sampler     = samplerInfo[i].GetSampler();
+
             descriptorWrites[currentBindingNumber].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[currentBindingNumber].dstSet          = *descriptorSet;
             descriptorWrites[currentBindingNumber].dstBinding      = currentBindingNumber;
             descriptorWrites[currentBindingNumber].dstArrayElement = 0;
             descriptorWrites[currentBindingNumber].descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
             descriptorWrites[currentBindingNumber].descriptorCount = 1;
-            descriptorWrites[currentBindingNumber].pImageInfo      = &samplerInfo[i];
+            descriptorWrites[currentBindingNumber].pImageInfo      = &imageInfo[i];
+
+            currentBindingNumber++;
         }
 
         for (uint32_t i = 0; i < fragmentUboCount; i++)
         {
+            if (&fUboInfo[i] == nullptr)
+            {
+                throw std::runtime_error("[FATAL] Not enough descriptors bound (fragment UBO)");
+            }
+
+            FInfo[i].buffer = fUboInfo[i].parent->buffer;
+            FInfo[i].offset = fUboInfo[i].offset;
+            FInfo[i].range  = fUboSize;
+
             descriptorWrites[currentBindingNumber].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[currentBindingNumber].dstSet          = *descriptorSet;
             descriptorWrites[currentBindingNumber].dstBinding      = currentBindingNumber;
             descriptorWrites[currentBindingNumber].dstArrayElement = 0;
             descriptorWrites[currentBindingNumber].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             descriptorWrites[currentBindingNumber].descriptorCount = 1;
-            descriptorWrites[currentBindingNumber].pBufferInfo     = &fUboInfo[i];
+            descriptorWrites[currentBindingNumber].pBufferInfo     = &FInfo[i];
 
             currentBindingNumber++;
         }

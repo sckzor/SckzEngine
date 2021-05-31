@@ -359,6 +359,8 @@ namespace sckz
             buffers.push_back((models[j]->GetCommandBuffer()));
         }
 
+        std::cout << buffers.size() << std::endl;
+
         vkCmdExecuteCommands(primaryCmdBuffer, buffers.size(), buffers.data());
 
         vkCmdEndRenderPass(primaryCmdBuffer);
@@ -453,10 +455,18 @@ namespace sckz
         return *pipelines.back();
     }
 
-    Model & Scene::CreateModel(const char * modelFile, const char * textureFile, GraphicsPipeline & pipeline)
+    Model & Scene::CreateModel(const char *       modelFile,
+                               const char *       colorFile,
+                               const char *       normalFile,
+                               const char *       specularFile,
+                               const char *       extraFile,
+                               GraphicsPipeline & pipeline)
     {
         models.push_back(new Model());
-        models.back()->CreateModel(textureFile,
+        models.back()->CreateModel(colorFile,
+                                   normalFile,
+                                   specularFile,
+                                   extraFile,
                                    modelFile,
                                    commandPool,
                                    renderPass,

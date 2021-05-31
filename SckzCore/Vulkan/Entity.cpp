@@ -2,26 +2,32 @@
 
 namespace sckz
 {
-    void Entity::CreateEntity(VkPhysicalDevice & physicalDevice,
-                              VkDevice &         device,
-                              VkQueue &          queue,
-                              Buffer &           hostLocalBuffer,
-                              DescriptorPool &   pool,
-                              GraphicsPipeline & pipeline,
-                              Image &            texture)
+    void Entity::CreateEntity(VkPhysicalDevice &     physicalDevice,
+                              VkDevice &             device,
+                              VkQueue &              queue,
+                              Buffer &               hostLocalBuffer,
+                              DescriptorPool &       descriptorPool,
+                              GraphicsPipeline &     pipeline,
+                              std::array<Image, 2> & textures)
     {
         this->physicalDevice  = &physicalDevice;
         this->queue           = &queue;
         this->device          = &device;
-        this->pool            = &pool;
+        this->descriptorPool  = &descriptorPool;
         this->pipeline        = &pipeline;
-        this->texture         = &texture;
+        this->textures        = &textures;
         this->hostLocalBuffer = &hostLocalBuffer;
 
         this->scale = glm::vec3(1.0f, 1.0f, 1.0f);
 
         CreateUniformBuffers();
-        CreateDescriptorSets();
+        this->pipeline->BindShaderData(&uniformBuffer[0],
+                                       sizeof(VertexUniformBufferObject),
+                                       this->textures->data(),
+                                       &uniformBuffer[1],
+                                       sizeof(FragmentUniformBufferObject),
+                                       *this->descriptorPool,
+                                       &descriptorSet);
     }
 
     void Entity::DestroyEntity() { }
@@ -30,7 +36,13 @@ namespace sckz
     {
         DestroyEntity();
         CreateUniformBuffers();
-        CreateDescriptorSets();
+        this->pipeline->BindShaderData(&uniformBuffer[0],
+                                       sizeof(VertexUniformBufferObject),
+                                       this->textures->data(),
+                                       &uniformBuffer[1],
+                                       sizeof(FragmentUniformBufferObject),
+                                       *this->descriptorPool,
+                                       &descriptorSet);
     }
 
     void Entity::SetShine(float reflectivity, float shineDamper)
@@ -73,68 +85,6 @@ namespace sckz
 
         uniformBuffer[0].CopyDataToBuffer(&Vubo, sizeof(Vubo));
         uniformBuffer[1].CopyDataToBuffer(&Fubo, sizeof(Fubo));
-    }
-
-    void Entity::CreateDescriptorSets()
-    {
-        VkDescriptorSetLayout       layout(pipeline->GetDescriptorSetLayout());
-        VkDescriptorSetAllocateInfo allocInfo {};
-        allocInfo.sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-        allocInfo.descriptorPool     = pool->GetDescriptorPool();
-        allocInfo.descriptorSetCount = 1;
-        allocInfo.pSetLayouts        = &layout;
-
-        if (vkAllocateDescriptorSets(*device, &allocInfo, &descriptorSet) != VK_SUCCESS)
-        {
-            throw std::runtime_error("failed to allocate descriptor sets!");
-        }
-
-        VkDescriptorBufferInfo VInfo {};
-        VInfo.buffer = uniformBuffer[0].parent->buffer;
-        VInfo.offset = uniformBuffer[0].offset;
-        VInfo.range  = sizeof(VertexUniformBufferObject);
-
-        VkDescriptorBufferInfo FInfo {};
-        FInfo.buffer = uniformBuffer[1].parent->buffer;
-        FInfo.offset = uniformBuffer[1].offset;
-        FInfo.range  = sizeof(FragmentUniformBufferObject);
-
-        VkDescriptorImageInfo imageInfo {};
-        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        imageInfo.imageView   = texture->GetImageView();
-        imageInfo.sampler     = texture->GetSampler();
-
-        std::array<VkWriteDescriptorSet, 3> descriptorWrites {};
-
-        descriptorWrites[0].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites[0].dstSet          = descriptorSet;
-        descriptorWrites[0].dstBinding      = 0;
-        descriptorWrites[0].dstArrayElement = 0;
-        descriptorWrites[0].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        descriptorWrites[0].descriptorCount = 1;
-        descriptorWrites[0].pBufferInfo     = &VInfo;
-
-        descriptorWrites[1].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites[1].dstSet          = descriptorSet;
-        descriptorWrites[1].dstBinding      = 1;
-        descriptorWrites[1].dstArrayElement = 0;
-        descriptorWrites[1].descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        descriptorWrites[1].descriptorCount = 1;
-        descriptorWrites[1].pImageInfo      = &imageInfo;
-
-        descriptorWrites[2].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites[2].dstSet          = descriptorSet;
-        descriptorWrites[2].dstBinding      = 2;
-        descriptorWrites[2].dstArrayElement = 0;
-        descriptorWrites[2].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        descriptorWrites[2].descriptorCount = 1;
-        descriptorWrites[2].pBufferInfo     = &FInfo;
-
-        vkUpdateDescriptorSets(*device,
-                               static_cast<uint32_t>(descriptorWrites.size()),
-                               descriptorWrites.data(),
-                               0,
-                               nullptr);
     }
 
     void Entity::CreateUniformBuffers()

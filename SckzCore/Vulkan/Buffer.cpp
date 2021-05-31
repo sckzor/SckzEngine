@@ -155,7 +155,7 @@ namespace sckz
     {
         if (dataSize != this->size)
         {
-            throw std::runtime_error("buffer size mis-match!");
+            throw std::runtime_error("buffer size mis-match!"); // Throw error
         }
 
         void * location;

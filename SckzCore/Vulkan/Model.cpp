@@ -5,7 +5,10 @@
 
 namespace sckz
 {
-    void Model::CreateModel(const char *       textureFileName,
+    void Model::CreateModel(const char *       colorFileName,
+                            const char *       normalFileName,
+                            const char *       spacularFileName,
+                            const char *       extraFileName,
                             const char *       modelFileName,
                             VkCommandPool &    commandPool,
                             VkRenderPass &     renderPass,
@@ -18,8 +21,12 @@ namespace sckz
                             Memory &           memory,
                             VkQueue &          queue)
     {
-        this->textureFileName = textureFileName;
-        this->modelFileName   = modelFileName;
+        this->colorFileName    = colorFileName;
+        this->normalFileName   = normalFileName;
+        this->spacularFileName = spacularFileName;
+        this->extraFileName    = extraFileName;
+        this->modelFileName    = modelFileName;
+
         this->renderPass      = &renderPass;
         this->device          = &device;
         this->physicalDevice  = &physicalDevice;
@@ -47,14 +54,29 @@ namespace sckz
 
         this->hasCommandBuffer = false;
 
-        texture.CreateTextureImage(textureFileName, *this->device, *this->physicalDevice, memory, commandPool, queue);
-
-        texture.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
-        texture.CreateTextureSampler();
+        CreateTexture(textures[0], colorFileName);
+        CreateTexture(textures[1], normalFileName);
+        // CreateTexture(textures[2], spacularFileName);
+        // CreateTexture(textures[3], extraFileName);
 
         LoadModel();
         CreateVertexBuffer();
         CreateIndexBuffer();
+    }
+
+    void Model::CreateTexture(Image & image, const char * fileName)
+    {
+        if (fileName == nullptr)
+        {
+            image.CreateBlankTextureImage(*this->device, *this->physicalDevice, *memory, *commandPool, *queue);
+        }
+        else
+        {
+            image.CreateTextureImage(fileName, *this->device, *this->physicalDevice, *memory, *commandPool, *queue);
+        }
+
+        image.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
+        image.CreateTextureSampler();
     }
 
     void Model::DestroyModel()
@@ -71,8 +93,8 @@ namespace sckz
 
         hostLocalBuffer.DestroyBuffer();
         deviceLocalBuffer.DestroyBuffer();
-
-        texture.DestroyImage();
+        textures[0].DestroyImage();
+        textures[1].DestroyImage();
     }
 
     void Model::Update(Camera & camera)
@@ -267,7 +289,7 @@ namespace sckz
     Entity & Model::CreateEntity()
     {
         Entity * entity = new Entity();
-        entity->CreateEntity(*physicalDevice, *device, *queue, hostLocalBuffer, *descriptorPool, *pipeline, texture);
+        entity->CreateEntity(*physicalDevice, *device, *queue, hostLocalBuffer, *descriptorPool, *pipeline, textures);
         entities.push_back(entity);
         CreateCommandBuffer();
 

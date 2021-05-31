@@ -13,7 +13,7 @@ namespace sckz
     class Model
     {
     private:
-        Image texture;
+        std::array<Image, 2> textures;
 
         std::vector<Vertex>   vertices;
         std::vector<uint32_t> indices;
@@ -40,13 +40,20 @@ namespace sckz
         VkRenderPass *     renderPass;
         bool               hasCommandBuffer;
 
-        const char * textureFileName;
+        const char * colorFileName;
+        const char * normalFileName;
+        const char * spacularFileName;
+        const char * extraFileName;
+
         const char * modelFileName;
 
         std::vector<Entity *> entities;
 
     public:
-        void CreateModel(const char *       textureFileName,
+        void CreateModel(const char *       colorFileName,
+                         const char *       normalFileName,
+                         const char *       spacularFileName,
+                         const char *       extraFileName,
                          const char *       modelFileName,
                          VkCommandPool &    commandPool,
                          VkRenderPass &     renderPass,
@@ -70,6 +77,7 @@ namespace sckz
         void CreateCommandBuffer();
 
     public:
+        void CreateTexture(Image & image, const char * fileName);
         void LoadModel();
         void CreateVertexBuffer();
         void CreateIndexBuffer();

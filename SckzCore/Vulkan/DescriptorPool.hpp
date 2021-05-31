@@ -7,7 +7,7 @@ namespace sckz
     {
     private:
         uint32_t              allocatedPools = 0;
-        static const uint32_t size_inc       = 2;
+        static const uint32_t size_inc       = 6;
 
         std::vector<VkDescriptorPool *> pools;
 

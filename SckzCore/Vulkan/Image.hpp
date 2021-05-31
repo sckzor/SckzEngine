@@ -54,6 +54,12 @@ namespace sckz
                                 VkCommandPool &    pool,
                                 VkQueue &          queue);
 
+        void CreateBlankTextureImage(VkDevice &         device,
+                                     VkPhysicalDevice & physicalDevice,
+                                     Memory &           memory,
+                                     VkCommandPool &    pool,
+                                     VkQueue &          queue);
+
         void GenerateMipmaps(VkFormat imageFormat, int32_t texWidth, int32_t texHeight, VkCommandPool & pool);
 
         void TransitionImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout, VkCommandPool & pool);

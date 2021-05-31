@@ -17,11 +17,21 @@ int main()
     sckz::GraphicsPipeline & f1 = vkan.CreateFBOPipeline("Resources/fbo_fragment_normal.spv");
 
     sckz::GraphicsPipeline & p1 = s1.CreatePipeline("Resources/simple_vertex.spv", "Resources/simple_fragment.spv");
-    sckz::Model &            m1 = s1.CreateModel("Resources/room.obj", "Resources/RoomTextureAtlas.png", p1);
+    sckz::Model &            m1 = s1.CreateModel("Resources/room.obj",
+                                      "Resources/RoomTextureAtlas.png",
+                                      nullptr,
+                                      "Resources/RoomTextureAtlas.png",
+                                      "Resources/RoomTextureAtlas.png",
+                                      p1);
     sckz::Light &            l1 = s1.CreateLight();
 
     sckz::GraphicsPipeline & p2 = s2.CreatePipeline("Resources/simple_vertex.spv", "Resources/simple_fragment.spv");
-    sckz::Model &            m2 = s2.CreateModel("Resources/room.obj", "Resources/RoomTextureAtlas.png", p1);
+    sckz::Model &            m2 = s2.CreateModel("Resources/room.obj",
+                                      "Resources/RoomTextureAtlas.png",
+                                      nullptr,
+                                      "Resources/RoomTextureAtlas.png",
+                                      "Resources/RoomTextureAtlas.png",
+                                      p2);
     sckz::Light &            l2 = s2.CreateLight();
 
     sckz::Entity & e1 = s1.CreateEntity(m1);
@@ -39,6 +49,7 @@ int main()
     e1.SetShine(1, 10);
     e1.SetRotation(90, 0, 0);
     e1.SetLocation(0, 1, 0);
+    e1.SetScale(0.1, 0.1, 0.1);
 
     l1.SetColor(1, 1, 0);
     l1.SetLocation(0, 0, 0);
@@ -47,6 +58,7 @@ int main()
     e2.SetShine(1, 10);
     e2.SetRotation(90, 0, 0);
     e2.SetLocation(0, 1, 0);
+    e2.SetScale(0.1, 0.1, 0.1);
 
     l2.SetColor(0.2, 0.2, 0.2);
     l2.SetLocation(1, 1, 1);

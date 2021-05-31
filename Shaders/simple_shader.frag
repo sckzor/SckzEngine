@@ -4,8 +4,9 @@
 const int MAX_LIGHTS = 4;
 
 layout(binding = 1) uniform sampler2D texSampler;
+layout(binding = 2) uniform sampler2D norSampler;
 
-layout(binding = 2) uniform UniformBufferObject
+layout(binding = 3) uniform UniformBufferObject
 {
     vec4 lightColor[MAX_LIGHTS];
     vec4 attenuation[MAX_LIGHTS];
@@ -26,7 +27,17 @@ layout(location = 0) out vec4 outColor;
 
 void main() 
 {
-    vec3 unitNormal = normalize(surfaceNormal);
+    ivec2 norSize = textureSize(norSampler, 0);
+    vec3 unitNormal;
+    if(norSize.x == 1 && norSize.y == 1)
+    {
+        unitNormal = normalize(surfaceNormal); // Use the data provided in the model
+    }
+    else
+    {
+        unitNormal = normalize(texture(norSampler, fragTexCoord).rgb); // Use the data provieded in the Normal map
+    }
+
     vec3 unitToCameraVector = normalize(toCameraVector);
 
     vec3 totalDiffuse = vec3(0.0);
