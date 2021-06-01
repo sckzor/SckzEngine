@@ -8,7 +8,7 @@ namespace sckz
                               Buffer &               hostLocalBuffer,
                               DescriptorPool &       descriptorPool,
                               GraphicsPipeline &     pipeline,
-                              std::array<Image, 2> & textures)
+                              std::array<Image, 3> & textures)
     {
         this->physicalDevice  = &physicalDevice;
         this->queue           = &queue;

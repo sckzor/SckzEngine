@@ -171,7 +171,7 @@ namespace sckz
                                        queue);
 
         int          texWidth = 1, texHeight = 1;
-        void *       dummyData = new char;
+        char *       dummyData = new char;
         VkDeviceSize imageSize = 4;
         mipLevels              = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
 

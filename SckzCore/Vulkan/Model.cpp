@@ -8,7 +8,6 @@ namespace sckz
     void Model::CreateModel(const char *       colorFileName,
                             const char *       normalFileName,
                             const char *       spacularFileName,
-                            const char *       extraFileName,
                             const char *       modelFileName,
                             VkCommandPool &    commandPool,
                             VkRenderPass &     renderPass,
@@ -56,8 +55,7 @@ namespace sckz
 
         CreateTexture(textures[0], colorFileName);
         CreateTexture(textures[1], normalFileName);
-        // CreateTexture(textures[2], spacularFileName);
-        // CreateTexture(textures[3], extraFileName);
+        CreateTexture(textures[2], spacularFileName);
 
         LoadModel();
         CreateVertexBuffer();
@@ -95,6 +93,7 @@ namespace sckz
         deviceLocalBuffer.DestroyBuffer();
         textures[0].DestroyImage();
         textures[1].DestroyImage();
+        textures[2].DestroyImage();
     }
 
     void Model::Update(Camera & camera)

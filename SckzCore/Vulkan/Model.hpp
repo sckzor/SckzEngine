@@ -13,7 +13,7 @@ namespace sckz
     class Model
     {
     private:
-        std::array<Image, 2> textures;
+        std::array<Image, 3> textures;
 
         std::vector<Vertex>   vertices;
         std::vector<uint32_t> indices;
@@ -53,7 +53,6 @@ namespace sckz
         void CreateModel(const char *       colorFileName,
                          const char *       normalFileName,
                          const char *       spacularFileName,
-                         const char *       extraFileName,
                          const char *       modelFileName,
                          VkCommandPool &    commandPool,
                          VkRenderPass &     renderPass,

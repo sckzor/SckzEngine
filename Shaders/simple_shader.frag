@@ -3,10 +3,13 @@
 
 const int MAX_LIGHTS = 4;
 
-layout(binding = 1) uniform sampler2D texSampler;
-layout(binding = 2) uniform sampler2D norSampler;
+const float CEL_SHADING_LEVELS = -1; // Use -1 to disable
 
-layout(binding = 3) uniform UniformBufferObject
+layout(binding = 1) uniform sampler2D texSampler; // Normal color texture.
+layout(binding = 2) uniform sampler2D norSampler; // Red is X, Green is Y, Blue is Z (as per normal (no pun intended))
+layout(binding = 3) uniform sampler2D speSampler; // Red Channel is Specular Map, Green is glow map
+
+layout(binding = 4) uniform UniformBufferObject
 {
     vec4 lightColor[MAX_LIGHTS];
     vec4 attenuation[MAX_LIGHTS];
@@ -52,6 +55,13 @@ void main()
 
         float brightness = dot(unitNormal, unitLightVector);
         brightness = max(brightness, 0.0);
+
+        if(CEL_SHADING_LEVELS > 0)
+        {
+            float level = floor(brightness * CEL_SHADING_LEVELS);
+            brightness = level / CEL_SHADING_LEVELS;
+        }
+
         totalDiffuse = totalDiffuse + (brightness * ubo.lightColor[i].xyz);
 
         vec3 lightDirection = -unitLightVector;
@@ -59,9 +69,28 @@ void main()
         float specularFactor = dot(reflectedLightDirection, unitToCameraVector);
         specularFactor = max(specularFactor, 0.0);
         float dampedFactor = pow(specularFactor, ubo.reflectivity.y);
+
+        if(CEL_SHADING_LEVELS > 0)
+        {
+            float level = floor(dampedFactor * CEL_SHADING_LEVELS);
+            dampedFactor = level / CEL_SHADING_LEVELS;
+        }
+
         totalSpecular = totalSpecular + (dampedFactor * ubo.reflectivity.x * ubo.lightColor[i].xyz) / attFactor;
     }
     totalDiffuse = max(totalDiffuse, 0.2);
+
+    ivec2 speSize = textureSize(speSampler, 0);
+    if(speSize.x != 1 && speSize.y != 1)
+    {
+        vec4 specMapColor = texture(speSampler, fragTexCoord);
+        totalSpecular *= max(specMapColor.r, 0.2); 
+        // Set the lowest that the total Specular can be so that the model always has some specular light on it.
+        if(specMapColor.g > 0.5)
+        {
+            totalDiffuse = vec3(1.0); // With a diffuse value of 1 models will look like they are glowing!
+        }
+    }
 
     outColor = vec4(totalDiffuse, 1.0) * texture(texSampler, fragTexCoord) + vec4(totalSpecular, 1.0);
 }

@@ -35,7 +35,7 @@ namespace sckz
 
             case PipelineType::MODEL_PIPELINE:
                 vertexUboCount   = 1;
-                samplerCount     = 2;
+                samplerCount     = 3;
                 fragmentUboCount = 1;
                 break;
 

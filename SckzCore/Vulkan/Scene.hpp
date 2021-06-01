@@ -97,7 +97,6 @@ namespace sckz
                             const char *       colorFile,
                             const char *       normalFile,
                             const char *       specularFile,
-                            const char *       extraFile,
                             GraphicsPipeline & pipeline);
 
         Camera & CreateCamera(float fov, float near, float far);

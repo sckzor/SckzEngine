@@ -2,7 +2,7 @@
 
 #### A Vulkan games engine by Sckzor
 
-All code in this repository is copyright Charles Sands 2021. All rights reserved!  Ask me before copying.
+All code in this repository is copyright Charles Sands 2021. All rights reserved! Ask me before copying.
 
 This repository should only go public when I want to share it with someone, otherwise it should stay private most of the time.
 
@@ -51,6 +51,7 @@ Time behind schedule: 2 weeks
 - [x] Simple GUIs.
 - [ ] Advanced Lighting.
 - [ ] Bloom.
+- [ ] Shadows!
 - [ ] FBO Class / Extensible pipelines for unique UBOs
 - [ ] Animation.
 - [ ] Error handling (out the wazoo!)

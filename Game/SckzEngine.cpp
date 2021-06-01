@@ -17,24 +17,24 @@ int main()
     sckz::GraphicsPipeline & f1 = vkan.CreateFBOPipeline("Resources/fbo_fragment_normal.spv");
 
     sckz::GraphicsPipeline & p1 = s1.CreatePipeline("Resources/simple_vertex.spv", "Resources/simple_fragment.spv");
-    sckz::Model &            m1 = s1.CreateModel("Resources/room.obj",
-                                      "Resources/RoomTextureAtlas.png",
-                                      nullptr,
-                                      "Resources/RoomTextureAtlas.png",
-                                      "Resources/RoomTextureAtlas.png",
+    sckz::Model &            m1 = s1.CreateModel("Resources/barrel.obj",
+                                      "Resources/barrelColor.png",
+                                      "Resources/barrelNormal.png",
+                                      "Resources/barrelSpecular.png",
                                       p1);
-    sckz::Light &            l1 = s1.CreateLight();
+    sckz::Model & m3 = s1.CreateModel("Resources/room.obj", "Resources/RoomTextureAtlas.png", nullptr, nullptr, p1);
+    sckz::Light & l1 = s1.CreateLight();
 
     sckz::GraphicsPipeline & p2 = s2.CreatePipeline("Resources/simple_vertex.spv", "Resources/simple_fragment.spv");
-    sckz::Model &            m2 = s2.CreateModel("Resources/room.obj",
-                                      "Resources/RoomTextureAtlas.png",
-                                      nullptr,
-                                      "Resources/RoomTextureAtlas.png",
-                                      "Resources/RoomTextureAtlas.png",
+    sckz::Model &            m2 = s2.CreateModel("Resources/barrel.obj",
+                                      "Resources/barrelColor.png",
+                                      "Resources/barrelNormal.png",
+                                      "Resources/barrelSpecular.png",
                                       p2);
     sckz::Light &            l2 = s2.CreateLight();
 
     sckz::Entity & e1 = s1.CreateEntity(m1);
+    sckz::Entity & e3 = s1.CreateEntity(m3);
     sckz::Camera & c1 = s1.CreateCamera(45, 0.1, 10);
 
     sckz::Entity & e2 = s2.CreateEntity(m2);
@@ -51,7 +51,7 @@ int main()
     e1.SetLocation(0, 1, 0);
     e1.SetScale(0.1, 0.1, 0.1);
 
-    l1.SetColor(1, 1, 0);
+    l1.SetColor(1, 1, 1);
     l1.SetLocation(0, 0, 0);
     l1.SetAttenuation(1, 0.01, 0.002);
 
@@ -59,6 +59,10 @@ int main()
     e2.SetRotation(90, 0, 0);
     e2.SetLocation(0, 1, 0);
     e2.SetScale(0.1, 0.1, 0.1);
+
+    e3.SetShine(1, 30);
+    e3.SetRotation(90, 0, 0);
+    e3.SetLocation(0, 1, 0);
 
     l2.SetColor(0.2, 0.2, 0.2);
     l2.SetLocation(1, 1, 1);
@@ -166,6 +170,16 @@ int main()
             {
                 vkan.Present(s1, f2);
             }
+        }
+
+        if (win.QueryKey('5'))
+        {
+            l1.SetLocation(c1.GetLocation().x, c1.GetLocation().y, c1.GetLocation().z);
+        }
+
+        if (win.QueryKey('6'))
+        {
+            e1.SetRotation(e1.GetRotation().x, e1.GetRotation().y - (100 * vkan.GetDeltaT()), e1.GetRotation().z);
         }
     }
 
