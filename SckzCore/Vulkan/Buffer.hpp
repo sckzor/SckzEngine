@@ -58,7 +58,7 @@ namespace sckz
                           VkQueue &             queue);
 
         SubBlock & GetBuffer(uint32_t size, VkBufferUsageFlags usage);
-
+        // Stuff
         void DestroyBuffer();
     };
 } // namespace sckz

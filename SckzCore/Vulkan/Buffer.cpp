@@ -166,7 +166,7 @@ namespace sckz
                     0,
                     &location);
 
-        char * OffsetLocation = (char *)location + this->offset;
+        char * OffsetLocation = (char *)location + this->offset; // stuff
         memcpy(OffsetLocation, data, static_cast<size_t>(size));
         vkUnmapMemory(*this->parent->parent->device, *this->parent->parent->memoryBlock->memory);
     }

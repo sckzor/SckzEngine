@@ -27,7 +27,6 @@ layout(location = 6) in vec3 toCameraVector;
 
 layout(location = 0) out vec4 outColor;
 
-
 void main() 
 {
     ivec2 norSize = textureSize(norSampler, 0);
