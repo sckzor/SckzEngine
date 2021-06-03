@@ -50,7 +50,7 @@ Time behind schedule: 2 weeks
 - [ ] Optimize, Optimize, Optimize.
 - [x] Simple GUIs.
 - [ ] Advanced Lighting.
-- [ ] Bloom.
+- [ ] Bloom / Merge shader.
 - [ ] Shadows!
 - [x] FBO Class / Extensible pipelines for unique UBOs
 - [ ] Animation.
