@@ -19,6 +19,9 @@ $(RESOURCES_DIR)/fbo_vertex_normal.spv: fbo_shader.vert
 $(RESOURCES_DIR)/fbo_fragment_normal.spv: fbo_shader.frag
 	glslc fbo_shader.frag -o $(RESOURCES_DIR)/fbo_fragment_normal.spv
 
+$(RESOURCES_DIR)/fbo_fragment_outline.spv: fbo_outline.frag
+	glslc fbo_outline.frag -o $(RESOURCES_DIR)/fbo_fragment_outline.spv
+
 $(RESOURCES_DIR)/fbo_fragment_invert.spv: fbo_invert.frag
 	glslc fbo_invert.frag -o $(RESOURCES_DIR)/fbo_fragment_invert.spv
 

@@ -52,7 +52,7 @@ Time behind schedule: 2 weeks
 - [ ] Advanced Lighting.
 - [ ] Bloom.
 - [ ] Shadows!
-- [ ] FBO Class / Extensible pipelines for unique UBOs
+- [x] FBO Class / Extensible pipelines for unique UBOs
 - [ ] Animation.
 - [ ] Error handling (out the wazoo!)
 - [ ] Add custom _system_ memory managment
