@@ -33,7 +33,7 @@ int main()
                                       p2);
     sckz::Light &            l2 = s2.CreateLight();
 
-    sckz::Entity & e1 = s1.CreateEntity(m1);
+    // sckz::Entity & e1 = s1.CreateEntity(m1);
     sckz::Entity & e3 = s1.CreateEntity(m3);
     sckz::Camera & c1 = s1.CreateCamera(45, 0.1, 10);
 
@@ -46,10 +46,10 @@ int main()
     gui.SetLocation(0, 0);
     gui.SetRotationPoint(100, 100);
 
-    e1.SetShine(1, 10);
-    e1.SetRotation(90, 0, 0);
-    e1.SetLocation(0, 1, 0);
-    e1.SetScale(0.1, 0.1, 0.1);
+    // e1.SetShine(1, 10);
+    // e1.SetRotation(90, 0, 0);
+    // e1.SetLocation(0, 1, 0);
+    // e1.SetScale(0.1, 0.1, 0.1);
 
     l1.SetColor(1, 1, 1);
     l1.SetLocation(0, 0, 0);
@@ -151,11 +151,11 @@ int main()
 
             if (win.QueryKey('y'))
             {
-                vkan.Present(s2, f1);
+                vkan.Present(s2, f2);
             }
             else
             {
-                vkan.Present(s2, f2);
+                vkan.Present(s2, f1);
             }
         }
         else
@@ -164,11 +164,11 @@ int main()
 
             if (win.QueryKey('y'))
             {
-                vkan.Present(s1, f1);
+                vkan.Present(s1, f2);
             }
             else
             {
-                vkan.Present(s1, f2);
+                vkan.Present(s1, f1);
             }
         }
 
@@ -179,7 +179,7 @@ int main()
 
         if (win.QueryKey('6'))
         {
-            e1.SetRotation(e1.GetRotation().x, e1.GetRotation().y - (100 * vkan.GetDeltaT()), e1.GetRotation().z);
+            // e1.SetRotation(e1.GetRotation().x, e1.GetRotation().y - (100 * vkan.GetDeltaT()), e1.GetRotation().z);
         }
     }
 

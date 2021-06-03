@@ -21,7 +21,7 @@ layout(location = 0) out vec2 fragTexCoord;
 layout(location = 1) out vec3 surfaceNormal;
 layout(location = 2) out vec3 toLightVector[MAX_LIGHTS];
 layout(location = 6) out vec3 toCameraVector;
-
+layout(location = 7) out vec3 camLocation;
 void main()
 {
     vec4 worldPosition = ubo.model * vec4(inPosition, 1.0);
@@ -37,5 +37,7 @@ void main()
     }
 
     // TODO: change this so that the camera position is uploaded in the UBO
-    toCameraVector = (inverse(ubo.view) * vec4(0.0, 0.0, 0.0, 1.0)).xyz - worldPosition.xyz;
+    camLocation = (inverse(ubo.view) * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+
+    toCameraVector = camLocation - worldPosition.xyz;
 }

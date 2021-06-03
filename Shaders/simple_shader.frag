@@ -20,10 +20,22 @@ layout(binding = 4) uniform UniformBufferObject
 }
 ubo;
 
+mat3 sx = mat3( 
+    1.0, 2.0, 1.0, 
+    0.0, 0.0, 0.0, 
+   -1.0, -2.0, -1.0 
+);
+mat3 sy = mat3( 
+    1.0, 0.0, -1.0, 
+    2.0, 0.0, -2.0, 
+    1.0, 0.0, -1.0 
+);
+
 layout(location = 0) in vec2 fragTexCoord;
 layout(location = 1) in vec3 surfaceNormal;
 layout(location = 2) in vec3 toLightVector[MAX_LIGHTS];
 layout(location = 6) in vec3 toCameraVector;
+layout(location = 7) in vec3 camLocation;
 
 layout(location = 0) out vec4 outColor;
 
@@ -92,5 +104,7 @@ void main()
     }
 
     outColor = vec4(totalDiffuse, 1.0) * texture(texSampler, fragTexCoord) + vec4(totalSpecular, 1.0);
+
+    
 }
 
