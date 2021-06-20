@@ -16,6 +16,7 @@ namespace sckz
         Memory *             memory;
         Buffer               hostLocalBuffer;
         Buffer               deviceLocalBuffer;
+        VkFramebuffer        imageFrameBuffer;
         VkDevice *           device;
         VkPhysicalDevice *   physicalDevice;
         VkFormat             format;
