@@ -9,8 +9,6 @@ layout(binding = 0) uniform UniformBufferObject
 }
 ubo;
 
-const int MAX_LIGHTS = 4;
-
 layout(location = 0) out vec2 fragTexCoord;
 
 

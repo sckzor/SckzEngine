@@ -1,6 +1,6 @@
 RESOURCES_DIR = ../Resources
 
-Shaders:SimpleShaders BlueShaders FBOShaders GUIShaders
+Shaders:SimpleShaders BlueShaders FBOShaders GUIShaders ParticleShaders
 
 SimpleShaders: $(RESOURCES_DIR)/simple_vertex.spv $(RESOURCES_DIR)/simple_fragment.spv
 
@@ -25,6 +25,13 @@ $(RESOURCES_DIR)/fbo_fragment_outline.spv: fbo_outline.frag
 $(RESOURCES_DIR)/fbo_fragment_invert.spv: fbo_invert.frag
 	glslc fbo_invert.frag -o $(RESOURCES_DIR)/fbo_fragment_invert.spv
 
+ParticleShaders: $(RESOURCES_DIR)/particle_fragment.spv $(RESOURCES_DIR)/particle_vertex.spv 
+
+$(RESOURCES_DIR)/particle_vertex.spv: particle_shader.vert
+	glslc particle_shader.vert -o $(RESOURCES_DIR)/particle_vertex.spv
+
+$(RESOURCES_DIR)/particle_fragment.spv: particle_shader.frag
+	glslc particle_shader.frag -o $(RESOURCES_DIR)/particle_fragment.spv
 
 GUIShaders: $(RESOURCES_DIR)/gui_fragment_normal.spv $(RESOURCES_DIR)/gui_vertex_normal.spv
 

@@ -38,7 +38,6 @@ namespace sckz
         VkExtent2D         swapChainExtent;
         VkQueue *          queue;
         VkRenderPass *     renderPass;
-        bool               hasCommandBuffer;
 
         const char * colorFileName;
         const char * normalFileName;

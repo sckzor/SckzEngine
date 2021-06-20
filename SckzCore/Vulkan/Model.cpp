@@ -51,8 +51,6 @@ namespace sckz
                                              VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
                                              *this->queue);
 
-        this->hasCommandBuffer = false;
-
         CreateTexture(textures[0], colorFileName);
         CreateTexture(textures[1], normalFileName);
         CreateTexture(textures[2], spacularFileName);
@@ -60,6 +58,8 @@ namespace sckz
         LoadModel();
         CreateVertexBuffer();
         CreateIndexBuffer();
+
+        CreateCommandBuffer();
     }
 
     void Model::CreateTexture(Image & image, const char * fileName)
@@ -274,16 +274,7 @@ namespace sckz
         }
     }
 
-    VkCommandBuffer & Model::GetCommandBuffer()
-    {
-        if (!hasCommandBuffer)
-        {
-            CreateCommandBuffer();
-        }
-
-        hasCommandBuffer = true;
-        return commandBuffer;
-    }
+    VkCommandBuffer & Model::GetCommandBuffer() { return commandBuffer; }
 
     Entity & Model::CreateEntity()
     {

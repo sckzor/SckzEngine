@@ -25,6 +25,14 @@ namespace sckz
         CreateFramebuffers();
         descriptorPool.CreateDescriptorPool(device, 1);
         CreateSyncObjects();
+
+        particlePipeline.CreatePipeline(*this->device,
+                                        swapChainExtent,
+                                        renderPass,
+                                        msaaSamples,
+                                        "Resources/particle_vertex.spv",
+                                        "Resources/particle_fragment.spv",
+                                        GraphicsPipeline::PipelineType::PARTICLE_PIPELINE);
     }
 
     void Scene::DestroyScene()
@@ -35,6 +43,12 @@ namespace sckz
         {
             models[i]->DestroyModel();
             delete models[i];
+        }
+
+        for (int i = 0; i < particleSystems.size(); i++)
+        {
+            particleSystems[i]->DestroyParticleSystem();
+            delete particleSystems[i];
         }
 
         for (int i = 0; i < cameras.size(); i++)
@@ -79,6 +93,13 @@ namespace sckz
         {
             models[i]->RebuildSwapResources(descriptorPool, swapChainExtent);
         }
+
+        particlePipeline.CreatePipeline(*device, swapChainExtent, renderPass, msaaSamples);
+
+        for (int i = 0; i < particleSystems.size(); i++)
+        {
+            particleSystems[i]->RebuildSwapResources(descriptorPool, swapChainExtent);
+        }
         CreateCommandBuffer();
 
         for (int i = 0; i < cameras.size(); i++)
@@ -96,6 +117,9 @@ namespace sckz
         {
             pipelines[i]->DestroyPipeline();
         }
+
+        particlePipeline.DestroyPipeline();
+
         DestroyRenderPass();
         descriptorPool.DestroyDescriptorPool();
         depthImage.DestroyImage();
@@ -228,6 +252,7 @@ namespace sckz
 
         VkCommandPoolCreateInfo poolInfo {};
         poolInfo.sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+        poolInfo.flags            = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
         poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
 
         if (vkCreateCommandPool(*device, &poolInfo, nullptr, &commandPool) != VK_SUCCESS)
@@ -317,19 +342,8 @@ namespace sckz
         }
     }
 
-    void Scene::CreateCommandBuffer()
+    void Scene::RebuildCommandBuffer()
     {
-        VkCommandBufferAllocateInfo allocInfo {};
-        allocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        allocInfo.commandPool        = commandPool;
-        allocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandBufferCount = 1;
-
-        if (vkAllocateCommandBuffers(*device, &allocInfo, &primaryCmdBuffer) != VK_SUCCESS)
-        {
-            throw std::runtime_error("failed to allocate command buffers!");
-        }
-
         VkCommandBufferBeginInfo beginInfo {};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
@@ -359,6 +373,11 @@ namespace sckz
             buffers.push_back((models[j]->GetCommandBuffer()));
         }
 
+        for (size_t j = 0; j < particleSystems.size(); j++)
+        {
+            buffers.push_back((particleSystems[j]->GetCommandBuffer()));
+        }
+
         vkCmdExecuteCommands(primaryCmdBuffer, buffers.size(), buffers.data());
 
         vkCmdEndRenderPass(primaryCmdBuffer);
@@ -367,6 +386,22 @@ namespace sckz
         {
             throw std::runtime_error("failed to record command buffer!");
         }
+    }
+
+    void Scene::CreateCommandBuffer()
+    {
+        VkCommandBufferAllocateInfo allocInfo {};
+        allocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocInfo.commandPool        = commandPool;
+        allocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        allocInfo.commandBufferCount = 1;
+
+        if (vkAllocateCommandBuffers(*device, &allocInfo, &primaryCmdBuffer) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to allocate command buffers!");
+        }
+
+        RebuildCommandBuffer();
     }
 
     VkSampleCountFlagBits Scene::GetTargetSampleCount(int32_t targetSampleCount) // TODO: make this mutable
@@ -490,15 +525,23 @@ namespace sckz
         RebuildSwapResources(swapChainExtent);
     }
 
-    void Scene::Render(Camera & camera)
+    void Scene::Render(Camera & camera, float deltaTime)
     {
-        vkWaitForFences(*device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
-        vkResetFences(*device, 1, &inFlightFence);
 
-        for (int i = 0; i < models.size(); i++)
+        for (uint32_t i = 0; i < models.size(); i++)
         {
             models[i]->Update(camera);
         }
+
+        for (uint32_t i = 0; i < particleSystems.size(); i++)
+        {
+            particleSystems[i]->Update(camera, deltaTime);
+        }
+
+        RebuildCommandBuffer();
+
+        vkWaitForFences(*device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
+        vkResetFences(*device, 1, &inFlightFence);
 
         VkSubmitInfo submitInfo {};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -524,8 +567,33 @@ namespace sckz
 
     Image & Scene::GetRenderedImage()
     {
-        return renderedImage;
         isUpdated = false;
+        return renderedImage;
+    }
+
+    ParticleSystem & Scene::CreateParticleSystem(uint32_t     numStages,
+                                                 const char * texture,
+                                                 uint32_t     hStages,
+                                                 uint32_t     vStages,
+                                                 uint32_t     totalStages)
+    {
+        particleSystems.push_back(new ParticleSystem());
+        particleSystems.back()->CreateParticleSystem(texture,
+                                                     vStages,
+                                                     hStages,
+                                                     totalStages,
+                                                     commandPool,
+                                                     renderPass,
+                                                     *device,
+                                                     *physicalDevice,
+                                                     renderedImageFrameBuffer,
+                                                     particlePipeline,
+                                                     descriptorPool,
+                                                     swapChainExtent,
+                                                     memory,
+                                                     *graphicsQueue,
+                                                     numStages);
+        return *particleSystems.back();
     }
 
 } // namespace sckz

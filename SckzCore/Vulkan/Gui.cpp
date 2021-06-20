@@ -39,15 +39,9 @@ namespace sckz
         texture.CreateTextureSampler();
 
         CreateUniformBuffers();
-        this->pipeline->BindShaderData(&uniformBuffer[0],
-                                       sizeof(VertexUniformBufferObject),
-                                       &texture,
-                                       &uniformBuffer[1],
-                                       sizeof(FragmentUniformBufferObject),
-                                       descriptorPool,
-                                       &descriptorSet);
+        this->pipeline->BindShaderData(&uniformBuffer[0], &texture, nullptr, descriptorPool, &descriptorSet);
 
-        hasCommandBuffer = false;
+        CreateCommandBuffer();
     }
 
     void Gui::DestroyGUI()
@@ -74,22 +68,16 @@ namespace sckz
         this->renderPass      = &renderPass;
 
         CreateUniformBuffers();
-        pipeline->BindShaderData(&uniformBuffer[0],
-                                 sizeof(VertexUniformBufferObject),
-                                 &texture,
-                                 &uniformBuffer[1],
-                                 sizeof(FragmentUniformBufferObject),
-                                 descriptorPool,
-                                 &descriptorSet);
+        pipeline->BindShaderData(&uniformBuffer[0], &texture, nullptr, descriptorPool, &descriptorSet);
+        CreateCommandBuffer();
+
         Update();
     }
 
     void Gui::CreateUniformBuffers()
     {
         VkDeviceSize VuboSize = sizeof(VertexUniformBufferObject);
-        VkDeviceSize FuboSize = sizeof(FragmentUniformBufferObject);
         uniformBuffer[0]      = hostLocalBuffer.GetBuffer(VuboSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
-        uniformBuffer[1]      = hostLocalBuffer.GetBuffer(FuboSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
     }
 
     void Gui::CreateCommandBuffer()
@@ -164,8 +152,7 @@ namespace sckz
 
     void Gui::Update()
     {
-        VertexUniformBufferObject   Vubo {};
-        FragmentUniformBufferObject Fubo {};
+        VertexUniformBufferObject Vubo {};
         Vubo.location.x = location.x / swapChainExtent.width;
         Vubo.location.y = location.y / swapChainExtent.height;
         Vubo.location.z = 0.0;
@@ -178,10 +165,7 @@ namespace sckz
         Vubo.rotation.y = rotationPoint.y / swapChainExtent.height;
         Vubo.rotation.z = glm::radians(rotation);
 
-        Fubo.dummy = glm::vec4(0.0, 0.0, 0.0, 1.0);
-
         uniformBuffer[0].CopyDataToBuffer(&Vubo, sizeof(Vubo));
-        uniformBuffer[1].CopyDataToBuffer(&Fubo, sizeof(Fubo));
     }
 
     void Gui::SetLocation(float x, float y)
@@ -219,14 +203,5 @@ namespace sckz
 
     glm::vec2 Gui::GetScale() { return scale; }
 
-    VkCommandBuffer Gui::GetCommandBuffer(uint32_t index)
-    {
-        if (!hasCommandBuffer)
-        {
-            CreateCommandBuffer();
-        }
-
-        hasCommandBuffer = true;
-        return commandBuffers[index];
-    }
+    VkCommandBuffer Gui::GetCommandBuffer(uint32_t index) { return commandBuffers[index]; }
 } // namespace sckz

@@ -27,10 +27,16 @@ namespace sckz
                 fragmentUboCount = 0;
                 break;
 
+            case PipelineType::PARTICLE_PIPELINE:
+                vertexUboCount   = 2;
+                samplerCount     = 1;
+                fragmentUboCount = 0;
+                break;
+
             case PipelineType::GUI_PIPELINE:
                 vertexUboCount   = 1;
                 samplerCount     = 1;
-                fragmentUboCount = 1;
+                fragmentUboCount = 0;
                 break;
 
             case PipelineType::MODEL_PIPELINE:
@@ -255,7 +261,7 @@ namespace sckz
 
         VkPipelineDepthStencilStateCreateInfo depthStencil {};
         depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-        if (type == PipelineType::GUI_PIPELINE)
+        if (type == PipelineType::GUI_PIPELINE || type == PipelineType::PARTICLE_PIPELINE)
         {
             depthStencil.depthTestEnable  = VK_FALSE;
             depthStencil.depthWriteEnable = VK_FALSE;
@@ -274,18 +280,28 @@ namespace sckz
             = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
         if (type == PipelineType::GUI_PIPELINE)
         {
-            colorBlendAttachment.blendEnable = VK_TRUE;
+            colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+            colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+            colorBlendAttachment.colorBlendOp        = VK_BLEND_OP_ADD;
+            colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+            colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+            colorBlendAttachment.alphaBlendOp        = VK_BLEND_OP_ADD;
+            colorBlendAttachment.blendEnable         = VK_TRUE;
+        }
+        else if (type == PipelineType::PARTICLE_PIPELINE)
+        {
+            colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+            colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE;
+            colorBlendAttachment.colorBlendOp        = VK_BLEND_OP_ADD;
+            colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+            colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+            colorBlendAttachment.alphaBlendOp        = VK_BLEND_OP_ADD;
+            colorBlendAttachment.blendEnable         = VK_TRUE;
         }
         else
         {
             colorBlendAttachment.blendEnable = VK_FALSE;
         }
-        colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-        colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-        colorBlendAttachment.colorBlendOp        = VK_BLEND_OP_ADD;
-        colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-        colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-        colorBlendAttachment.alphaBlendOp        = VK_BLEND_OP_ADD;
 
         VkPipelineColorBlendStateCreateInfo colorBlending {};
         colorBlending.sType             = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
@@ -345,10 +361,8 @@ namespace sckz
     }
 
     void GraphicsPipeline::BindShaderData(Buffer::SubBlock  vUboInfo[],
-                                          size_t            vUboSize,
                                           Image             samplerInfo[],
                                           Buffer::SubBlock  fUboInfo[],
-                                          size_t            fUboSize,
                                           DescriptorPool &  pool,
                                           VkDescriptorSet * descriptorSet)
     {
@@ -386,7 +400,7 @@ namespace sckz
 
             VInfo[i].buffer = vUboInfo[i].parent->buffer;
             VInfo[i].offset = vUboInfo[i].offset;
-            VInfo[i].range  = vUboSize;
+            VInfo[i].range  = vUboInfo[i].targetSize;
 
             descriptorWrites[currentBindingNumber].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[currentBindingNumber].dstSet          = *descriptorSet;
@@ -430,7 +444,7 @@ namespace sckz
 
             FInfo[i].buffer = fUboInfo[i].parent->buffer;
             FInfo[i].offset = fUboInfo[i].offset;
-            FInfo[i].range  = fUboSize;
+            FInfo[i].range  = fUboInfo[i].targetSize;
 
             descriptorWrites[currentBindingNumber].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[currentBindingNumber].dstSet          = *descriptorSet;
@@ -442,42 +456,6 @@ namespace sckz
 
             currentBindingNumber++;
         }
-
-        vkUpdateDescriptorSets(*device,
-                               static_cast<uint32_t>(descriptorWrites.size()),
-                               descriptorWrites.data(),
-                               0,
-                               nullptr);
-    }
-
-    void GraphicsPipeline::BindImage(Image & texture, DescriptorPool & pool, VkDescriptorSet * descriptorSet)
-    {
-        VkDescriptorSetLayout       layout(GetDescriptorSetLayout());
-        VkDescriptorSetAllocateInfo allocInfo {};
-        allocInfo.sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-        allocInfo.descriptorPool     = pool.GetDescriptorPool();
-        allocInfo.descriptorSetCount = 1;
-        allocInfo.pSetLayouts        = &layout;
-
-        if (vkAllocateDescriptorSets(*device, &allocInfo, descriptorSet) != VK_SUCCESS)
-        {
-            throw std::runtime_error("failed to allocate descriptor sets!");
-        }
-
-        VkDescriptorImageInfo imageInfo {};
-        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        imageInfo.imageView   = texture.GetImageView();
-        imageInfo.sampler     = texture.GetSampler();
-
-        std::array<VkWriteDescriptorSet, 1> descriptorWrites {};
-
-        descriptorWrites[0].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites[0].dstSet          = *descriptorSet;
-        descriptorWrites[0].dstBinding      = 0;
-        descriptorWrites[0].dstArrayElement = 0;
-        descriptorWrites[0].descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        descriptorWrites[0].descriptorCount = 1;
-        descriptorWrites[0].pImageInfo      = &imageInfo;
 
         vkUpdateDescriptorSets(*device,
                                static_cast<uint32_t>(descriptorWrites.size()),

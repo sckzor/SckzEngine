@@ -2,6 +2,8 @@
 
 int main()
 {
+    sckz::InitRand();
+
     sckz::Window win;
     win.CreateWindow("SckzEngine", 700, 500);
 
@@ -9,6 +11,8 @@ int main()
     vkan.CreateVulkan(win);
 
     win.SetIcon("Resources/icon.png");
+
+    vkan.SetFPS(-1);
 
     sckz::Scene & s1 = vkan.CreateScene();
     sckz::Scene & s2 = vkan.CreateScene();
@@ -24,6 +28,8 @@ int main()
                                       p1);
     sckz::Model & m3 = s1.CreateModel("Resources/room.obj", "Resources/RoomTextureAtlas.png", nullptr, nullptr, p1);
     sckz::Light & l1 = s1.CreateLight();
+
+    sckz::ParticleSystem & pa1 = s1.CreateParticleSystem(1000, "Resources/fireParticles.png", 4, 4, 15);
 
     sckz::GraphicsPipeline & p2 = s2.CreatePipeline("Resources/simple_vertex.spv", "Resources/simple_fragment.spv");
     sckz::Model &            m2 = s2.CreateModel("Resources/barrel.obj",
@@ -126,9 +132,14 @@ int main()
             c1.SetLocation(c1.GetLocation().x, c1.GetLocation().y, c1.GetLocation().z - (1 * vkan.GetDeltaT()));
         }
 
+        if (win.QueryKey(GLFW_KEY_TAB))
+        {
+            pa1.AddParticle(0, 0, 0, sckz::GetRandomFloat(1, -1), sckz::GetRandomFloat(1, -1), 3);
+        }
+
         if (win.QueryKey('p'))
         {
-            vkan.SetFPS(20);
+            vkan.SetFPS(30);
         }
 
         if (win.QueryKey('l'))
@@ -143,11 +154,10 @@ int main()
         }
 
         win.Update();
-        vkan.Update();
 
         if (win.QueryKey('u'))
         {
-            s2.Render(c2);
+            s2.Render(c2, vkan.GetDeltaT());
 
             if (win.QueryKey('y'))
             {
@@ -160,7 +170,7 @@ int main()
         }
         else
         {
-            s1.Render(c1);
+            s1.Render(c1, vkan.GetDeltaT());
 
             if (win.QueryKey('y'))
             {

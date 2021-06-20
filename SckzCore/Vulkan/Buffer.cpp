@@ -37,9 +37,10 @@ namespace sckz
                 blocks[i]->remainingSize -= size;
                 SubBlock * newSubBlock = new SubBlock();
 
-                newSubBlock->size   = size;
-                newSubBlock->next   = nullptr;
-                newSubBlock->parent = blocks[i];
+                newSubBlock->targetSize = size;
+                newSubBlock->size       = size;
+                newSubBlock->next       = nullptr;
+                newSubBlock->parent     = blocks[i];
 
                 if (subBlock == nullptr)
                 {

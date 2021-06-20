@@ -14,11 +14,6 @@ namespace sckz
             alignas(16) glm::vec4 rotation;
         };
 
-        struct FragmentUniformBufferObject
-        {
-            alignas(16) glm::vec4 dummy;
-        };
-
     private:
         VkDevice *                   device;
         VkPhysicalDevice *           physicalDevice;
@@ -34,7 +29,7 @@ namespace sckz
         VkDescriptorSet                 descriptorSet;
         std::vector<VkCommandBuffer>    commandBuffers;
         Buffer                          hostLocalBuffer;
-        std::array<Buffer::SubBlock, 2> uniformBuffer;
+        std::array<Buffer::SubBlock, 1> uniformBuffer;
 
         const char * textureFileName;
         Image        texture;
@@ -43,8 +38,6 @@ namespace sckz
         glm::vec2    scale;
         glm::vec2    rotationPoint;
         glm::float32 rotation;
-
-        bool hasCommandBuffer;
 
     public:
         void CreateGUI(const char *                 textureFileName,

@@ -853,7 +853,7 @@ namespace sckz
 
             VkDescriptorSet ds;
 
-            pipeline->BindShaderData(nullptr, 0, &scene->GetRenderedImage(), nullptr, 0, descriptorPool, &ds);
+            pipeline->BindShaderData(nullptr, &scene->GetRenderedImage(), nullptr, descriptorPool, &ds);
 
             vkCmdBindDescriptorSets(commandBuffers[i],
                                     VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -936,6 +936,8 @@ namespace sckz
         }
     }
 
+    void Vulkan::RebuildCommandBuffers(Scene * scene, GraphicsPipeline * pipeline) { }
+
     void Vulkan::Present(Scene & scene, GraphicsPipeline & pipeline)
     {
         vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
@@ -943,7 +945,6 @@ namespace sckz
         if (lastRenderedScene != &scene || lastRenderedPipeline != &pipeline || scene.IsUpdated())
         {
             CreateCommandBuffers(&scene, &pipeline);
-
             lastRenderedPipeline = &pipeline;
             lastRenderedScene    = &scene;
         }
@@ -1044,9 +1045,19 @@ namespace sckz
         deltaTime   = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
     }
 
-    void Vulkan::Update() { }
-
-    float Vulkan::GetDeltaT() { return deltaTime; }
+    float Vulkan::GetDeltaT()
+    {
+        // TODO: This is a band-aid for the fact that the first time the game launches this ends up as some big number
+        // (no idea why) Memory not being reset issue?
+        if (deltaTime > 999)
+        {
+            return 0;
+        }
+        else
+        {
+            return deltaTime;
+        }
+    }
 
     void Vulkan::SetFPS(int32_t fps)
     {

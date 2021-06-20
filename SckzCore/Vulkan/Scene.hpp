@@ -6,6 +6,7 @@
 #include "HelperMethods.hpp"
 #include "Image.hpp"
 #include "Model.hpp"
+#include "ParticleSystem.hpp"
 
 namespace sckz
 {
@@ -34,10 +35,13 @@ namespace sckz
 
         Memory memory;
 
+        GraphicsPipeline particlePipeline;
+
         std::vector<GraphicsPipeline *> pipelines; // Goes
         std::vector<Model *>            models;    // Goes
         std::vector<Camera *>           cameras;   // Goes
         std::vector<Light *>            lights;
+        std::vector<ParticleSystem *>   particleSystems;
 
         VkFence inFlightFence;
 
@@ -68,6 +72,8 @@ namespace sckz
         void CreateFramebuffers();
         void CreateSyncObjects();
 
+        void RebuildCommandBuffer(); // Missing implementation
+
     private:
         void DestroyRenderPass();
         void DestroyCommandPool();
@@ -84,7 +90,7 @@ namespace sckz
         VkSampleCountFlagBits GetTargetSampleCount(int32_t targetSampleCount);
 
     public:
-        void Render(Camera & camera);
+        void Render(Camera & camera, float deltaTime);
         void SetMSAA(int32_t targetMsaaSamples);
 
         Image & GetRenderedImage();
@@ -99,8 +105,13 @@ namespace sckz
                             const char *       specularFile,
                             GraphicsPipeline & pipeline);
 
-        Camera & CreateCamera(float fov, float near, float far);
-        Entity & CreateEntity(Model & model);
-        Light &  CreateLight();
+        Camera &         CreateCamera(float fov, float near, float far);
+        Entity &         CreateEntity(Model & model);
+        Light &          CreateLight();
+        ParticleSystem & CreateParticleSystem(uint32_t     numStages,
+                                              const char * texture,
+                                              uint32_t     hStages,
+                                              uint32_t     vStages,
+                                              uint32_t     totalStages);
     };
 } // namespace sckz

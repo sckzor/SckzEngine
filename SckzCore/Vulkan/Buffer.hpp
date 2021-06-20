@@ -26,6 +26,7 @@ namespace sckz
             uint32_t   offset;
             Block *    parent;
             uint32_t   size;
+            uint32_t   targetSize;
             SubBlock * next = nullptr;
             bool       isFree;
 

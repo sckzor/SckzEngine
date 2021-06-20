@@ -22,10 +22,8 @@ namespace sckz
 
         CreateUniformBuffers();
         this->pipeline->BindShaderData(&uniformBuffer[0],
-                                       sizeof(VertexUniformBufferObject),
                                        this->textures->data(),
                                        &uniformBuffer[1],
-                                       sizeof(FragmentUniformBufferObject),
                                        *this->descriptorPool,
                                        &descriptorSet);
     }
@@ -37,10 +35,8 @@ namespace sckz
         DestroyEntity();
         CreateUniformBuffers();
         this->pipeline->BindShaderData(&uniformBuffer[0],
-                                       sizeof(VertexUniformBufferObject),
                                        this->textures->data(),
                                        &uniformBuffer[1],
-                                       sizeof(FragmentUniformBufferObject),
                                        *this->descriptorPool,
                                        &descriptorSet);
     }

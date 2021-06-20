@@ -13,7 +13,8 @@ namespace sckz
         {
             FBO_PIPELINE,
             GUI_PIPELINE,
-            MODEL_PIPELINE
+            MODEL_PIPELINE,
+            PARTICLE_PIPELINE
         };
 
     private:
@@ -37,7 +38,7 @@ namespace sckz
         static std::vector<char> ReadFile(const std::string & filename);
         VkShaderModule           CreateShaderModule(const std::vector<char> & code);
 
-    public:
+    private:
         void CreateDescriptorSetLayout();
         void CreateGraphicsPipeline();
 
@@ -61,13 +62,10 @@ namespace sckz
         VkDescriptorSetLayout & GetDescriptorSetLayout();
         VkPipeline &            GetPipeline();
         VkPipelineLayout &      GetPieplineLayout();
-        void                    BindImage(Image & texture, DescriptorPool & pool, VkDescriptorSet * descriptorSet);
 
         void BindShaderData(Buffer::SubBlock  vUboInfo[],
-                            size_t            vUboSize,
                             Image             samplerInfo[],
                             Buffer::SubBlock  fUboInfo[],
-                            size_t            fUboSize,
                             DescriptorPool &  pool,
                             VkDescriptorSet * descriptorSet);
 

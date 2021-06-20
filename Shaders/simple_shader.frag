@@ -61,7 +61,7 @@ void main()
     {
         float dist = length(toLightVector[i]);
         float attFactor = ubo.attenuation[i].x + (ubo.attenuation[i].y * dist) + (ubo.attenuation[i].z * dist * dist);
-        
+
         vec3 unitLightVector = normalize(toLightVector[i]);
 
         float brightness = dot(unitNormal, unitLightVector);

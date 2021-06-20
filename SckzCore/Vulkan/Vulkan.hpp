@@ -1,4 +1,5 @@
 #pragma once
+#define SCKZ_DEBUG
 #include "../Include.hpp"
 #include "../Window/Window.hpp"
 #include "Camera.hpp"
@@ -25,10 +26,10 @@ namespace sckz
         };
 
     private: // Private Members
-#ifdef NDEBUG
-        const bool enableValidationLayers = false;
-#else
+#ifdef SCKZ_DEBUG
         const bool enableValidationLayers = true;
+#else
+        const bool enableValidationLayers = false;
 #endif
 
         static const int MAX_FRAMES_IN_FLIGHT = 2; // Stays
@@ -140,6 +141,8 @@ namespace sckz
         void CreateFramebuffers();
         void CreateSyncObjects();
 
+        void RebuildCommandBuffers(Scene * scene, GraphicsPipeline * pipeline);
+
     private: // Swapchain recreation functions
         void RebuildSwapChain();
         void DestroySwapResources();
@@ -164,8 +167,6 @@ namespace sckz
         // Stays here
         void CreateVulkan(Window & window);
         void DestroyVulkan();
-
-        void Update();
 
         void SetFPS(int32_t fps);
 

@@ -1,6 +1,10 @@
 .vscode/
 .VSCodeCounter/
+traces/
+massif.out.*
 Game/SckzEngine
 SckzCore/SckzCore.a
 SckzCore/build/
+SckzEngine.vktracer
+Resources/*.spv
 valgrind-out.txt

@@ -21,8 +21,8 @@ Time behind schedule: 2 weeks
 - June '21 - Have the basic engine working including more advanced lighting and animation
 
   - ~~April 30, '21 - FBOs / Swapchain~~
-  - May 31, '21 - Memory Manager / GUIs / Particles
-  - June 31, '21 - Animation / More Lighting
+  - ~~May 31, '21 - Memory Manager / GUIs / Particles~~
+  - June 31, '21 - Animation / More Lighting / Shadows
 
 - September '21 - Have a prototype for the game functioning, continue adding to the engine
 
@@ -45,7 +45,7 @@ Time behind schedule: 2 weeks
 - [x] Add sub-allocated buffers.
 - [x] FBO filters.
 - [x] Add an options for on-demand changes to the swap chain like locked refresh rate and stuff like that.
-- [ ] Particles.
+- [x] Particles.
 - [x] Finish the _vulkan_ memory manager.
 - [ ] Optimize, Optimize, Optimize.
 - [x] Simple GUIs.
@@ -99,4 +99,4 @@ those were caused by me and I need to fix them at some point.
 
 ## Image of the Engine in action
 
-![Screenshot](Screenshot.png)
+![Screenshot](Screenshot.gif)

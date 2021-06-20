@@ -13,7 +13,7 @@ namespace sckz
     {
         if (allocatedPools < size_inc)
         {
-            allocatedPools += 1;
+            allocatedPools += 3; // We allocate three from each pool, ALWAYS!
             return *pools.back();
         }
         else
