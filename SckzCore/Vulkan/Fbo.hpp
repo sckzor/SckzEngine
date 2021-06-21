@@ -1,6 +1,7 @@
 #pragma once
 #include "../Include.hpp"
 #include "DescriptorPool.hpp"
+#include "HelperMethods.hpp"
 #include "Image.hpp"
 
 namespace sckz
@@ -44,6 +45,8 @@ namespace sckz
         void CreateDepthResources();
 
         void CreateImage();
+
+        void CreateFramebuffer();
 
     public:
         Image & GetRenderedImage();
