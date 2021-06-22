@@ -2,6 +2,7 @@
 #include "../Include.hpp"
 #include "Camera.hpp"
 #include "DescriptorPool.hpp"
+#include "Fbo.hpp"
 #include "GraphicsPipeline.hpp"
 #include "HelperMethods.hpp"
 #include "Image.hpp"
@@ -19,17 +20,19 @@ namespace sckz
 
         VkCommandBuffer primaryCmdBuffer; // Duplicated
 
-        Image         renderedImage; // Stays
-        VkFramebuffer renderedImageFrameBuffer;
+        // Image         renderedImage; // Stays
+        // VkFramebuffer renderedImageFrameBuffer;
 
-        VkRenderPass renderPass;      // Duplicated
-        VkExtent2D   swapChainExtent; // Stays
+        // VkRenderPass renderPass;      // Duplicated
+        VkExtent2D swapChainExtent; // Stays
 
         DescriptorPool descriptorPool; // Duplicated
         VkCommandPool  commandPool;    // Duplicated
 
-        Image colorImage; // Duplicated
+        // Image colorImage; // Duplicated
         Image depthImage; // Duplicated
+
+        Fbo fboImage;
 
         VkFormat format;
 

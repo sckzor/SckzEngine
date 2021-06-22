@@ -7,26 +7,20 @@ namespace sckz
                                               uint32_t           hStages,
                                               uint32_t           totalStages,
                                               VkCommandPool &    commandPool,
-                                              VkRenderPass &     renderPass,
                                               VkDevice &         device,
                                               VkPhysicalDevice & physicalDevice,
-                                              VkFramebuffer &    framebuffer,
                                               GraphicsPipeline & pipeline,
                                               DescriptorPool &   descriptorPool,
-                                              VkExtent2D         swapChainExtent,
                                               Memory &           memory,
                                               VkQueue &          queue,
                                               uint32_t           maxParticles)
     {
         this->textureFileName = textureFileName;
-        this->renderPass      = &renderPass;
         this->device          = &device;
         this->physicalDevice  = &physicalDevice;
         this->commandPool     = &commandPool;
         this->descriptorPool  = &descriptorPool;
         this->pipeline        = &pipeline;
-        this->framebuffer     = &framebuffer;
-        this->swapChainExtent = swapChainExtent;
         this->queue           = &queue;
         this->memory          = &memory;
         this->hStages         = hStages;
@@ -73,8 +67,7 @@ namespace sckz
     {
         DestroySwapResources();
 
-        this->descriptorPool  = &descriptorPool;
-        this->swapChainExtent = swapChainExtent;
+        this->descriptorPool = &descriptorPool;
 
         CreateUniformBuffers();
         for (uint32_t i = 0; i < particles.size(); i++)
@@ -122,9 +115,9 @@ namespace sckz
 
         VkCommandBufferInheritanceInfo inheritanceInfo {};
         inheritanceInfo.sType      = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
-        inheritanceInfo.renderPass = *renderPass;
+        inheritanceInfo.renderPass = pipeline->GetFbo().GetRenderPass();
         // Secondary command buffer also use the currently active framebuffer
-        inheritanceInfo.framebuffer = *framebuffer;
+        inheritanceInfo.framebuffer = pipeline->GetFbo().GetImageFramebuffer();
 
         beginInfo.pInheritanceInfo = &inheritanceInfo;
 
@@ -134,11 +127,7 @@ namespace sckz
         }
 
         VkRenderPassBeginInfo renderPassInfo {};
-        renderPassInfo.sType             = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassInfo.renderPass        = *renderPass;
-        renderPassInfo.framebuffer       = *framebuffer;
-        renderPassInfo.renderArea.offset = { 0, 0 };
-        renderPassInfo.renderArea.extent = swapChainExtent;
+        pipeline->GetFbo().GetRenderPassBeginInfo(renderPassInfo);
 
         std::array<VkClearValue, 2> clearValues {};
         clearValues[0].color        = { 0.0f, 0.0f, 0.0f, 1.0f };

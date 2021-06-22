@@ -1,6 +1,7 @@
 #pragma once
 #include "../Include.hpp"
 #include "DescriptorPool.hpp"
+#include "Fbo.hpp"
 #include "Image.hpp"
 #include "Vertex.hpp"
 
@@ -22,13 +23,11 @@ namespace sckz
         VkPipelineLayout      pipelineLayout;
         VkPipeline            pipeline;
 
-        VkDevice *            device;
-        VkExtent2D            extent;
-        VkRenderPass *        renderPass;
-        VkSampleCountFlagBits msaaSamples;
-        const char *          vertexFile;
-        const char *          fragmentFile;
-        PipelineType          type;
+        VkDevice *   device;
+        Fbo *        fbo;
+        const char * vertexFile;
+        const char * fragmentFile;
+        PipelineType type;
 
         uint32_t vertexUboCount   = -1;
         uint32_t samplerCount     = -1;
@@ -43,25 +42,20 @@ namespace sckz
         void CreateGraphicsPipeline();
 
     public:
-        void CreatePipeline(VkDevice &            device,
-                            VkExtent2D            extent,
-                            VkRenderPass &        renderPass,
-                            VkSampleCountFlagBits msaaSamples,
-                            const char *          vertexFile,
-                            const char *          fragmentFile,
-                            PipelineType          type);
+        void CreatePipeline(VkDevice &   device,
+                            Fbo &        fbo,
+                            const char * vertexFile,
+                            const char * fragmentFile,
+                            PipelineType type);
 
-        void CreatePipeline(VkDevice &            device,
-                            VkExtent2D            extent,
-                            VkRenderPass &        renderPass,
-                            VkSampleCountFlagBits msaaSamples);
-
+        void CreatePipeline(VkDevice & device, Fbo & fbo);
         void DestroyPipeline();
 
     public:
         VkDescriptorSetLayout & GetDescriptorSetLayout();
         VkPipeline &            GetPipeline();
         VkPipelineLayout &      GetPieplineLayout();
+        Fbo &                   GetFbo();
 
         void BindShaderData(Buffer::SubBlock  vUboInfo[],
                             Image             samplerInfo[],

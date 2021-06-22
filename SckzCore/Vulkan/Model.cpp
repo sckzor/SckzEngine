@@ -10,32 +10,24 @@ namespace sckz
                             const char *       spacularFileName,
                             const char *       modelFileName,
                             VkCommandPool &    commandPool,
-                            VkRenderPass &     renderPass,
                             VkDevice &         device,
                             VkPhysicalDevice & physicalDevice,
-                            VkFramebuffer &    framebuffer,
                             GraphicsPipeline * pipeline,
                             DescriptorPool &   descriptorPool,
-                            VkExtent2D         swapChainExtent,
                             Memory &           memory,
                             VkQueue &          queue)
     {
         this->colorFileName    = colorFileName;
         this->normalFileName   = normalFileName;
         this->spacularFileName = spacularFileName;
-        this->extraFileName    = extraFileName;
         this->modelFileName    = modelFileName;
-
-        this->renderPass      = &renderPass;
-        this->device          = &device;
-        this->physicalDevice  = &physicalDevice;
-        this->commandPool     = &commandPool;
-        this->descriptorPool  = &descriptorPool;
-        this->pipeline        = pipeline;
-        this->framebuffer     = &framebuffer;
-        this->swapChainExtent = swapChainExtent;
-        this->queue           = &queue;
-        this->memory          = &memory;
+        this->device           = &device;
+        this->physicalDevice   = &physicalDevice;
+        this->commandPool      = &commandPool;
+        this->descriptorPool   = &descriptorPool;
+        this->pipeline         = pipeline;
+        this->queue            = &queue;
+        this->memory           = &memory;
 
         this->hostLocalBuffer.CreateBuffer(*this->physicalDevice,
                                            *this->device,
@@ -192,8 +184,7 @@ namespace sckz
         }
         // Create
 
-        this->descriptorPool  = &descriptorPool;
-        this->swapChainExtent = swapChainExtent;
+        this->descriptorPool = &descriptorPool;
 
         CreateCommandBuffer();
     }
@@ -217,9 +208,9 @@ namespace sckz
 
         VkCommandBufferInheritanceInfo inheritanceInfo {};
         inheritanceInfo.sType      = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
-        inheritanceInfo.renderPass = *renderPass;
+        inheritanceInfo.renderPass = pipeline->GetFbo().GetRenderPass();
         // Secondary command buffer also use the currently active framebuffer
-        inheritanceInfo.framebuffer = *framebuffer;
+        inheritanceInfo.framebuffer = pipeline->GetFbo().GetImageFramebuffer();
 
         beginInfo.pInheritanceInfo = &inheritanceInfo;
 
@@ -229,11 +220,7 @@ namespace sckz
         }
 
         VkRenderPassBeginInfo renderPassInfo {};
-        renderPassInfo.sType             = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassInfo.renderPass        = *renderPass;
-        renderPassInfo.framebuffer       = *framebuffer;
-        renderPassInfo.renderArea.offset = { 0, 0 };
-        renderPassInfo.renderArea.extent = swapChainExtent;
+        pipeline->GetFbo().GetRenderPassBeginInfo(renderPassInfo);
 
         std::array<VkClearValue, 2> clearValues {};
         clearValues[0].color        = { 0.0f, 0.0f, 0.0f, 1.0f };

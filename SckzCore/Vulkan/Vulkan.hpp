@@ -5,6 +5,7 @@
 #include "Camera.hpp"
 #include "CommandBuffer.hpp"
 #include "DescriptorPool.hpp"
+#include "Fbo.hpp"
 #include "GraphicsPipeline.hpp"
 #include "Gui.hpp"
 #include "HelperMethods.hpp"
@@ -92,6 +93,8 @@ namespace sckz
 
         Scene *            lastRenderedScene;
         GraphicsPipeline * lastRenderedPipeline;
+
+        Fbo dummyFbo;
 
     public: // Public static functions
         static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,

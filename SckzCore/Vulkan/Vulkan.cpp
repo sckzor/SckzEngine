@@ -728,10 +728,10 @@ namespace sckz
         descriptorPool.CreateDescriptorPool(device, swapChainImages.size());
         CreateSyncObjects();
 
+        dummyFbo.CreateDummyFBO(renderPass, VK_SAMPLE_COUNT_1_BIT, swapChainExtent);
+
         guiPipeline.CreatePipeline(device,
-                                   swapChainExtent,
-                                   renderPass,
-                                   VK_SAMPLE_COUNT_1_BIT,
+                                   dummyFbo,
                                    "Resources/gui_vertex_normal.spv",
                                    "Resources/gui_fragment_normal.spv",
                                    GraphicsPipeline::PipelineType::GUI_PIPELINE);
@@ -770,10 +770,12 @@ namespace sckz
         CreateDepthResources();
         CreateFramebuffers();
         descriptorPool.CreateDescriptorPool(device, swapChainImages.size());
-        guiPipeline.CreatePipeline(device, swapChainExtent, renderPass, VK_SAMPLE_COUNT_1_BIT);
+
+        dummyFbo.CreateDummyFBO(renderPass, VK_SAMPLE_COUNT_1_BIT, swapChainExtent);
+        guiPipeline.CreatePipeline(device, dummyFbo);
         for (uint32_t i = 0; i < fboPipelines.size(); i++)
         {
-            fboPipelines[i]->CreatePipeline(device, swapChainExtent, renderPass, VK_SAMPLE_COUNT_1_BIT);
+            fboPipelines[i]->CreatePipeline(device, dummyFbo);
         }
 
         for (uint32_t i = 0; i < guis.size(); i++)
@@ -1081,9 +1083,7 @@ namespace sckz
     {
         fboPipelines.push_back(new GraphicsPipeline());
         fboPipelines.back()->CreatePipeline(device,
-                                            swapChainExtent,
-                                            renderPass,
-                                            VK_SAMPLE_COUNT_1_BIT,
+                                            dummyFbo,
                                             "Resources/fbo_vertex_normal.spv",
                                             fragShader,
                                             GraphicsPipeline::PipelineType::FBO_PIPELINE);

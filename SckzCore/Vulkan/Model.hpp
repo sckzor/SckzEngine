@@ -4,6 +4,7 @@
 #include "Camera.hpp"
 #include "DescriptorPool.hpp"
 #include "Entity.hpp"
+#include "Fbo.hpp"
 #include "GraphicsPipeline.hpp"
 #include "Image.hpp"
 #include "Vertex.hpp"
@@ -34,16 +35,11 @@ namespace sckz
         VkCommandPool *    commandPool;
         DescriptorPool *   descriptorPool;
         GraphicsPipeline * pipeline;
-        VkFramebuffer *    framebuffer;
-        VkExtent2D         swapChainExtent;
         VkQueue *          queue;
-        VkRenderPass *     renderPass;
 
         const char * colorFileName;
         const char * normalFileName;
         const char * spacularFileName;
-        const char * extraFileName;
-
         const char * modelFileName;
 
         std::vector<Entity *> entities;
@@ -54,13 +50,10 @@ namespace sckz
                          const char *       spacularFileName,
                          const char *       modelFileName,
                          VkCommandPool &    commandPool,
-                         VkRenderPass &     renderPass,
                          VkDevice &         device,
                          VkPhysicalDevice & physicalDevice,
-                         VkFramebuffer &    swapChainFramebuffers,
                          GraphicsPipeline * pipeline,
                          DescriptorPool &   descriptorPool,
-                         VkExtent2D         swapChainExtent,
                          Memory &           memory,
                          VkQueue &          queue);
 

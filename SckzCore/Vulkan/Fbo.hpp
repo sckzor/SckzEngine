@@ -17,8 +17,8 @@ namespace sckz
         Image         renderedImage;
         VkFramebuffer renderedImageFrameBuffer;
 
-        VkRenderPass * renderPass;      // Duplicated
-        VkExtent2D     swapChainExtent; // Stays
+        VkRenderPass renderPass;      // Duplicated
+        VkExtent2D   swapChainExtent; // Stays
 
         DescriptorPool descriptorPool; // Duplicated
         VkQueue *      graphicsQueue;
@@ -32,23 +32,31 @@ namespace sckz
     public:
         void CreateFBO(VkPhysicalDevice &    physicalDevice,
                        VkDevice &            device,
-                       VkRenderPass &        renderPass,
                        Memory &              memory,
                        VkQueue &             graphicsQueue,
+                       VkFormat              format,
                        VkSampleCountFlagBits msaaSamples,
                        VkExtent2D            swapChainExtent);
+
+        void CreateDummyFBO(VkRenderPass & renderPass, VkSampleCountFlagBits msaaSamples, VkExtent2D swapChainExtent);
+        void RebuildSwapResources(VkSampleCountFlagBits msaaSamples, VkExtent2D swapChainExtent);
 
         void DestroyFBO();
 
     private:
+        void DestroySwapResources();
         void CreateColorResources();
         void CreateDepthResources();
-
         void CreateImage();
-
+        void CreateRenderPass();
         void CreateFramebuffer();
 
     public:
-        Image & GetRenderedImage();
+        Image &               GetImage();
+        VkFramebuffer &       GetImageFramebuffer();
+        VkSampleCountFlagBits GetMSAASamples();
+        VkExtent2D            GetSwapChainExtent();
+        VkRenderPass &        GetRenderPass();
+        void                  GetRenderPassBeginInfo(VkRenderPassBeginInfo & renderPassInfo);
     };
 } // namespace sckz

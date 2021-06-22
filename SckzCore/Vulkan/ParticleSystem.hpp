@@ -1,6 +1,7 @@
 #pragma once
 #include "../Include.hpp"
 #include "Camera.hpp"
+#include "Fbo.hpp"
 #include "GraphicsPipeline.hpp"
 #include "Image.hpp"
 
@@ -41,10 +42,7 @@ namespace sckz
         VkCommandPool *       commandPool;
         DescriptorPool *      descriptorPool;
         GraphicsPipeline *    pipeline;
-        VkFramebuffer *       framebuffer;
-        VkExtent2D            swapChainExtent;
         VkQueue *             queue;
-        VkRenderPass *        renderPass;
         Memory *              memory;
 
         const float GRAVITY = -5.1f; //
@@ -70,13 +68,10 @@ namespace sckz
                                   uint32_t           hStages,
                                   uint32_t           totalStages,
                                   VkCommandPool &    commandPool,
-                                  VkRenderPass &     renderPass,
                                   VkDevice &         device,
                                   VkPhysicalDevice & physicalDevice,
-                                  VkFramebuffer &    framebuffers,
                                   GraphicsPipeline & pipeline,
                                   DescriptorPool &   descriptorPool,
-                                  VkExtent2D         swapChainExtent,
                                   Memory &           memory,
                                   VkQueue &          queue,
                                   uint32_t           maxParticles);

@@ -26,10 +26,9 @@ namespace sckz
         descriptorPool.CreateDescriptorPool(device, 1);
         CreateSyncObjects();
 
+        fboImage.CreateFBO(physicalDevice, device, memory, graphicsQueue, format, msaaSamples, swapChainExtent);
         particlePipeline.CreatePipeline(*this->device,
-                                        swapChainExtent,
-                                        renderPass,
-                                        msaaSamples,
+                                        fboImage,
                                         "Resources/particle_vertex.spv",
                                         "Resources/particle_fragment.spv",
                                         GraphicsPipeline::PipelineType::PARTICLE_PIPELINE);
@@ -38,6 +37,8 @@ namespace sckz
     void Scene::DestroyScene()
     {
         DestroySwapResources();
+
+        fboImage.DestroyFBO();
 
         for (int i = 0; i < models.size(); i++)
         {
@@ -78,11 +79,11 @@ namespace sckz
         isUpdated       = true;
         DestroySwapResources();
 
-        CreateImage();
+        fboImage.RebuildSwapResources(msaaSamples, swapChainExtent);
         CreateRenderPass();
         for (int i = 0; i < pipelines.size(); i++)
         {
-            pipelines[i]->CreatePipeline(*device, swapChainExtent, renderPass, msaaSamples);
+            pipelines[i]->CreatePipeline(*device, fboImage);
         }
         CreateColorResources();
         CreateDepthResources();
@@ -94,7 +95,7 @@ namespace sckz
             models[i]->RebuildSwapResources(descriptorPool, swapChainExtent);
         }
 
-        particlePipeline.CreatePipeline(*device, swapChainExtent, renderPass, msaaSamples);
+        particlePipeline.CreatePipeline(*device, fboImage);
 
         for (int i = 0; i < particleSystems.size(); i++)
         {
@@ -112,7 +113,7 @@ namespace sckz
     {
         vkQueueWaitIdle(*graphicsQueue);
 
-        DestroyFramebuffers();
+        // DestroyFramebuffers();
         for (int i = 0; i < pipelines.size(); i++)
         {
             pipelines[i]->DestroyPipeline();
@@ -120,21 +121,24 @@ namespace sckz
 
         particlePipeline.DestroyPipeline();
 
-        DestroyRenderPass();
+        // DestroyRenderPass();
         descriptorPool.DestroyDescriptorPool();
+
+        // fboImage.DestroyFBO();
+        /*
         depthImage.DestroyImage();
         colorImage.DestroyImage();
 
         renderedImage.DestroyImage();
+        */
     }
 
-    void Scene::DestroyFramebuffers() { vkDestroyFramebuffer(*device, renderedImageFrameBuffer, nullptr); }
-    void Scene::DestroyRenderPass() { vkDestroyRenderPass(*device, renderPass, nullptr); }
     void Scene::DestroySyncObjects() { vkDestroyFence(*device, inFlightFence, nullptr); }
     void Scene::DestroyCommandPool() { vkDestroyCommandPool(*device, commandPool, nullptr); }
 
     void Scene::CreateImage()
     {
+        /*
         renderedImage.CreateImage(swapChainExtent.width,
                                   swapChainExtent.height,
                                   1,
@@ -149,10 +153,12 @@ namespace sckz
                                   *this->graphicsQueue);
         renderedImage.CreateTextureSampler();
         renderedImage.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
+        */
     }
 
     void Scene::CreateRenderPass()
     {
+        /*
         VkAttachmentDescription colorAttachment {};
         colorAttachment.format         = renderedImage.GetFormat();
         colorAttachment.samples        = msaaSamples;
@@ -244,6 +250,7 @@ namespace sckz
         {
             throw std::runtime_error("failed to create render pass!");
         }
+        */
     }
 
     void Scene::CreateCommandPool()
@@ -263,6 +270,7 @@ namespace sckz
 
     void Scene::CreateColorResources()
     {
+        /*
         VkFormat colorFormat = renderedImage.GetFormat();
 
         colorImage.CreateImage(swapChainExtent.width,
@@ -278,10 +286,12 @@ namespace sckz
                                memory,
                                *graphicsQueue);
         colorImage.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
+        */
     }
 
     void Scene::CreateDepthResources()
     {
+        /*
         VkFormat depthFormat = HelperMethods::FindDepthFormat(*physicalDevice);
 
         depthImage.CreateImage(swapChainExtent.width,
@@ -297,10 +307,12 @@ namespace sckz
                                memory,
                                *graphicsQueue);
         depthImage.CreateImageView(VK_IMAGE_ASPECT_DEPTH_BIT);
+        */
     }
 
     void Scene::CreateFramebuffers()
     {
+        /*
         std::vector<VkImageView> attachments;
 
         if (msaaSamples == VK_SAMPLE_COUNT_1_BIT)
@@ -328,6 +340,7 @@ namespace sckz
         {
             throw std::runtime_error("failed to create framebuffer!");
         }
+        */
     }
 
     void Scene::CreateSyncObjects()
@@ -353,11 +366,7 @@ namespace sckz
         }
 
         VkRenderPassBeginInfo renderPassInfo {};
-        renderPassInfo.sType             = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassInfo.renderPass        = renderPass;
-        renderPassInfo.framebuffer       = renderedImageFrameBuffer;
-        renderPassInfo.renderArea.offset = { 0, 0 };
-        renderPassInfo.renderArea.extent = swapChainExtent;
+        fboImage.GetRenderPassBeginInfo(renderPassInfo);
 
         std::array<VkClearValue, 2> clearValues {};
         clearValues[0].color        = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -479,9 +488,7 @@ namespace sckz
     {
         pipelines.push_back(new GraphicsPipeline());
         pipelines.back()->CreatePipeline(*device,
-                                         swapChainExtent,
-                                         renderPass,
-                                         msaaSamples,
+                                         fboImage,
                                          vertexFile,
                                          fragmentFile,
                                          GraphicsPipeline::PipelineType::MODEL_PIPELINE);
@@ -500,13 +507,10 @@ namespace sckz
                                    specularFile,
                                    modelFile,
                                    commandPool,
-                                   renderPass,
                                    *device,
                                    *physicalDevice,
-                                   renderedImageFrameBuffer,
                                    &pipeline,
                                    descriptorPool,
-                                   swapChainExtent,
                                    memory,
                                    *graphicsQueue);
         return *models.back();
@@ -568,7 +572,7 @@ namespace sckz
     Image & Scene::GetRenderedImage()
     {
         isUpdated = false;
-        return renderedImage;
+        return fboImage.GetImage();
     }
 
     ParticleSystem & Scene::CreateParticleSystem(uint32_t     numStages,
@@ -583,13 +587,10 @@ namespace sckz
                                                      hStages,
                                                      totalStages,
                                                      commandPool,
-                                                     renderPass,
                                                      *device,
                                                      *physicalDevice,
-                                                     renderedImageFrameBuffer,
                                                      particlePipeline,
                                                      descriptorPool,
-                                                     swapChainExtent,
                                                      memory,
                                                      *graphicsQueue,
                                                      numStages);

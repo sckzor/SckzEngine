@@ -3,18 +3,14 @@
 namespace sckz
 {
 
-    void GraphicsPipeline::CreatePipeline(VkDevice &            device,
-                                          VkExtent2D            extent,
-                                          VkRenderPass &        renderPass,
-                                          VkSampleCountFlagBits msaaSamples,
-                                          const char *          vertexFile,
-                                          const char *          fragmentFile,
-                                          PipelineType          type)
+    void GraphicsPipeline::CreatePipeline(VkDevice &   device,
+                                          Fbo &        fbo,
+                                          const char * vertexFile,
+                                          const char * fragmentFile,
+                                          PipelineType type)
     {
         this->device       = &device;
-        this->extent       = extent;
-        this->renderPass   = &renderPass;
-        this->msaaSamples  = msaaSamples;
+        this->fbo          = &fbo;
         this->vertexFile   = vertexFile;
         this->fragmentFile = fragmentFile;
         this->type         = type;
@@ -56,15 +52,10 @@ namespace sckz
         CreateGraphicsPipeline();
     }
 
-    void GraphicsPipeline::CreatePipeline(VkDevice &            device,
-                                          VkExtent2D            extent,
-                                          VkRenderPass &        renderPass,
-                                          VkSampleCountFlagBits msaaSamples)
+    void GraphicsPipeline::CreatePipeline(VkDevice & device, Fbo & fbo)
     {
-        this->device      = &device;
-        this->extent      = extent;
-        this->renderPass  = &renderPass;
-        this->msaaSamples = msaaSamples;
+        this->device = &device;
+        this->fbo    = &fbo;
         if (vertexFile == nullptr || fragmentFile == nullptr)
         {
             throw std::runtime_error(
@@ -221,14 +212,14 @@ namespace sckz
         VkViewport viewport {};
         viewport.x        = 0.0f;
         viewport.y        = 0.0f;
-        viewport.width    = (float)extent.width;
-        viewport.height   = (float)extent.height;
+        viewport.width    = (float)fbo->GetSwapChainExtent().width;
+        viewport.height   = (float)fbo->GetSwapChainExtent().height;
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
 
         VkRect2D scissor {};
         scissor.offset = { 0, 0 };
-        scissor.extent = extent;
+        scissor.extent = fbo->GetSwapChainExtent();
 
         VkPipelineViewportStateCreateInfo viewportState {};
         viewportState.sType         = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -257,7 +248,7 @@ namespace sckz
         VkPipelineMultisampleStateCreateInfo multisampling {};
         multisampling.sType                = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
         multisampling.sampleShadingEnable  = VK_FALSE;
-        multisampling.rasterizationSamples = msaaSamples; // TODO: Make this extensable
+        multisampling.rasterizationSamples = fbo->GetMSAASamples(); // TODO: Make this extensable
 
         VkPipelineDepthStencilStateCreateInfo depthStencil {};
         depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
@@ -336,7 +327,7 @@ namespace sckz
         pipelineInfo.pDepthStencilState  = &depthStencil;
         pipelineInfo.pColorBlendState    = &colorBlending;
         pipelineInfo.layout              = pipelineLayout;
-        pipelineInfo.renderPass          = *renderPass;
+        pipelineInfo.renderPass          = fbo->GetRenderPass();
         pipelineInfo.subpass             = 0;
         pipelineInfo.basePipelineHandle  = VK_NULL_HANDLE;
 
@@ -463,4 +454,6 @@ namespace sckz
                                0,
                                nullptr);
     }
+
+    Fbo & GraphicsPipeline::GetFbo() { return *fbo; }
 } // namespace sckz
