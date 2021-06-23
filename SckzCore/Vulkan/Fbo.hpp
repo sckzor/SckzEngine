@@ -8,7 +8,7 @@ namespace sckz
 {
     class Fbo
     {
-    public:
+    private:
         VkPhysicalDevice * physicalDevice;
         VkDevice *         device; // Stays
 
@@ -57,6 +57,7 @@ namespace sckz
         VkSampleCountFlagBits GetMSAASamples();
         VkExtent2D            GetSwapChainExtent();
         VkRenderPass &        GetRenderPass();
+        void                  CopyToFbo(Fbo & dst, VkCommandPool & pool);
         void                  GetRenderPassBeginInfo(VkRenderPassBeginInfo & renderPassInfo);
     };
 } // namespace sckz

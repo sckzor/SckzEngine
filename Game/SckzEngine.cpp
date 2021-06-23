@@ -46,11 +46,13 @@ int main()
     sckz::Entity & e2 = s2.CreateEntity(m2);
     sckz::Camera & c2 = s2.CreateCamera(45, 0.1, 10);
 
-    sckz::Gui & gui = vkan.CreateGUI("Resources/circle.png");
+    sckz::Gui & gui = vkan.CreateGUI("Resources/icon.png");
+
+    sckz::Fbo & fbo = s1.CreateFbo();
 
     gui.SetScale(200, 200);
-    gui.SetLocation(0, 0);
-    gui.SetRotationPoint(100, 100);
+    gui.SetLocation(500, 300);
+    // gui.SetRotationPoint(100, 100);
 
     // e1.SetShine(1, 10);
     // e1.SetRotation(90, 0, 0);
@@ -83,7 +85,6 @@ int main()
     {
         if (win.QueryKey('w'))
         {
-            gui.SetRotation(gui.GetRotation() + 10);
             c1.SetLocation(c1.GetLocation().x, c1.GetLocation().y - (1 * vkan.GetDeltaT()), c1.GetLocation().z);
         }
 
@@ -157,7 +158,7 @@ int main()
 
         if (win.QueryKey('u'))
         {
-            s2.Render(c2, vkan.GetDeltaT());
+            s2.Render(c2, vkan.GetDeltaT(), fbo);
 
             if (win.QueryKey('y'))
             {
@@ -170,7 +171,7 @@ int main()
         }
         else
         {
-            s1.Render(c1, vkan.GetDeltaT());
+            s1.Render(c1, vkan.GetDeltaT(), fbo);
 
             if (win.QueryKey('y'))
             {

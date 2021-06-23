@@ -36,7 +36,14 @@ namespace sckz
                                                          const VkDebugUtilsMessengerCallbackDataEXT * pCallbackData,
                                                          void *                                       pUserData)
     {
-        std::cerr << "[Validation Layer] " << pCallbackData->pMessage << std::endl;
+        if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+        {
+            std::cerr << "[Validation Error] " << pCallbackData->pMessage << std::endl;
+        }
+        else
+        {
+            std::cerr << "[Validation Layer] " << pCallbackData->pMessage << std::endl;
+        }
 
         return VK_FALSE;
     }
@@ -461,7 +468,8 @@ namespace sckz
 
         for (int i = 0; i < imageCount; i++)
         {
-            swapChainImages[i].CreateImage(device, rawSwapChainImages[i], surfaceFormat.format, 1, memory);
+            swapChainImages[i]
+                .CreateImage(device, rawSwapChainImages[i], surfaceFormat.format, 1, memory, swapChainExtent);
         }
 
         swapChainExtent = extent;

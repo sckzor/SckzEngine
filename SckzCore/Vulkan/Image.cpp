@@ -18,6 +18,8 @@ namespace sckz
                             Memory &              memory,
                             VkQueue &             queue)
     {
+        size.width           = width;
+        size.height          = height;
         this->device         = &device;
         this->physicalDevice = &physicalDevice;
         this->format         = format;
@@ -54,12 +56,18 @@ namespace sckz
         vkBindImageMemory(*this->device, image, *block->memory, block->offset);
     }
 
-    void Image::CreateImage(VkDevice & device, VkImage & image, VkFormat & format, uint32_t mipLevels, Memory & memory)
+    void Image::CreateImage(VkDevice & device,
+                            VkImage &  image,
+                            VkFormat & format,
+                            uint32_t   mipLevels,
+                            Memory &   memory,
+                            VkExtent2D size)
     {
         this->device    = &device;
         this->image     = image;
         this->format    = format;
         this->memory    = &memory;
+        this->size      = size;
         this->mipLevels = mipLevels;
         this->sampler   = VK_NULL_HANDLE;
         holdsRealImage  = false;
@@ -114,6 +122,9 @@ namespace sckz
         VkDeviceSize imageSize = texWidth * texHeight * 4;
         mipLevels              = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
 
+        size.width  = texWidth;
+        size.height = texHeight;
+
         if (!pixels)
         {
             throw std::runtime_error("failed to load texture image!");
@@ -155,6 +166,8 @@ namespace sckz
         this->device         = &device;
         this->physicalDevice = &physicalDevice;
         this->memory         = &memory;
+        size.width           = 0;
+        size.height          = 0;
 
         hostLocalBuffer.CreateBuffer(*this->physicalDevice,
                                      *this->device,
@@ -254,6 +267,14 @@ namespace sckz
             sourceStage      = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
             destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
         }
+        else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
+        {
+            barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            barrier.dstAccessMask = 0;
+
+            sourceStage      = VK_PIPELINE_STAGE_TRANSFER_BIT;
+            destinationStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+        }
         else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
                  && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
         {
@@ -278,6 +299,33 @@ namespace sckz
                              nullptr,
                              1,
                              &barrier);
+
+        imageLayout = newLayout;
+
+        cmdBuffer.EndSingleUseCommandBuffer();
+    }
+
+    void Image::CopyImage(Image & dst, VkCommandPool & pool)
+    {
+        CommandBuffer cmdBuffer;
+        cmdBuffer.BeginSingleUseCommandBuffer(*device, pool, *queue);
+
+        VkOffset3D noOffset { 0, 0, 0 };
+
+        VkImageSubresourceLayers subresourceLayers;
+        subresourceLayers.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+        subresourceLayers.baseArrayLayer = 0;
+        subresourceLayers.layerCount     = 1;
+        subresourceLayers.mipLevel       = mipLevels - 1;
+
+        VkImageCopy copyData;
+        copyData.dstOffset      = noOffset;
+        copyData.dstSubresource = subresourceLayers;
+        copyData.srcOffset      = noOffset;
+        copyData.srcSubresource = subresourceLayers;
+        copyData.extent         = VkExtent3D { size.width, size.height, 1 };
+
+        vkCmdCopyImage(cmdBuffer.GetCommandBuffer(), image, imageLayout, dst.image, dst.imageLayout, 1, &copyData);
 
         cmdBuffer.EndSingleUseCommandBuffer();
     }

@@ -23,6 +23,8 @@ namespace sckz
         VkQueue *            queue;
         bool                 holdsRealImage;
         uint32_t             mipLevels;
+        VkImageLayout        imageLayout;
+        VkExtent2D           size;
 
     public:
         void CreateImage(uint32_t              width,
@@ -42,7 +44,8 @@ namespace sckz
                          VkImage &  image,
                          VkFormat & imageFormat,
                          uint32_t   mipLevels,
-                         Memory &   memory);
+                         Memory &   memory,
+                         VkExtent2D size);
 
         void DestroyImage();
 
@@ -60,6 +63,8 @@ namespace sckz
                                      Memory &           memory,
                                      VkCommandPool &    pool,
                                      VkQueue &          queue);
+
+        void CopyImage(Image & dst, VkCommandPool & pool);
 
         void GenerateMipmaps(VkFormat imageFormat, int32_t texWidth, int32_t texHeight, VkCommandPool & pool);
 

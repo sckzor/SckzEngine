@@ -19,20 +19,16 @@ namespace sckz
         VkQueue *          graphicsQueue;  // Stays
 
         VkCommandBuffer primaryCmdBuffer; // Duplicated
-
-        // Image         renderedImage; // Stays
-        // VkFramebuffer renderedImageFrameBuffer;
-
-        // VkRenderPass renderPass;      // Duplicated
-        VkExtent2D swapChainExtent; // Stays
+        VkExtent2D      swapChainExtent;  // Stays
 
         DescriptorPool descriptorPool; // Duplicated
         VkCommandPool  commandPool;    // Duplicated
 
-        // Image colorImage; // Duplicated
         Image depthImage; // Duplicated
 
         Fbo fboImage;
+
+        Fbo copyToFbo;
 
         VkFormat format;
 
@@ -40,6 +36,7 @@ namespace sckz
 
         GraphicsPipeline particlePipeline;
 
+        std::vector<Fbo *>              fbos;
         std::vector<GraphicsPipeline *> pipelines; // Goes
         std::vector<Model *>            models;    // Goes
         std::vector<Camera *>           cameras;   // Goes
@@ -66,24 +63,15 @@ namespace sckz
         void RebuildSwapResources(VkExtent2D newExtent);
 
     private:
-        void CreateImage();
-        void CreateRenderPass();
         void CreateCommandPool();
         void CreateCommandBuffer(); // Missing implementation
-        void CreateColorResources();
-        void CreateDepthResources();
-        void CreateFramebuffers();
         void CreateSyncObjects();
 
         void RebuildCommandBuffer(); // Missing implementation
 
     private:
-        void DestroyRenderPass();
         void DestroyCommandPool();
         void DestroyCommandBuffer(); // Missing implementation
-        void DestroyColorResources();
-        void DestroyDepthResources();
-        void DestroyFramebuffers();
         void DestroySyncObjects();
 
     private:
@@ -93,7 +81,7 @@ namespace sckz
         VkSampleCountFlagBits GetTargetSampleCount(int32_t targetSampleCount);
 
     public:
-        void Render(Camera & camera, float deltaTime);
+        void Render(Camera & camera, float deltaTime, Fbo & fbo);
         void SetMSAA(int32_t targetMsaaSamples);
 
         Image & GetRenderedImage();
@@ -111,6 +99,7 @@ namespace sckz
         Camera &         CreateCamera(float fov, float near, float far);
         Entity &         CreateEntity(Model & model);
         Light &          CreateLight();
+        Fbo &            CreateFbo();
         ParticleSystem & CreateParticleSystem(uint32_t     numStages,
                                               const char * texture,
                                               uint32_t     hStages,
