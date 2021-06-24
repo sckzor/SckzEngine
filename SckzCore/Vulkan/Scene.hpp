@@ -24,11 +24,9 @@ namespace sckz
         DescriptorPool descriptorPool; // Duplicated
         VkCommandPool  commandPool;    // Duplicated
 
-        Image depthImage; // Duplicated
-
         Fbo fboImage;
 
-        Fbo copyToFbo;
+        Image copyToImage;
 
         VkFormat format;
 

@@ -307,6 +307,10 @@ namespace sckz
 
     void Image::CopyImage(Image & dst, VkCommandPool & pool)
     {
+        TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, pool);
+
+        dst.TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, pool);
+
         CommandBuffer cmdBuffer;
         cmdBuffer.BeginSingleUseCommandBuffer(*device, pool, *queue);
 
@@ -328,6 +332,8 @@ namespace sckz
         vkCmdCopyImage(cmdBuffer.GetCommandBuffer(), image, imageLayout, dst.image, dst.imageLayout, 1, &copyData);
 
         cmdBuffer.EndSingleUseCommandBuffer();
+
+        dst.TransitionImageLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, pool);
     }
 
     void Image::GenerateMipmaps(VkFormat imageFormat, int32_t texWidth, int32_t texHeight, VkCommandPool & pool)

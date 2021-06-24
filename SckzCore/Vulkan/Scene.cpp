@@ -22,7 +22,22 @@ namespace sckz
         descriptorPool.CreateDescriptorPool(device, 1);
         CreateSyncObjects();
 
-        copyToFbo.CreateFBO(physicalDevice, device, memory, graphicsQueue, format, msaaSamples, swapChainExtent);
+        copyToImage.CreateImage(swapChainExtent.width,
+                                swapChainExtent.height,
+                                1,
+                                VK_SAMPLE_COUNT_1_BIT,
+                                this->format,
+                                VK_IMAGE_TILING_OPTIMAL,
+                                VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT
+                                    | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
+                                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                                *this->device,
+                                *this->physicalDevice,
+                                memory,
+                                *this->graphicsQueue);
+        copyToImage.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
+        copyToImage.CreateTextureSampler();
+
         fboImage.CreateFBO(physicalDevice, device, memory, graphicsQueue, format, msaaSamples, swapChainExtent);
         particlePipeline.CreatePipeline(*this->device,
                                         fboImage,
@@ -36,6 +51,7 @@ namespace sckz
         DestroySwapResources();
 
         fboImage.DestroyFBO();
+        copyToImage.DestroyImage();
 
         for (uint32_t i = 0; i < models.size(); i++)
         {
@@ -339,6 +355,7 @@ namespace sckz
 
     void Scene::Render(Camera & camera, float deltaTime, Fbo & fbo)
     {
+        fboImage.GetImage().CopyImage(copyToImage, commandPool);
 
         for (uint32_t i = 0; i < models.size(); i++)
         {
@@ -380,9 +397,7 @@ namespace sckz
     Image & Scene::GetRenderedImage()
     {
         isUpdated = false;
-        fboImage.CopyToFbo(copyToFbo, commandPool);
-
-        return copyToFbo.GetImage();
+        return copyToImage;
     }
 
     ParticleSystem & Scene::CreateParticleSystem(uint32_t     numStages,
