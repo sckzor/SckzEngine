@@ -1,6 +1,7 @@
 #pragma once
 #include "../Include.hpp"
 #include "DescriptorPool.hpp"
+// #include "Filter.hpp"
 #include "HelperMethods.hpp"
 #include "Image.hpp"
 
@@ -58,6 +59,7 @@ namespace sckz
         VkExtent2D            GetSwapChainExtent();
         VkRenderPass &        GetRenderPass();
         void                  CopyToFbo(Fbo & dst, VkCommandPool & pool);
-        void                  GetRenderPassBeginInfo(VkRenderPassBeginInfo & renderPassInfo);
+        // void                  FilterImage(Filter & pipeline);
+        void GetRenderPassBeginInfo(VkRenderPassBeginInfo & renderPassInfo);
     };
 } // namespace sckz

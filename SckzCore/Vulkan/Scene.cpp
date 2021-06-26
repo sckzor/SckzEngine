@@ -38,6 +38,7 @@ namespace sckz
         copyToImage.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
         copyToImage.CreateTextureSampler();
 
+        copyToFbo.CreateFBO(physicalDevice, device, memory, graphicsQueue, format, msaaSamples, swapChainExtent);
         fboImage.CreateFBO(physicalDevice, device, memory, graphicsQueue, format, msaaSamples, swapChainExtent);
         particlePipeline.CreatePipeline(*this->device,
                                         fboImage,
@@ -52,6 +53,7 @@ namespace sckz
 
         fboImage.DestroyFBO();
         copyToImage.DestroyImage();
+        copyToFbo.DestroyFBO();
 
         for (uint32_t i = 0; i < models.size(); i++)
         {
@@ -355,7 +357,8 @@ namespace sckz
 
     void Scene::Render(Camera & camera, float deltaTime, Fbo & fbo)
     {
-        fboImage.GetImage().CopyImage(copyToImage, commandPool);
+        fboImage.CopyToFbo(copyToFbo, commandPool);
+        /// fboImage.GetImage().CopyImage(copyToImage, commandPool);
 
         for (uint32_t i = 0; i < models.size(); i++)
         {
@@ -397,7 +400,7 @@ namespace sckz
     Image & Scene::GetRenderedImage()
     {
         isUpdated = false;
-        return copyToImage;
+        return copyToFbo.GetImage();
     }
 
     ParticleSystem & Scene::CreateParticleSystem(uint32_t     numStages,

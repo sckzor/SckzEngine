@@ -148,7 +148,15 @@ namespace sckz
                     memory,
                     queue); // queue is the PRIVATE queue
 
-        TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, pool);
+        CommandBuffer cmdBuffer;
+        cmdBuffer.BeginSingleUseCommandBuffer(device, pool, queue);
+        TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED,
+                              VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                              pool,
+                              VK_IMAGE_ASPECT_COLOR_BIT,
+                              cmdBuffer);
+        cmdBuffer.EndCommandBuffer();
+
         stagingBuffer.CopyBufferToImage(image, pool, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
         // transitioned to VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL while generating mipmaps
 
@@ -211,7 +219,15 @@ namespace sckz
                     memory,
                     queue); // queue is the PRIVATE queue
 
-        TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, pool);
+        CommandBuffer cmdBuffer;
+        cmdBuffer.BeginSingleUseCommandBuffer(device, pool, queue);
+        TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED,
+                              VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                              pool,
+                              VK_IMAGE_ASPECT_COLOR_BIT,
+                              cmdBuffer);
+        cmdBuffer.EndCommandBuffer();
+
         stagingBuffer.CopyBufferToImage(image, pool, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
         // transitioned to VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL while generating mipmaps
 
@@ -238,11 +254,12 @@ namespace sckz
         }
     }
 
-    void Image::TransitionImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout, VkCommandPool & pool)
+    void Image::TransitionImageLayout(VkImageLayout         oldLayout,
+                                      VkImageLayout         newLayout,
+                                      VkCommandPool &       pool,
+                                      VkImageAspectFlagBits aspectMask,
+                                      CommandBuffer &       cmdBuffer)
     {
-        CommandBuffer cmdBuffer;
-        cmdBuffer.BeginSingleUseCommandBuffer(*device, pool, *queue);
-
         VkImageMemoryBarrier barrier {};
         barrier.sType                           = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
         barrier.oldLayout                       = oldLayout;
@@ -250,7 +267,7 @@ namespace sckz
         barrier.srcQueueFamilyIndex             = VK_QUEUE_FAMILY_IGNORED;
         barrier.dstQueueFamilyIndex             = VK_QUEUE_FAMILY_IGNORED;
         barrier.image                           = image;
-        barrier.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+        barrier.subresourceRange.aspectMask     = aspectMask;
         barrier.subresourceRange.baseMipLevel   = 0;
         barrier.subresourceRange.levelCount     = mipLevels;
         barrier.subresourceRange.baseArrayLayer = 0;
@@ -284,6 +301,14 @@ namespace sckz
             sourceStage      = VK_PIPELINE_STAGE_TRANSFER_BIT;
             destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
         }
+        else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+        {
+            barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+            sourceStage      = VK_PIPELINE_STAGE_TRANSFER_BIT;
+            destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+        }
         else
         {
             throw std::invalid_argument("unsupported layout transition!");
@@ -301,23 +326,29 @@ namespace sckz
                              &barrier);
 
         imageLayout = newLayout;
-
-        cmdBuffer.EndSingleUseCommandBuffer();
     }
 
-    void Image::CopyImage(Image & dst, VkCommandPool & pool)
+    void Image::CopyImage(Image & dst, VkCommandPool & pool, VkImageAspectFlagBits aspectMask)
     {
-        TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, pool);
-
-        dst.TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, pool);
-
         CommandBuffer cmdBuffer;
         cmdBuffer.BeginSingleUseCommandBuffer(*device, pool, *queue);
+
+        TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED,
+                              VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                              pool,
+                              aspectMask,
+                              cmdBuffer);
+
+        dst.TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED,
+                                  VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                  pool,
+                                  aspectMask,
+                                  cmdBuffer);
 
         VkOffset3D noOffset { 0, 0, 0 };
 
         VkImageSubresourceLayers subresourceLayers;
-        subresourceLayers.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+        subresourceLayers.aspectMask     = aspectMask;
         subresourceLayers.baseArrayLayer = 0;
         subresourceLayers.layerCount     = 1;
         subresourceLayers.mipLevel       = mipLevels - 1;
@@ -331,9 +362,12 @@ namespace sckz
 
         vkCmdCopyImage(cmdBuffer.GetCommandBuffer(), image, imageLayout, dst.image, dst.imageLayout, 1, &copyData);
 
+        dst.TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED,
+                                  VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                                  pool,
+                                  aspectMask,
+                                  cmdBuffer);
         cmdBuffer.EndSingleUseCommandBuffer();
-
-        dst.TransitionImageLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, pool);
     }
 
     void Image::GenerateMipmaps(VkFormat imageFormat, int32_t texWidth, int32_t texHeight, VkCommandPool & pool)

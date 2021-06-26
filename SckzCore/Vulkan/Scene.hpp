@@ -24,13 +24,11 @@ namespace sckz
         DescriptorPool descriptorPool; // Duplicated
         VkCommandPool  commandPool;    // Duplicated
 
-        Fbo fboImage;
-
-        Image copyToImage;
-
+        Fbo      fboImage;
+        Image    copyToImage;
+        Fbo      copyToFbo;
         VkFormat format;
-
-        Memory memory;
+        Memory   memory;
 
         GraphicsPipeline particlePipeline;
 

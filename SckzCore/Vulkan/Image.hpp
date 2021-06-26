@@ -64,11 +64,15 @@ namespace sckz
                                      VkCommandPool &    pool,
                                      VkQueue &          queue);
 
-        void CopyImage(Image & dst, VkCommandPool & pool);
+        void CopyImage(Image & dst, VkCommandPool & pool, VkImageAspectFlagBits aspectMask);
 
         void GenerateMipmaps(VkFormat imageFormat, int32_t texWidth, int32_t texHeight, VkCommandPool & pool);
 
-        void TransitionImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout, VkCommandPool & pool);
+        void TransitionImageLayout(VkImageLayout         oldLayout,
+                                   VkImageLayout         newLayout,
+                                   VkCommandPool &       pool,
+                                   VkImageAspectFlagBits aspectMask,
+                                   CommandBuffer &       cmdBuffer);
 
         VkSampleCountFlagBits GetMaxUsableSampleCount();
 

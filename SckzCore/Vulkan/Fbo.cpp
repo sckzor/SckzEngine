@@ -57,7 +57,7 @@ namespace sckz
                                colorFormat,
                                VK_IMAGE_TILING_OPTIMAL,
                                VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT
-                                   | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
+                                   | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
                                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
                                *device,
                                *physicalDevice,
@@ -77,7 +77,7 @@ namespace sckz
                                depthFormat,
                                VK_IMAGE_TILING_OPTIMAL,
                                VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT
-                                   | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
+                                   | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
                                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
                                *device,
                                *physicalDevice,
@@ -244,23 +244,14 @@ namespace sckz
             throw std::runtime_error("failed to create render pass!");
         }
     }
+
+    // void Fbo::FilterImage(Filter & filter) { filter.FilterFbo(*this); }
+
     void Fbo::CopyToFbo(Fbo & dst, VkCommandPool & pool)
     {
-        renderedImage.TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, pool);
-        colorImage.TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, pool);
-        depthImage.TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, pool);
-
-        dst.renderedImage.TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, pool);
-        dst.colorImage.TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, pool);
-        dst.depthImage.TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, pool);
-
-        colorImage.CopyImage(dst.colorImage, pool);
-        depthImage.CopyImage(dst.depthImage, pool);
-        renderedImage.CopyImage(dst.renderedImage, pool);
-
-        dst.renderedImage.TransitionImageLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                                VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                                                pool);
+        colorImage.CopyImage(dst.colorImage, pool, VK_IMAGE_ASPECT_COLOR_BIT);
+        depthImage.CopyImage(dst.depthImage, pool, VK_IMAGE_ASPECT_DEPTH_BIT);
+        renderedImage.CopyImage(dst.renderedImage, pool, VK_IMAGE_ASPECT_COLOR_BIT);
     }
 
     void Fbo::GetRenderPassBeginInfo(VkRenderPassBeginInfo & renderPassInfo)
