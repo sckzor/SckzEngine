@@ -155,7 +155,7 @@ namespace sckz
                               pool,
                               VK_IMAGE_ASPECT_COLOR_BIT,
                               cmdBuffer);
-        cmdBuffer.EndCommandBuffer();
+        cmdBuffer.EndSingleUseCommandBuffer();
 
         stagingBuffer.CopyBufferToImage(image, pool, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
         // transitioned to VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL while generating mipmaps
@@ -226,7 +226,7 @@ namespace sckz
                               pool,
                               VK_IMAGE_ASPECT_COLOR_BIT,
                               cmdBuffer);
-        cmdBuffer.EndCommandBuffer();
+        cmdBuffer.EndSingleUseCommandBuffer();
 
         stagingBuffer.CopyBufferToImage(image, pool, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
         // transitioned to VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL while generating mipmaps

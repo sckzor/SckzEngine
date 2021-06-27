@@ -30,7 +30,7 @@ namespace sckz
                                       tempFbo,
                                       vertexFile,
                                       fragmentFile,
-                                      GraphicsPipeline::PipelineType::PARTICLE_PIPELINE);
+                                      GraphicsPipeline::PipelineType::FBO_PIPELINE);
 
         CreateCommandBuffer();
     }

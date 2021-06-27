@@ -101,6 +101,7 @@ namespace sckz
         DestroySwapResources();
 
         fboImage.RebuildSwapResources(msaaSamples, swapChainExtent);
+        copyToFbo.RebuildSwapResources(msaaSamples, swapChainExtent);
         for (uint32_t i = 0; i < pipelines.size(); i++)
         {
             pipelines[i]->CreatePipeline(*device, fboImage);
