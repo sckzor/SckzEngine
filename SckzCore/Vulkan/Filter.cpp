@@ -128,7 +128,7 @@ namespace sckz
             throw std::runtime_error("failed to submit draw command buffer! (scene)");
         }
 
-        vkQueueWaitIdle(*graphicsQueue);
+        // vkQueueWaitIdle(*graphicsQueue);
 
         tempFbo.CopyToFbo(fbo, *commandPool);
     }

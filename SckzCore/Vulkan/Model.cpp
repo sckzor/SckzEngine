@@ -34,14 +34,16 @@ namespace sckz
                                            *this->memory,
                                            0x7FFFFFF,
                                            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                                           *this->queue);
+                                           *this->queue,
+                                           commandPool);
 
         this->deviceLocalBuffer.CreateBuffer(*this->physicalDevice,
                                              *this->device,
                                              *this->memory,
                                              0x7FFFFFF,
                                              VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                                             *this->queue);
+                                             *this->queue,
+                                             commandPool);
 
         CreateTexture(textures[0], colorFileName);
         CreateTexture(textures[1], normalFileName);
@@ -152,7 +154,7 @@ namespace sckz
             = &deviceLocalBuffer.GetBuffer(bufferSize,
                                            VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 
-        stagingBuffer.CopyBufferToBuffer(*vertexBuffer, *commandPool);
+        stagingBuffer.CopyBufferToBuffer(*vertexBuffer);
 
         stagingBuffer.DestroySubBlock();
     }
@@ -169,7 +171,7 @@ namespace sckz
         indexBuffer = &deviceLocalBuffer.GetBuffer(bufferSize,
                                                    VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
 
-        stagingBuffer.CopyBufferToBuffer(*indexBuffer, *commandPool);
+        stagingBuffer.CopyBufferToBuffer(*indexBuffer);
 
         stagingBuffer.DestroySubBlock();
     }

@@ -21,8 +21,9 @@ namespace sckz
         VkRenderPass renderPass;      // Duplicated
         VkExtent2D   swapChainExtent; // Stays
 
-        DescriptorPool descriptorPool; // Duplicated
-        VkQueue *      graphicsQueue;
+        DescriptorPool  descriptorPool; // Duplicated
+        VkQueue *       graphicsQueue;
+        VkCommandPool * pool;
 
         VkFormat format;
 
@@ -37,7 +38,8 @@ namespace sckz
                        VkQueue &             graphicsQueue,
                        VkFormat              format,
                        VkSampleCountFlagBits msaaSamples,
-                       VkExtent2D            swapChainExtent);
+                       VkExtent2D            swapChainExtent,
+                       VkCommandPool &       pool);
 
         void CreateDummyFBO(VkRenderPass & renderPass, VkSampleCountFlagBits msaaSamples, VkExtent2D swapChainExtent);
         void RebuildSwapResources(VkSampleCountFlagBits msaaSamples, VkExtent2D swapChainExtent);
@@ -58,7 +60,7 @@ namespace sckz
         VkSampleCountFlagBits GetMSAASamples();
         VkExtent2D            GetSwapChainExtent();
         VkRenderPass &        GetRenderPass();
-        void                  CopyToFbo(Fbo & dst, VkCommandPool & pool);
+        void                  CopyToFbo(Fbo & dst);
         // void                  FilterImage(Filter & pipeline);
         void GetRenderPassBeginInfo(VkRenderPassBeginInfo & renderPassInfo);
     };

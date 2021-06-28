@@ -2,7 +2,7 @@
 
 namespace sckz
 {
-    void CommandBuffer::BeginSingleUseCommandBuffer(VkDevice & device, VkCommandPool & pool, VkQueue & queue)
+    void CommandBuffer::AllocateSingleUseCommandBuffer(VkDevice & device, VkCommandPool & pool, VkQueue & queue)
     {
         this->device = &device;
         this->pool   = &pool;
@@ -14,7 +14,10 @@ namespace sckz
         allocInfo.commandBufferCount = 1;
 
         vkAllocateCommandBuffers(*this->device, &allocInfo, &this->commandBuffer);
+    }
 
+    void CommandBuffer::BeginSingleUseCommandBuffer()
+    {
         VkCommandBufferBeginInfo beginInfo {};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
@@ -32,14 +35,12 @@ namespace sckz
         submitInfo.pCommandBuffers    = &this->commandBuffer;
 
         vkQueueSubmit(*this->queue, 1, &submitInfo, VK_NULL_HANDLE);
-        vkQueueWaitIdle(*this->queue);
-
-        vkFreeCommandBuffers(*this->device, *this->pool, 1, &this->commandBuffer);
     }
 
-    void CommandBuffer::BeginCommandBuffer() { }
-
-    void CommandBuffer::EndCommandBuffer() { }
+    void CommandBuffer::FreeSingleUseCommandBuffer()
+    {
+        vkFreeCommandBuffers(*this->device, *this->pool, 1, &this->commandBuffer);
+    }
 
     VkCommandBuffer & CommandBuffer::GetCommandBuffer() { return commandBuffer; }
 } // namespace sckz

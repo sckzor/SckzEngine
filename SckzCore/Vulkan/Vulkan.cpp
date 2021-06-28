@@ -595,7 +595,8 @@ namespace sckz
                                device,
                                physicalDevice,
                                memory,
-                               graphicsQueue);
+                               graphicsQueue,
+                               commandPool);
         colorImage.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
     }
 
@@ -614,7 +615,8 @@ namespace sckz
                                device,
                                physicalDevice,
                                memory,
-                               graphicsQueue);
+                               graphicsQueue,
+                               commandPool);
         depthImage.CreateImageView(VK_IMAGE_ASPECT_DEPTH_BIT);
     }
 
@@ -950,6 +952,7 @@ namespace sckz
 
     void Vulkan::Present(Scene & scene, GraphicsPipeline & pipeline)
     {
+        // ZoneScoped("present", true);
         vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
         if (lastRenderedScene != &scene || lastRenderedPipeline != &pipeline || scene.IsUpdated())
@@ -1053,6 +1056,7 @@ namespace sckz
         lastTime    = currentTime;
         currentTime = std::chrono::high_resolution_clock::now();
         deltaTime   = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
+        // FrameMark("frame");
     }
 
     float Vulkan::GetDeltaT()

@@ -25,6 +25,7 @@ namespace sckz
         uint32_t             mipLevels;
         VkImageLayout        imageLayout;
         VkExtent2D           size;
+        CommandBuffer        cmdBuffer;
 
     public:
         void CreateImage(uint32_t              width,
@@ -38,7 +39,8 @@ namespace sckz
                          VkDevice &            device,
                          VkPhysicalDevice &    physicalDevice,
                          Memory &              memory,
-                         VkQueue &             queue);
+                         VkQueue &             queue,
+                         VkCommandPool &       pool);
 
         void CreateImage(VkDevice & device,
                          VkImage &  image,
@@ -64,13 +66,12 @@ namespace sckz
                                      VkCommandPool &    pool,
                                      VkQueue &          queue);
 
-        void CopyImage(Image & dst, VkCommandPool & pool, VkImageAspectFlagBits aspectMask);
+        void CopyImage(Image & dst, VkImageAspectFlagBits aspectMask);
 
-        void GenerateMipmaps(VkFormat imageFormat, int32_t texWidth, int32_t texHeight, VkCommandPool & pool);
+        void GenerateMipmaps(VkFormat imageFormat, int32_t texWidth, int32_t texHeight);
 
         void TransitionImageLayout(VkImageLayout         oldLayout,
                                    VkImageLayout         newLayout,
-                                   VkCommandPool &       pool,
                                    VkImageAspectFlagBits aspectMask,
                                    CommandBuffer &       cmdBuffer);
 

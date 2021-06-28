@@ -34,12 +34,30 @@ namespace sckz
                                 *this->device,
                                 *this->physicalDevice,
                                 memory,
-                                *this->graphicsQueue);
+                                *this->graphicsQueue,
+                                commandPool);
+
         copyToImage.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
         copyToImage.CreateTextureSampler();
 
-        copyToFbo.CreateFBO(physicalDevice, device, memory, graphicsQueue, format, msaaSamples, swapChainExtent);
-        fboImage.CreateFBO(physicalDevice, device, memory, graphicsQueue, format, msaaSamples, swapChainExtent);
+        copyToFbo.CreateFBO(physicalDevice,
+                            device,
+                            memory,
+                            graphicsQueue,
+                            format,
+                            msaaSamples,
+                            swapChainExtent,
+                            commandPool);
+
+        fboImage.CreateFBO(physicalDevice,
+                           device,
+                           memory,
+                           graphicsQueue,
+                           format,
+                           msaaSamples,
+                           swapChainExtent,
+                           commandPool);
+
         particlePipeline.CreatePipeline(*this->device,
                                         fboImage,
                                         "Resources/particle_vertex.spv",
@@ -339,7 +357,14 @@ namespace sckz
     Fbo & Scene::CreateFbo()
     {
         fbos.push_back(new Fbo);
-        fbos.back()->CreateFBO(*physicalDevice, *device, memory, *graphicsQueue, format, msaaSamples, swapChainExtent);
+        fbos.back()->CreateFBO(*physicalDevice,
+                               *device,
+                               memory,
+                               *graphicsQueue,
+                               format,
+                               msaaSamples,
+                               swapChainExtent,
+                               commandPool);
         return *fbos.back();
     }
 
@@ -358,7 +383,7 @@ namespace sckz
 
     void Scene::Render(Camera & camera, float deltaTime, Fbo & fbo)
     {
-        fboImage.CopyToFbo(copyToFbo, commandPool);
+        fboImage.CopyToFbo(copyToFbo);
         /// fboImage.GetImage().CopyImage(copyToImage, commandPool);
 
         for (uint32_t i = 0; i < models.size(); i++)
@@ -393,7 +418,7 @@ namespace sckz
             throw std::runtime_error("failed to submit draw command buffer! (scene)");
         }
 
-        vkQueueWaitIdle(*graphicsQueue);
+        // vkQueueWaitIdle(*graphicsQueue);
     }
 
     bool Scene::IsUpdated() { return isUpdated; }

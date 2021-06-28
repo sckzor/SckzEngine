@@ -10,13 +10,19 @@ namespace sckz
         VkDevice *      device;
         VkCommandPool * pool;
         VkQueue *       queue;
+        VkFence         inFlightFence;
 
     public:
-        void BeginSingleUseCommandBuffer(VkDevice & device, VkCommandPool & pool, VkQueue & queue);
+        void AllocateSingleUseCommandBuffer(VkDevice & device, VkCommandPool & pool, VkQueue & queue);
+
+        void BeginSingleUseCommandBuffer();
 
         void EndSingleUseCommandBuffer();
-        void BeginCommandBuffer();
-        void EndCommandBuffer();
+
+        void FreeSingleUseCommandBuffer();
+
+    private:
+        void CreateSyncObjects();
 
     public:
         VkCommandBuffer & GetCommandBuffer();

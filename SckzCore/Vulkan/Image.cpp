@@ -16,7 +16,8 @@ namespace sckz
                             VkDevice &            device,
                             VkPhysicalDevice &    physicalDevice,
                             Memory &              memory,
-                            VkQueue &             queue)
+                            VkQueue &             queue,
+                            VkCommandPool &       pool)
     {
         size.width           = width;
         size.height          = height;
@@ -48,6 +49,8 @@ namespace sckz
         {
             throw std::runtime_error("failed to create image!");
         }
+
+        cmdBuffer.AllocateSingleUseCommandBuffer(device, pool, queue);
 
         VkMemoryRequirements memRequirements;
         vkGetImageMemoryRequirements(*this->device, image, &memRequirements);
@@ -108,14 +111,16 @@ namespace sckz
                                      *this->memory,
                                      0x7FFFFFF,
                                      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                                     queue);
+                                     queue,
+                                     pool);
 
         deviceLocalBuffer.CreateBuffer(*this->physicalDevice,
                                        *this->device,
                                        *this->memory,
                                        0x7FFFFFF,
                                        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                                       queue);
+                                       queue,
+                                       pool);
 
         int          texWidth, texHeight, texChannels;
         stbi_uc *    pixels    = stbi_load(fileName, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
@@ -146,23 +151,22 @@ namespace sckz
                     *this->device,
                     *this->physicalDevice,
                     memory,
-                    queue); // queue is the PRIVATE queue
+                    queue,
+                    pool); // queue is the PRIVATE queue
 
-        CommandBuffer cmdBuffer;
-        cmdBuffer.BeginSingleUseCommandBuffer(device, pool, queue);
+        cmdBuffer.BeginSingleUseCommandBuffer();
         TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED,
                               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                              pool,
                               VK_IMAGE_ASPECT_COLOR_BIT,
                               cmdBuffer);
         cmdBuffer.EndSingleUseCommandBuffer();
 
-        stagingBuffer.CopyBufferToImage(image, pool, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
+        stagingBuffer.CopyBufferToImage(image, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
         // transitioned to VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL while generating mipmaps
 
         stagingBuffer.DestroySubBlock();
 
-        GenerateMipmaps(VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight, pool);
+        GenerateMipmaps(VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight);
     }
 
     void Image::CreateBlankTextureImage(VkDevice &         device,
@@ -182,14 +186,16 @@ namespace sckz
                                      *this->memory,
                                      0x7FFFFFF,
                                      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                                     queue);
+                                     queue,
+                                     pool);
 
         deviceLocalBuffer.CreateBuffer(*this->physicalDevice,
                                        *this->device,
                                        *this->memory,
                                        0x7FFFFFF,
                                        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                                       queue);
+                                       queue,
+                                       pool);
 
         int          texWidth = 1, texHeight = 1;
         char *       dummyData = new char;
@@ -217,23 +223,23 @@ namespace sckz
                     *this->device,
                     *this->physicalDevice,
                     memory,
-                    queue); // queue is the PRIVATE queue
+                    queue,
+                    pool); // queue is the PRIVATE queue
 
         CommandBuffer cmdBuffer;
-        cmdBuffer.BeginSingleUseCommandBuffer(device, pool, queue);
+        cmdBuffer.BeginSingleUseCommandBuffer();
         TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED,
                               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                              pool,
                               VK_IMAGE_ASPECT_COLOR_BIT,
                               cmdBuffer);
         cmdBuffer.EndSingleUseCommandBuffer();
 
-        stagingBuffer.CopyBufferToImage(image, pool, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
+        stagingBuffer.CopyBufferToImage(image, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
         // transitioned to VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL while generating mipmaps
 
         stagingBuffer.DestroySubBlock();
 
-        GenerateMipmaps(VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight, pool);
+        GenerateMipmaps(VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight);
     }
 
     void Image::DestroyImage()
@@ -252,11 +258,12 @@ namespace sckz
         {
             memory->DeallocateMemory(*block);
         }
+
+        cmdBuffer.FreeSingleUseCommandBuffer();
     }
 
     void Image::TransitionImageLayout(VkImageLayout         oldLayout,
                                       VkImageLayout         newLayout,
-                                      VkCommandPool &       pool,
                                       VkImageAspectFlagBits aspectMask,
                                       CommandBuffer &       cmdBuffer)
     {
@@ -328,20 +335,14 @@ namespace sckz
         imageLayout = newLayout;
     }
 
-    void Image::CopyImage(Image & dst, VkCommandPool & pool, VkImageAspectFlagBits aspectMask)
+    void Image::CopyImage(Image & dst, VkImageAspectFlagBits aspectMask)
     {
-        CommandBuffer cmdBuffer;
-        cmdBuffer.BeginSingleUseCommandBuffer(*device, pool, *queue);
+        cmdBuffer.BeginSingleUseCommandBuffer();
 
-        TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED,
-                              VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                              pool,
-                              aspectMask,
-                              cmdBuffer);
+        TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, aspectMask, cmdBuffer);
 
         dst.TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED,
                                   VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                  pool,
                                   aspectMask,
                                   cmdBuffer);
 
@@ -364,13 +365,12 @@ namespace sckz
 
         dst.TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED,
                                   VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                                  pool,
                                   aspectMask,
                                   cmdBuffer);
         cmdBuffer.EndSingleUseCommandBuffer();
     }
 
-    void Image::GenerateMipmaps(VkFormat imageFormat, int32_t texWidth, int32_t texHeight, VkCommandPool & pool)
+    void Image::GenerateMipmaps(VkFormat imageFormat, int32_t texWidth, int32_t texHeight)
     {
         // Check if image format supports linear blitting
         VkFormatProperties formatProperties;
@@ -381,8 +381,7 @@ namespace sckz
             throw std::runtime_error("texture image format does not support linear blitting!");
         }
 
-        CommandBuffer cmdBuffer;
-        cmdBuffer.BeginSingleUseCommandBuffer(*device, pool, *queue);
+        cmdBuffer.BeginSingleUseCommandBuffer();
 
         VkImageMemoryBarrier barrier {};
         barrier.sType                           = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;

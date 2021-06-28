@@ -32,9 +32,9 @@ namespace sckz
 
             SubBlock() = default;
 
-            void CopyBufferToBuffer(Buffer::SubBlock & buffer, VkCommandPool & pool);
+            void CopyBufferToBuffer(Buffer::SubBlock & buffer);
 
-            void CopyBufferToImage(VkImage & image, VkCommandPool & pool, uint32_t width, uint32_t height);
+            void CopyBufferToImage(VkImage & image, uint32_t width, uint32_t height);
 
             void CopyDataToBuffer(void * data, uint32_t dataSize);
 
@@ -48,7 +48,9 @@ namespace sckz
         uint32_t              blockSize;
         VkQueue *             queue;
         Memory *              memory;
+        VkCommandPool *       pool;
         VkMemoryPropertyFlags memoryProperty;
+        CommandBuffer         cmdBuffer;
 
     public:
         void CreateBuffer(VkPhysicalDevice &    physicalDevice,
@@ -56,7 +58,8 @@ namespace sckz
                           Memory &              memory,
                           uint32_t              blockSize,
                           VkMemoryPropertyFlags memoryProperty,
-                          VkQueue &             queue);
+                          VkQueue &             queue,
+                          VkCommandPool &       pool);
 
         SubBlock & GetBuffer(uint32_t size, VkBufferUsageFlags usage);
         // Stuff

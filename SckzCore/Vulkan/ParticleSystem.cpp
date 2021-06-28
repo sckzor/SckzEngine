@@ -34,7 +34,8 @@ namespace sckz
                                            *this->memory,
                                            0x7FFFFFF,
                                            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                                           *this->queue);
+                                           *this->queue,
+                                           commandPool);
 
         texture.CreateTextureImage(textureFileName, *this->device, *this->physicalDevice, memory, commandPool, queue);
 

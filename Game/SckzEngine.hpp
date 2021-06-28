@@ -1,5 +1,4 @@
 #pragma once
-#define TRACY_ENABLE
 #include "../SckzCore/Extra/Random.hpp"
 #include "../SckzCore/Vulkan/Entity.hpp"
 #include "../SckzCore/Vulkan/Fbo.hpp"

@@ -8,7 +8,8 @@ namespace sckz
                         VkQueue &             graphicsQueue,
                         VkFormat              format,
                         VkSampleCountFlagBits msaaSamples,
-                        VkExtent2D            swapChainExtent)
+                        VkExtent2D            swapChainExtent,
+                        VkCommandPool &       pool)
     {
         this->physicalDevice  = &physicalDevice;
         this->device          = &device;
@@ -17,6 +18,7 @@ namespace sckz
         this->graphicsQueue   = &graphicsQueue;
         this->msaaSamples     = msaaSamples;
         this->swapChainExtent = swapChainExtent;
+        this->pool            = &pool;
 
         CreateImage();
         CreateRenderPass();
@@ -62,7 +64,8 @@ namespace sckz
                                *device,
                                *physicalDevice,
                                *memory,
-                               *graphicsQueue);
+                               *graphicsQueue,
+                               *pool);
         colorImage.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
     }
 
@@ -82,7 +85,8 @@ namespace sckz
                                *device,
                                *physicalDevice,
                                *memory,
-                               *graphicsQueue);
+                               *graphicsQueue,
+                               *pool);
         depthImage.CreateImageView(VK_IMAGE_ASPECT_DEPTH_BIT);
     }
 
@@ -132,7 +136,8 @@ namespace sckz
                                   *this->device,
                                   *this->physicalDevice,
                                   *memory,
-                                  *this->graphicsQueue);
+                                  *this->graphicsQueue,
+                                  *pool);
         renderedImage.CreateTextureSampler();
         renderedImage.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
     }
@@ -247,11 +252,11 @@ namespace sckz
 
     // void Fbo::FilterImage(Filter & filter) { filter.FilterFbo(*this); }
 
-    void Fbo::CopyToFbo(Fbo & dst, VkCommandPool & pool)
+    void Fbo::CopyToFbo(Fbo & dst)
     {
-        colorImage.CopyImage(dst.colorImage, pool, VK_IMAGE_ASPECT_COLOR_BIT);
-        depthImage.CopyImage(dst.depthImage, pool, VK_IMAGE_ASPECT_DEPTH_BIT);
-        renderedImage.CopyImage(dst.renderedImage, pool, VK_IMAGE_ASPECT_COLOR_BIT);
+        colorImage.CopyImage(dst.colorImage, VK_IMAGE_ASPECT_COLOR_BIT);
+        depthImage.CopyImage(dst.depthImage, VK_IMAGE_ASPECT_DEPTH_BIT);
+        renderedImage.CopyImage(dst.renderedImage, VK_IMAGE_ASPECT_COLOR_BIT);
     }
 
     void Fbo::GetRenderPassBeginInfo(VkRenderPassBeginInfo & renderPassInfo)

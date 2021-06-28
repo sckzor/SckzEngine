@@ -7,13 +7,15 @@ namespace sckz
                               Memory &              memory,
                               uint32_t              blockSize,
                               VkMemoryPropertyFlags memoryProperty,
-                              VkQueue &             queue)
+                              VkQueue &             queue,
+                              VkCommandPool &       pool)
     {
         this->device         = &device;
         this->blockSize      = blockSize;
         this->queue          = &queue;
         this->memory         = &memory;
         this->memoryProperty = memoryProperty;
+        cmdBuffer.AllocateSingleUseCommandBuffer(device, pool, queue);
     }
 
     Buffer::SubBlock & Buffer::GetBuffer(uint32_t size, VkBufferUsageFlags usage)
@@ -103,31 +105,35 @@ namespace sckz
 
             delete blocks[i];
         }
+
+        cmdBuffer.FreeSingleUseCommandBuffer();
     }
 
-    void Buffer::SubBlock::CopyBufferToBuffer(Buffer::SubBlock & buffer, VkCommandPool & pool)
+    void Buffer::SubBlock::CopyBufferToBuffer(Buffer::SubBlock & buffer)
     {
         if (this->size != buffer.size)
         {
             throw std::runtime_error("Buffer Size Mis-match!");
         }
 
-        CommandBuffer cmdBuffer;
-        cmdBuffer.BeginSingleUseCommandBuffer(*this->parent->parent->device, pool, *this->parent->parent->queue);
+        parent->parent->cmdBuffer.BeginSingleUseCommandBuffer();
 
         VkBufferCopy copyRegion {};
         copyRegion.dstOffset = buffer.offset;
         copyRegion.srcOffset = this->offset;
         copyRegion.size      = this->offset + this->size;
-        vkCmdCopyBuffer(cmdBuffer.GetCommandBuffer(), this->parent->buffer, buffer.parent->buffer, 1, &copyRegion);
+        vkCmdCopyBuffer(parent->parent->cmdBuffer.GetCommandBuffer(),
+                        this->parent->buffer,
+                        buffer.parent->buffer,
+                        1,
+                        &copyRegion);
 
-        cmdBuffer.EndSingleUseCommandBuffer();
+        parent->parent->cmdBuffer.EndSingleUseCommandBuffer();
     }
 
-    void Buffer::SubBlock::CopyBufferToImage(VkImage & image, VkCommandPool & pool, uint32_t width, uint32_t height)
+    void Buffer::SubBlock::CopyBufferToImage(VkImage & image, uint32_t width, uint32_t height)
     {
-        CommandBuffer cmdBuffer;
-        cmdBuffer.BeginSingleUseCommandBuffer(*this->parent->parent->device, pool, *this->parent->parent->queue);
+        parent->parent->cmdBuffer.BeginSingleUseCommandBuffer();
 
         VkBufferImageCopy region {};
         region.bufferOffset                    = this->offset;
@@ -140,14 +146,14 @@ namespace sckz
         region.imageOffset                     = { 0, 0, 0 };
         region.imageExtent                     = { width, height, 1 };
 
-        vkCmdCopyBufferToImage(cmdBuffer.GetCommandBuffer(),
+        vkCmdCopyBufferToImage(parent->parent->cmdBuffer.GetCommandBuffer(),
                                this->parent->buffer,
                                image,
                                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                1,
                                &region);
 
-        cmdBuffer.EndSingleUseCommandBuffer();
+        parent->parent->cmdBuffer.EndSingleUseCommandBuffer();
     }
 
     void Buffer::SubBlock::DestroySubBlock() {};
