@@ -164,6 +164,7 @@ namespace sckz
     }
 
     void Scene::DestroySyncObjects() { vkDestroyFence(*device, inFlightFence, nullptr); }
+
     void Scene::DestroyCommandPool() { vkDestroyCommandPool(*device, commandPool, nullptr); }
 
     void Scene::CreateCommandPool()
@@ -183,6 +184,9 @@ namespace sckz
 
     void Scene::CreateSyncObjects()
     {
+        VkSemaphoreCreateInfo semaphoreInfo {};
+        semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
         VkFenceCreateInfo fenceInfo {};
         fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
         fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
@@ -383,9 +387,6 @@ namespace sckz
 
     void Scene::Render(Camera & camera, float deltaTime, Fbo & fbo)
     {
-        fboImage.CopyToFbo(copyToFbo);
-        /// fboImage.GetImage().CopyImage(copyToImage, commandPool);
-
         for (uint32_t i = 0; i < models.size(); i++)
         {
             models[i]->Update(camera);
@@ -396,10 +397,11 @@ namespace sckz
             particleSystems[i]->Update(camera, deltaTime);
         }
 
-        RebuildCommandBuffer();
-
         vkWaitForFences(*device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
-        vkResetFences(*device, 1, &inFlightFence);
+        fboImage.CopyToFbo(copyToFbo);
+        /// fboImage.GetImage().CopyImage(copyToImage, commandPool);
+
+        RebuildCommandBuffer();
 
         VkSubmitInfo submitInfo {};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -411,14 +413,14 @@ namespace sckz
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers    = &primaryCmdBuffer;
 
-        submitInfo.signalSemaphoreCount = 0;
+        vkResetFences(*device, 1, &inFlightFence);
 
         if (vkQueueSubmit(*graphicsQueue, 1, &submitInfo, inFlightFence) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to submit draw command buffer! (scene)");
         }
 
-        vkQueueWaitIdle(*graphicsQueue);
+        // vkQueueWaitIdle(*graphicsQueue); // TODO: GET RID OF THIS
     }
 
     bool Scene::IsUpdated() { return isUpdated; }

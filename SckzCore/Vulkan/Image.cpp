@@ -31,6 +31,8 @@ namespace sckz
         this->sampler        = VK_NULL_HANDLE;
         holdsRealImage       = true;
 
+        CreateSyncObjects();
+
         VkImageCreateInfo imageInfo {};
         imageInfo.sType         = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         imageInfo.imageType     = VK_IMAGE_TYPE_2D;
@@ -51,12 +53,32 @@ namespace sckz
             throw std::runtime_error("failed to create image!");
         }
 
+        CreateCommandBuffer();
+
         VkMemoryRequirements memRequirements;
         vkGetImageMemoryRequirements(*this->device, image, &memRequirements);
 
         block = &memory.AllocateMemory(memRequirements, properties);
         vkBindImageMemory(*this->device, image, *block->memory, block->offset);
     }
+
+    void Image::CreateCommandBuffer()
+    {
+        VkCommandBufferAllocateInfo allocInfo {};
+        allocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocInfo.commandPool        = *pool;
+        allocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        allocInfo.commandBufferCount = 1;
+
+        if (vkAllocateCommandBuffers(*device, &allocInfo, &copyCmdBuffer) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to allocate command buffers!");
+        }
+    }
+
+    void Image::DestroyCommandBuffer() { vkFreeCommandBuffers(*device, *pool, 1, &copyCmdBuffer); }
+
+    void Image::DestroySyncObjects() { vkDestroyFence(*device, imageInFlight, nullptr); }
 
     void Image::CreateImage(VkDevice & device,
                             VkImage &  image,
@@ -158,7 +180,7 @@ namespace sckz
         TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED,
                               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                               VK_IMAGE_ASPECT_COLOR_BIT,
-                              cmdBuffer);
+                              cmdBuffer.GetCommandBuffer());
         cmdBuffer.EndSingleUseCommandBuffer();
 
         stagingBuffer.CopyBufferToImage(image, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
@@ -231,7 +253,7 @@ namespace sckz
         TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED,
                               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                               VK_IMAGE_ASPECT_COLOR_BIT,
-                              cmdBuffer);
+                              cmdBuffer.GetCommandBuffer());
         cmdBuffer.EndSingleUseCommandBuffer();
 
         stagingBuffer.CopyBufferToImage(image, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
@@ -258,12 +280,18 @@ namespace sckz
         {
             memory->DeallocateMemory(*block);
         }
+
+        if (copyCmdBuffer != nullptr)
+        {
+            DestroySyncObjects();
+            DestroyCommandBuffer();
+        }
     }
 
     void Image::TransitionImageLayout(VkImageLayout         oldLayout,
                                       VkImageLayout         newLayout,
                                       VkImageAspectFlagBits aspectMask,
-                                      CommandBuffer &       cmdBuffer)
+                                      VkCommandBuffer &     cmdBuffer)
     {
         VkImageMemoryBarrier barrier {};
         barrier.sType                           = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -319,31 +347,58 @@ namespace sckz
             throw std::invalid_argument("unsupported layout transition!");
         }
 
-        vkCmdPipelineBarrier(cmdBuffer.GetCommandBuffer(),
-                             sourceStage,
-                             destinationStage,
-                             0,
-                             0,
-                             nullptr,
-                             0,
-                             nullptr,
-                             1,
-                             &barrier);
+        vkCmdPipelineBarrier(cmdBuffer, sourceStage, destinationStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
 
         imageLayout = newLayout;
     }
 
+    void Image::CreateSyncObjects()
+    {
+        VkSemaphoreCreateInfo semaphoreInfo {};
+        semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+        VkFenceCreateInfo fenceInfo {};
+        fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+        fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+        if (vkCreateFence(*device, &fenceInfo, nullptr, &imageInFlight) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to create synchronization objects for a frame!");
+        }
+    }
+
+    void Image::BeginCommandBuffer()
+    {
+        VkCommandBufferBeginInfo beginInfo {};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+        if (vkBeginCommandBuffer(copyCmdBuffer, &beginInfo) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to begin recording command buffer!");
+        }
+    }
+
+    void Image::EndCommandBuffer()
+    {
+        if (vkEndCommandBuffer(copyCmdBuffer) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to record command buffer!");
+        }
+    }
+
     void Image::CopyImage(Image & dst, VkImageAspectFlagBits aspectMask)
     {
-        CommandBuffer cmdBuffer;
-        cmdBuffer.BeginSingleUseCommandBuffer(*device, *pool, *queue);
+        BeginCommandBuffer();
 
-        TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, aspectMask, cmdBuffer);
+        TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED,
+                              VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                              aspectMask,
+                              copyCmdBuffer);
 
         dst.TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED,
                                   VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                   aspectMask,
-                                  cmdBuffer);
+                                  copyCmdBuffer);
 
         VkOffset3D noOffset { 0, 0, 0 };
 
@@ -360,13 +415,28 @@ namespace sckz
         copyData.srcSubresource = subresourceLayers;
         copyData.extent         = VkExtent3D { size.width, size.height, 1 };
 
-        vkCmdCopyImage(cmdBuffer.GetCommandBuffer(), image, imageLayout, dst.image, dst.imageLayout, 1, &copyData);
+        vkCmdCopyImage(copyCmdBuffer, image, imageLayout, dst.image, dst.imageLayout, 1, &copyData);
 
         dst.TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED,
                                   VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                                   aspectMask,
-                                  cmdBuffer);
-        cmdBuffer.EndSingleUseCommandBuffer();
+                                  copyCmdBuffer);
+        EndCommandBuffer();
+
+        vkWaitForFences(*device, 1, &imageInFlight, VK_TRUE, UINT64_MAX);
+        vkResetFences(*device, 1, &imageInFlight);
+
+        VkSubmitInfo submitInfo {};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+        VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+        submitInfo.waitSemaphoreCount     = 0;
+        submitInfo.pWaitDstStageMask      = waitStages;
+
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers    = &copyCmdBuffer;
+
+        vkQueueSubmit(*queue, 1, &submitInfo, imageInFlight);
     }
 
     void Image::GenerateMipmaps(VkFormat imageFormat, int32_t texWidth, int32_t texHeight)

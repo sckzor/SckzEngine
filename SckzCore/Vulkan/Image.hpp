@@ -26,6 +26,8 @@ namespace sckz
         VkImageLayout        imageLayout;
         VkExtent2D           size;
         VkCommandPool *      pool;
+        VkCommandBuffer      copyCmdBuffer;
+        VkFence              imageInFlight;
 
     public:
         void CreateImage(uint32_t              width,
@@ -67,17 +69,25 @@ namespace sckz
                                      VkQueue &          queue);
 
         void CopyImage(Image & dst, VkImageAspectFlagBits aspectMask);
-
         void GenerateMipmaps(VkFormat imageFormat, int32_t texWidth, int32_t texHeight);
 
         void TransitionImageLayout(VkImageLayout         oldLayout,
                                    VkImageLayout         newLayout,
                                    VkImageAspectFlagBits aspectMask,
-                                   CommandBuffer &       cmdBuffer);
+                                   VkCommandBuffer &     cmdBuffer);
 
         VkSampleCountFlagBits GetMaxUsableSampleCount();
 
         void CreateTextureSampler();
+
+    private:
+        void CreateCommandBuffer();
+        void DestroyCommandBuffer();
+        void CreateSyncObjects();
+        void DestroySyncObjects();
+
+        void BeginCommandBuffer();
+        void EndCommandBuffer();
 
     public:
         VkImageView & GetImageView();

@@ -47,7 +47,7 @@ Time behind schedule: 2 weeks
 - [x] Add an options for on-demand changes to the swap chain like locked refresh rate and stuff like that.
 - [x] Particles.
 - [x] Finish the _vulkan_ memory manager.
-- [ ] Optimize, Optimize, Optimize.
+- [x] Optimize, Optimize, Optimize.
 - [x] Simple GUIs.
 - [ ] Advanced Lighting.
 - [ ] Bloom / Merge shader.

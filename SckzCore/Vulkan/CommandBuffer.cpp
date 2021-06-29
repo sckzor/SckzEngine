@@ -2,6 +2,7 @@
 
 namespace sckz
 {
+    /* WARNING THIS OPPERATION IS EXTREMELY EXPESNIVE! CALL AS LITTLE AS POSSIBLE DURING OPPERATION!!!! */
     void CommandBuffer::BeginSingleUseCommandBuffer(VkDevice & device, VkCommandPool & pool, VkQueue & queue)
     {
         this->device = &device;
@@ -23,6 +24,7 @@ namespace sckz
         vkBeginCommandBuffer(this->commandBuffer, &beginInfo);
     }
 
+    /* WARNING THIS OPPERATION IS EXTREMELY EXPESNIVE! CALL AS LITTLE AS POSSIBLE DURING OPPERATION!!!! */
     void CommandBuffer::EndSingleUseCommandBuffer()
     {
         vkEndCommandBuffer(this->commandBuffer);
@@ -33,7 +35,7 @@ namespace sckz
         submitInfo.pCommandBuffers    = &this->commandBuffer;
 
         vkQueueSubmit(*this->queue, 1, &submitInfo, VK_NULL_HANDLE);
-        vkQueueWaitIdle(*this->queue);
+        vkQueueWaitIdle(*this->queue); // OMG, MY PERFORMANCE!!!!!!
 
         vkFreeCommandBuffers(*this->device, *this->pool, 1, &this->commandBuffer);
     }
