@@ -418,7 +418,7 @@ namespace sckz
             throw std::runtime_error("failed to submit draw command buffer! (scene)");
         }
 
-        // vkQueueWaitIdle(*graphicsQueue);
+        vkQueueWaitIdle(*graphicsQueue);
     }
 
     bool Scene::IsUpdated() { return isUpdated; }
