@@ -27,6 +27,7 @@ namespace sckz
         this->queue          = &queue;
         this->mipLevels      = mipLevels;
         this->memory         = &memory;
+        this->pool           = &pool;
         this->sampler        = VK_NULL_HANDLE;
         holdsRealImage       = true;
 
@@ -49,8 +50,6 @@ namespace sckz
         {
             throw std::runtime_error("failed to create image!");
         }
-
-        cmdBuffer.AllocateSingleUseCommandBuffer(device, pool, queue);
 
         VkMemoryRequirements memRequirements;
         vkGetImageMemoryRequirements(*this->device, image, &memRequirements);
@@ -154,7 +153,8 @@ namespace sckz
                     queue,
                     pool); // queue is the PRIVATE queue
 
-        cmdBuffer.BeginSingleUseCommandBuffer();
+        CommandBuffer cmdBuffer;
+        cmdBuffer.BeginSingleUseCommandBuffer(device, pool, queue);
         TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED,
                               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                               VK_IMAGE_ASPECT_COLOR_BIT,
@@ -227,7 +227,7 @@ namespace sckz
                     pool); // queue is the PRIVATE queue
 
         CommandBuffer cmdBuffer;
-        cmdBuffer.BeginSingleUseCommandBuffer();
+        cmdBuffer.BeginSingleUseCommandBuffer(device, pool, queue);
         TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED,
                               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                               VK_IMAGE_ASPECT_COLOR_BIT,
@@ -258,8 +258,6 @@ namespace sckz
         {
             memory->DeallocateMemory(*block);
         }
-
-        cmdBuffer.FreeSingleUseCommandBuffer();
     }
 
     void Image::TransitionImageLayout(VkImageLayout         oldLayout,
@@ -337,7 +335,8 @@ namespace sckz
 
     void Image::CopyImage(Image & dst, VkImageAspectFlagBits aspectMask)
     {
-        cmdBuffer.BeginSingleUseCommandBuffer();
+        CommandBuffer cmdBuffer;
+        cmdBuffer.BeginSingleUseCommandBuffer(*device, *pool, *queue);
 
         TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, aspectMask, cmdBuffer);
 
@@ -381,7 +380,8 @@ namespace sckz
             throw std::runtime_error("texture image format does not support linear blitting!");
         }
 
-        cmdBuffer.BeginSingleUseCommandBuffer();
+        CommandBuffer cmdBuffer;
+        cmdBuffer.BeginSingleUseCommandBuffer(*device, *pool, *queue);
 
         VkImageMemoryBarrier barrier {};
         barrier.sType                           = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;

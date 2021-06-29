@@ -25,7 +25,7 @@ namespace sckz
         uint32_t             mipLevels;
         VkImageLayout        imageLayout;
         VkExtent2D           size;
-        CommandBuffer        cmdBuffer;
+        VkCommandPool *      pool;
 
     public:
         void CreateImage(uint32_t              width,
