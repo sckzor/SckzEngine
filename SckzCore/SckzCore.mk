@@ -4,8 +4,8 @@ all: SckzCore.a
 
 # C++ based make information
 
-SckzCore.a:build/Scene.o build/Gui.o build/ParticleSystem.o build/Buffer.o build/CommandBuffer.o build/HelperMethods.o build/Image.o build/Memory.o build/Model.o build/Entity.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o build/Light.o  build/Camera.o build/Fbo.o $(INCLUDE)
-	ar rvs SckzCore.a build/Buffer.o build/ParticleSystem.o build/Gui.o build/Scene.o build/HelperMethods.o build/CommandBuffer.o build/Image.o build/Memory.o build/Model.o build/Entity.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o build/Camera.o build/Light.o build/Fbo.o
+SckzCore.a:build/Scene.o build/Gui.o build/ParticleSystem.o build/Buffer.o build/CommandBuffer.o build/Filter.o build/HelperMethods.o build/Image.o build/Memory.o build/Model.o build/Entity.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o build/Light.o  build/Camera.o build/Fbo.o $(INCLUDE)
+	ar rvs SckzCore.a build/Buffer.o build/ParticleSystem.o build/Gui.o build/Scene.o build/Filter.o build/HelperMethods.o build/CommandBuffer.o build/Image.o build/Memory.o build/Model.o build/Entity.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o build/Camera.o build/Light.o build/Fbo.o
 
 build/Buffer.o: $(VK_PATH)/Buffer.cpp $(VK_PATH)/Buffer.hpp $(VK_PATH)/Memory.hpp $(VK_PATH)/CommandBuffer.hpp $(INCLUDE)
 	g++ $(CFLAGS) -c $(VK_PATH)/Buffer.cpp -o build/Buffer.o $(LDFLAGS)
@@ -57,6 +57,9 @@ build/ParticleSystem.o: $(VK_PATH)/ParticleSystem.cpp $(VK_PATH)/ParticleSystem.
 
 build/Fbo.o: $(VK_PATH)/Fbo.cpp $(VK_PATH)/Fbo.hpp $(VK_PATH)/DescriptorPool.hpp $(VK_PATH)/HelperMethods.hpp $(VK_PATH)/Image.hpp
 	g++ $(CFLAGS) -c $(VK_PATH)/Fbo.cpp -o build/Fbo.o $(LDFLAGS)
+
+build/Filter.o: $(VK_PATH)/Filter.cpp $(VK_PATH)/Filter.hpp $(VK_PATH)/CommandBuffer.hpp $(VK_PATH)/GraphicsPipeline.hpp $(VK_PATH)/Image.hpp $(VK_PATH)/Memory.hpp $(INCLUDE)
+	g++ $(CFLAGS) -c $(VK_PATH)/Filter.cpp -o build/Filter.o $(LDFLAGS)
 
 clean:
 	rm -f build/*.o

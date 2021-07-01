@@ -813,7 +813,7 @@ namespace sckz
         }
     }
 
-    void Vulkan::CreateCommandBuffers(Scene * scene, GraphicsPipeline * pipeline)
+    void Vulkan::CreateCommandBuffers(Fbo * fbo, GraphicsPipeline * pipeline)
     {
         commandBuffers.resize(swapChainFramebuffers.size());
 
@@ -865,7 +865,7 @@ namespace sckz
 
             VkDescriptorSet ds;
 
-            pipeline->BindShaderData(nullptr, &scene->GetRenderedImage(), nullptr, descriptorPool, &ds);
+            pipeline->BindShaderData(nullptr, &fbo->GetImage(), nullptr, descriptorPool, &ds);
 
             vkCmdBindDescriptorSets(commandBuffers[i],
                                     VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -950,16 +950,15 @@ namespace sckz
 
     void Vulkan::RebuildCommandBuffers(Scene * scene, GraphicsPipeline * pipeline) { }
 
-    void Vulkan::Present(Scene & scene, GraphicsPipeline & pipeline)
+    void Vulkan::Present(Fbo & fbo, GraphicsPipeline & pipeline)
     {
-        // ZoneScoped("present", true);
         vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
-        if (lastRenderedScene != &scene || lastRenderedPipeline != &pipeline || scene.IsUpdated())
+        if (lastRenderedFbo != &fbo || lastRenderedPipeline != &pipeline)
         {
-            CreateCommandBuffers(&scene, &pipeline);
+            CreateCommandBuffers(&fbo, &pipeline);
             lastRenderedPipeline = &pipeline;
-            lastRenderedScene    = &scene;
+            lastRenderedFbo      = &fbo;
         }
 
         uint32_t imageIndex;

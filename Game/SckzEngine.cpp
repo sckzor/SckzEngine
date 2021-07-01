@@ -50,6 +50,8 @@ int main()
 
     sckz::Fbo & fbo = s1.CreateFbo();
 
+    sckz::Filter fil = s1.CreateFilter("Resources/fbo_fragment_invert.spv");
+
     gui.SetScale(200, 200);
     gui.SetLocation(500, 300);
     // gui.SetRotationPoint(100, 100);
@@ -154,32 +156,35 @@ int main()
             s2.SetMSAA(8);
         }
 
-        win.Update();
-
         if (win.QueryKey('u'))
         {
             s2.Render(c2, vkan.GetDeltaT(), fbo);
 
+            // sckz::Fbo & filteredImage = fil.FilterFbo(s2.GetRenderedImage());
+
             if (win.QueryKey('y'))
             {
-                vkan.Present(s2, f2);
+                vkan.Present(s2.GetRenderedImage(), f2);
             }
             else
             {
-                vkan.Present(s2, f1);
+                vkan.Present(s2.GetRenderedImage(), f1);
             }
         }
         else
         {
             s1.Render(c1, vkan.GetDeltaT(), fbo);
 
+            sckz::Fbo & filteredImage = fil.FilterFbo(s1.GetRenderedImage());
+
             if (win.QueryKey('y'))
             {
-                vkan.Present(s1, f2);
+
+                vkan.Present(s1.GetRenderedImage(), f2);
             }
             else
             {
-                vkan.Present(s1, f1);
+                vkan.Present(filteredImage, f1);
             }
         }
 
@@ -192,6 +197,8 @@ int main()
         {
             // e1.SetRotation(e1.GetRotation().x, e1.GetRotation().y - (100 * vkan.GetDeltaT()), e1.GetRotation().z);
         }
+
+        win.Update();
     }
 
     s1.DestroyScene();

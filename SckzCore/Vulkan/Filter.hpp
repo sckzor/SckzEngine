@@ -14,7 +14,7 @@ namespace sckz
         VkPhysicalDevice *    physicalDevice;
         Memory *              memory;
         GraphicsPipeline      filterPipeline;
-        CommandBuffer         commandBuffer;
+        VkCommandBuffer       commandBuffer;
         VkExtent2D            swapChainExtent;
         DescriptorPool *      descriptorPool;
         VkCommandPool *       commandPool;
@@ -23,6 +23,7 @@ namespace sckz
         VkFence               inFlightFence;
         VkSampleCountFlagBits msaaSamples;
         Fbo                   tempFbo;
+        Fbo *                 lastRenderedFbo;
 
     public:
         void CreateFilter(const char *          fragmentFile,
@@ -39,9 +40,11 @@ namespace sckz
 
         void DestroyFilter();
 
-        void FilterFbo(Fbo & fbo);
+        Fbo & FilterFbo(Fbo & fbo);
 
         void Render(Fbo & fbo);
+
+        void RebuildSwapResources(VkSampleCountFlagBits msaaSamples, VkExtent2D swapChainExtent);
 
     private:
         void CreateCommandBuffer();

@@ -3,6 +3,7 @@
 #include "Camera.hpp"
 #include "DescriptorPool.hpp"
 #include "Fbo.hpp"
+#include "Filter.hpp"
 #include "GraphicsPipeline.hpp"
 #include "HelperMethods.hpp"
 #include "Image.hpp"
@@ -25,14 +26,13 @@ namespace sckz
         VkCommandPool  commandPool;    // Duplicated
 
         Fbo      fboImage;
-        Image    copyToImage;
-        Fbo      copyToFbo;
         VkFormat format;
         Memory   memory;
 
         GraphicsPipeline particlePipeline;
 
         std::vector<Fbo *>              fbos;
+        std::vector<Filter *>           filters;
         std::vector<GraphicsPipeline *> pipelines; // Goes
         std::vector<Model *>            models;    // Goes
         std::vector<Camera *>           cameras;   // Goes
@@ -80,8 +80,8 @@ namespace sckz
         void Render(Camera & camera, float deltaTime, Fbo & fbo);
         void SetMSAA(int32_t targetMsaaSamples);
 
-        Image & GetRenderedImage();
-        bool    IsUpdated();
+        Fbo & GetRenderedImage();
+        bool  IsUpdated();
 
     public:
         GraphicsPipeline & CreatePipeline(const char * vertexFile, const char * fragmentFile);
@@ -96,6 +96,7 @@ namespace sckz
         Entity &         CreateEntity(Model & model);
         Light &          CreateLight();
         Fbo &            CreateFbo();
+        Filter &         CreateFilter(const char * fragmentFile);
         ParticleSystem & CreateParticleSystem(uint32_t     numStages,
                                               const char * texture,
                                               uint32_t     hStages,

@@ -22,33 +22,6 @@ namespace sckz
         descriptorPool.CreateDescriptorPool(device, 1);
         CreateSyncObjects();
 
-        copyToImage.CreateImage(swapChainExtent.width,
-                                swapChainExtent.height,
-                                1,
-                                VK_SAMPLE_COUNT_1_BIT,
-                                this->format,
-                                VK_IMAGE_TILING_OPTIMAL,
-                                VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT
-                                    | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
-                                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                                *this->device,
-                                *this->physicalDevice,
-                                memory,
-                                *this->graphicsQueue,
-                                commandPool);
-
-        copyToImage.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
-        copyToImage.CreateTextureSampler();
-
-        copyToFbo.CreateFBO(physicalDevice,
-                            device,
-                            memory,
-                            graphicsQueue,
-                            format,
-                            msaaSamples,
-                            swapChainExtent,
-                            commandPool);
-
         fboImage.CreateFBO(physicalDevice,
                            device,
                            memory,
@@ -70,8 +43,6 @@ namespace sckz
         DestroySwapResources();
 
         fboImage.DestroyFBO();
-        copyToImage.DestroyImage();
-        copyToFbo.DestroyFBO();
 
         for (uint32_t i = 0; i < models.size(); i++)
         {
@@ -97,6 +68,12 @@ namespace sckz
             delete fbos[i];
         }
 
+        for (uint32_t i = 0; i < filters.size(); i++)
+        {
+            filters[i]->DestroyFilter();
+            delete filters[i];
+        }
+
         DestroySyncObjects();
         DestroyCommandPool();
         memory.DestroyMemory();
@@ -119,7 +96,6 @@ namespace sckz
         DestroySwapResources();
 
         fboImage.RebuildSwapResources(msaaSamples, swapChainExtent);
-        copyToFbo.RebuildSwapResources(msaaSamples, swapChainExtent);
         for (uint32_t i = 0; i < pipelines.size(); i++)
         {
             pipelines[i]->CreatePipeline(*device, fboImage);
@@ -134,6 +110,11 @@ namespace sckz
         for (uint32_t i = 0; i < fbos.size(); i++)
         {
             fbos[i]->RebuildSwapResources(msaaSamples, swapChainExtent);
+        }
+
+        for (uint32_t i = 0; i < filters.size(); i++)
+        {
+            filters[i]->RebuildSwapResources(msaaSamples, swapChainExtent);
         }
 
         particlePipeline.CreatePipeline(*device, fboImage);
@@ -398,8 +379,6 @@ namespace sckz
         }
 
         vkWaitForFences(*device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
-        fboImage.CopyToFbo(copyToFbo);
-        /// fboImage.GetImage().CopyImage(copyToImage, commandPool);
 
         RebuildCommandBuffer();
 
@@ -425,10 +404,10 @@ namespace sckz
 
     bool Scene::IsUpdated() { return isUpdated; }
 
-    Image & Scene::GetRenderedImage()
+    Fbo & Scene::GetRenderedImage()
     {
         isUpdated = false;
-        return copyToFbo.GetImage();
+        return fboImage;
     }
 
     ParticleSystem & Scene::CreateParticleSystem(uint32_t     numStages,
@@ -451,6 +430,23 @@ namespace sckz
                                                      *graphicsQueue,
                                                      numStages);
         return *particleSystems.back();
+    }
+
+    Filter & Scene::CreateFilter(const char * fragmentFile)
+    {
+        filters.push_back(new Filter());
+        filters.back()->CreateFilter(fragmentFile,
+                                     "Resources/fbo_vertex_normal.spv",
+                                     *device,
+                                     *physicalDevice,
+                                     memory,
+                                     descriptorPool,
+                                     *graphicsQueue,
+                                     commandPool,
+                                     format,
+                                     msaaSamples,
+                                     swapChainExtent);
+        return *filters.back();
     }
 
 } // namespace sckz

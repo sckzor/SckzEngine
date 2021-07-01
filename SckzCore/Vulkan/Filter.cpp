@@ -24,7 +24,14 @@ namespace sckz
         this->msaaSamples     = msaaSamples;
         this->swapChainExtent = swapChainExtent;
 
-        tempFbo.CreateFBO(physicalDevice, device, memory, graphicsQueue, format, msaaSamples, swapChainExtent);
+        tempFbo.CreateFBO(physicalDevice,
+                          device,
+                          memory,
+                          graphicsQueue,
+                          format,
+                          msaaSamples,
+                          swapChainExtent,
+                          commandPool);
 
         filterPipeline.CreatePipeline(*this->device,
                                       tempFbo,
@@ -33,8 +40,27 @@ namespace sckz
                                       GraphicsPipeline::PipelineType::FBO_PIPELINE);
 
         CreateCommandBuffer();
+        CreateSyncObjects();
     }
-    void Filter::DestroyFilter() { }
+
+    void Filter::RebuildSwapResources(VkSampleCountFlagBits msaaSamples, VkExtent2D swapChainExtent)
+    {
+        this->msaaSamples     = msaaSamples;
+        this->swapChainExtent = swapChainExtent;
+
+        tempFbo.RebuildSwapResources(msaaSamples, swapChainExtent);
+
+        filterPipeline.DestroyPipeline();
+        filterPipeline.CreatePipeline(*this->device, tempFbo);
+    }
+
+    void Filter::DestroyFilter()
+    {
+        tempFbo.DestroyFBO();
+        vkDestroyFence(*device, inFlightFence, nullptr);
+        filterPipeline.DestroyPipeline();
+        vkFreeCommandBuffers(*device, *commandPool, 1, &commandBuffer);
+    }
 
     void Filter::CreateCommandBuffer()
     {
@@ -44,7 +70,7 @@ namespace sckz
         allocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         allocInfo.commandBufferCount = 1;
 
-        if (vkAllocateCommandBuffers(*device, &allocInfo, &commandBuffer.GetCommandBuffer()) != VK_SUCCESS)
+        if (vkAllocateCommandBuffers(*device, &allocInfo, &commandBuffer) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to allocate command buffers!");
         }
@@ -64,7 +90,7 @@ namespace sckz
 
         beginInfo.pInheritanceInfo = &inheritanceInfo;
 
-        if (vkBeginCommandBuffer(commandBuffer.GetCommandBuffer(), &beginInfo) != VK_SUCCESS)
+        if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to begin recording command buffer!");
         }
@@ -79,15 +105,18 @@ namespace sckz
         renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
         renderPassInfo.pClearValues    = clearValues.data();
 
-        vkCmdBindPipeline(commandBuffer.GetCommandBuffer(),
-                          VK_PIPELINE_BIND_POINT_GRAPHICS,
-                          filterPipeline.GetPipeline());
+        std::cout << commandBuffer << " " << renderPassInfo.framebuffer << " " << renderPassInfo.renderPass
+                  << std::endl;
+
+        vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, filterPipeline.GetPipeline());
 
         VkDescriptorSet ds;
 
         filterPipeline.BindShaderData(nullptr, &fbo.GetImage(), nullptr, *descriptorPool, &ds);
 
-        vkCmdBindDescriptorSets(commandBuffer.GetCommandBuffer(),
+        vkCmdBindDescriptorSets(commandBuffer,
                                 VK_PIPELINE_BIND_POINT_GRAPHICS,
                                 filterPipeline.GetPieplineLayout(),
                                 0,
@@ -96,19 +125,32 @@ namespace sckz
                                 0,
                                 nullptr);
 
-        vkCmdDraw(commandBuffer.GetCommandBuffer(), 3, 1, 0, 0);
+        vkCmdDraw(commandBuffer, 3, 1, 0, 0);
         // Uses the wacky shader from Sascha to draw the image to the screen
 
-        if (vkEndCommandBuffer(commandBuffer.GetCommandBuffer()) != VK_SUCCESS)
+        vkCmdEndRenderPass(commandBuffer);
+
+        if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to record command buffer!");
         }
     }
 
+    Fbo & Filter::FilterFbo(Fbo & fbo)
+    {
+        Render(fbo);
+        return tempFbo;
+    }
+
     void Filter::Render(Fbo & fbo)
     {
-        RebuildCommandBuffer(fbo);
         vkWaitForFences(*device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
+        if (&fbo != lastRenderedFbo)
+        {
+            RebuildCommandBuffer(fbo);
+            lastRenderedFbo = &fbo;
+        }
+
         vkResetFences(*device, 1, &inFlightFence);
 
         VkSubmitInfo submitInfo {};
@@ -119,7 +161,7 @@ namespace sckz
         submitInfo.pWaitDstStageMask      = waitStages;
 
         submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers    = &commandBuffer.GetCommandBuffer();
+        submitInfo.pCommandBuffers    = &commandBuffer;
 
         submitInfo.signalSemaphoreCount = 0;
 
@@ -129,8 +171,6 @@ namespace sckz
         }
 
         // vkQueueWaitIdle(*graphicsQueue);
-
-        tempFbo.CopyToFbo(fbo, *commandPool);
     }
 
     void Filter::CreateSyncObjects()

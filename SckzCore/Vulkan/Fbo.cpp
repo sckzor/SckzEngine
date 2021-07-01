@@ -250,8 +250,6 @@ namespace sckz
         }
     }
 
-    // void Fbo::FilterImage(Filter & filter) { filter.FilterFbo(*this); }
-
     void Fbo::CopyToFbo(Fbo & dst)
     {
         colorImage.CopyImage(dst.colorImage, VK_IMAGE_ASPECT_COLOR_BIT);

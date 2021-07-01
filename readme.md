@@ -74,7 +74,7 @@ Time behind schedule: 2 weeks
 ## Known issues and bugs
 
 - [ ] The sampler does not need to be recreated with every texture, one for all of the textures is fine.
-- [ ] Some strange bug where if a time.deltatime call is made in the first iteration of the main while loop then the movement/ rotation of an object will just lockup and not move at all?
+- [x] Some strange bug where if a time.deltatime call is made in the first iteration of the main while loop then the movement/ rotation of an object will just lockup and not move at all?
 - [ ] Program breaks when the resolution becomes too large because the frame buffer gets bigger than the size of the memory blocks, I need to dynamically choose the size of the buffer based on the screen resolution.
 
 ## Build tools
@@ -82,6 +82,7 @@ Time behind schedule: 2 weeks
 - G++ is required to build the C++ code
 - clang-format is needed to format all of the code that you might add
 - Valgrind for leak checking the code
+- VkTracer is needed for profiling Vulkan command and discovering performance sinks
 
 ## Latest Valgrind results
 

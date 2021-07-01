@@ -91,7 +91,7 @@ namespace sckz
 
         int32_t fps = 0; // Stays
 
-        Scene *            lastRenderedScene;
+        Fbo *              lastRenderedFbo;
         GraphicsPipeline * lastRenderedPipeline;
 
         Fbo dummyFbo;
@@ -138,7 +138,7 @@ namespace sckz
         void CreateImageViews();
         void CreateRenderPass();
         void CreateCommandPool();
-        void CreateCommandBuffers(Scene * scene, GraphicsPipeline * pipeline);
+        void CreateCommandBuffers(Fbo * fbo, GraphicsPipeline * pipeline);
         void CreateColorResources();
         void CreateDepthResources();
         void CreateFramebuffers();
@@ -176,7 +176,7 @@ namespace sckz
         uint32_t GetMaximumSampleCount();
         float    GetDeltaT();
 
-        void Present(Scene & scene, GraphicsPipeline & pipeline);
+        void Present(Fbo & fbo, GraphicsPipeline & pipeline);
 
     public:
         Scene & CreateScene();
