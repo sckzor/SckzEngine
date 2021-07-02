@@ -257,13 +257,13 @@ namespace sckz
         renderedImage.CopyImage(dst.renderedImage, VK_IMAGE_ASPECT_COLOR_BIT);
     }
 
-    void Fbo::GetRenderPassBeginInfo(VkRenderPassBeginInfo & renderPassInfo)
+    void Fbo::GetRenderPassBeginInfo(VkRenderPassBeginInfo * renderPassInfo)
     {
-        renderPassInfo.sType             = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassInfo.renderPass        = renderPass;
-        renderPassInfo.framebuffer       = renderedImageFrameBuffer;
-        renderPassInfo.renderArea.offset = { 0, 0 };
-        renderPassInfo.renderArea.extent = swapChainExtent;
+        renderPassInfo->sType             = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        renderPassInfo->renderPass        = renderPass;
+        renderPassInfo->framebuffer       = renderedImageFrameBuffer;
+        renderPassInfo->renderArea.offset = { 0, 0 };
+        renderPassInfo->renderArea.extent = swapChainExtent;
     }
 
     Image &        Fbo::GetImage() { return renderedImage; }

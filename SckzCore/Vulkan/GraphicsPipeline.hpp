@@ -15,7 +15,8 @@ namespace sckz
             FBO_PIPELINE,
             GUI_PIPELINE,
             MODEL_PIPELINE,
-            PARTICLE_PIPELINE
+            PARTICLE_PIPELINE,
+            COMBINE_PIPELINE
         };
 
     private:

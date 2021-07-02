@@ -1,5 +1,4 @@
 #pragma once
-// #define SCKZ_DEBUG
 #include "../Include.hpp"
 #include "../Window/Window.hpp"
 #include "Camera.hpp"

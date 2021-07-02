@@ -42,13 +42,13 @@ namespace sckz
 
         Fbo & FilterFbo(Fbo & fbo);
 
-        void Render(Fbo & fbo);
-
-        void RebuildSwapResources(VkSampleCountFlagBits msaaSamples, VkExtent2D swapChainExtent);
+        void RebuildSwapResources(DescriptorPool &      descriptorPool,
+                                  VkSampleCountFlagBits msaaSamples,
+                                  VkExtent2D            swapChainExtent);
 
     private:
         void CreateCommandBuffer();
-        void RebuildCommandBuffer(Fbo & fbo);
+        void RebuildCommandBuffer(Fbo * fbo);
         void CreateSyncObjects();
     };
 } // namespace sckz

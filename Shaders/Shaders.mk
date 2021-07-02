@@ -11,7 +11,7 @@ $(RESOURCES_DIR)/simple_vertex.spv: simple_shader.vert
 	glslc simple_shader.vert -o $(RESOURCES_DIR)/simple_vertex.spv
 
 
-FBOShaders:  $(RESOURCES_DIR)/fbo_vertex_normal.spv $(RESOURCES_DIR)/fbo_fragment_normal.spv $(RESOURCES_DIR)/fbo_fragment_outline.spv $(RESOURCES_DIR)/fbo_fragment_invert.spv
+FBOShaders:  $(RESOURCES_DIR)/fbo_vertex_normal.spv $(RESOURCES_DIR)/fbo_fragment_combine_shader.spv $(RESOURCES_DIR)/fbo_fragment_normal.spv $(RESOURCES_DIR)/fbo_fragment_outline.spv $(RESOURCES_DIR)/fbo_fragment_invert.spv
 
 $(RESOURCES_DIR)/fbo_vertex_normal.spv: fbo_shader.vert
 	glslc fbo_shader.vert -o $(RESOURCES_DIR)/fbo_vertex_normal.spv
@@ -24,6 +24,10 @@ $(RESOURCES_DIR)/fbo_fragment_outline.spv: fbo_outline.frag
 
 $(RESOURCES_DIR)/fbo_fragment_invert.spv: fbo_invert.frag
 	glslc fbo_invert.frag -o $(RESOURCES_DIR)/fbo_fragment_invert.spv
+
+$(RESOURCES_DIR)/fbo_fragment_combine_shader.spv: fbo_combine_shader.frag
+	glslc fbo_combine_shader.frag -o $(RESOURCES_DIR)/fbo_fragment_combine_shader.spv
+
 
 ParticleShaders: $(RESOURCES_DIR)/particle_fragment.spv $(RESOURCES_DIR)/particle_vertex.spv 
 

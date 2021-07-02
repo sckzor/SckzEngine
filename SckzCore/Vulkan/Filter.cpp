@@ -43,15 +43,22 @@ namespace sckz
         CreateSyncObjects();
     }
 
-    void Filter::RebuildSwapResources(VkSampleCountFlagBits msaaSamples, VkExtent2D swapChainExtent)
+    void Filter::RebuildSwapResources(DescriptorPool &      descriptorPool,
+                                      VkSampleCountFlagBits msaaSamples,
+                                      VkExtent2D            swapChainExtent)
     {
         this->msaaSamples     = msaaSamples;
         this->swapChainExtent = swapChainExtent;
+        this->descriptorPool  = &descriptorPool;
 
         tempFbo.RebuildSwapResources(msaaSamples, swapChainExtent);
 
         filterPipeline.DestroyPipeline();
         filterPipeline.CreatePipeline(*this->device, tempFbo);
+
+        RebuildCommandBuffer(nullptr);
+
+        lastRenderedFbo = nullptr;
     }
 
     void Filter::DestroyFilter()
@@ -76,7 +83,7 @@ namespace sckz
         }
     }
 
-    void Filter::RebuildCommandBuffer(Fbo & fbo)
+    void Filter::RebuildCommandBuffer(Fbo * fbo)
     {
         VkCommandBufferBeginInfo beginInfo {};
         beginInfo.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
@@ -96,7 +103,7 @@ namespace sckz
         }
 
         VkRenderPassBeginInfo renderPassInfo {};
-        tempFbo.GetRenderPassBeginInfo(renderPassInfo);
+        tempFbo.GetRenderPassBeginInfo(&renderPassInfo);
 
         std::array<VkClearValue, 2> clearValues {};
         clearValues[0].color        = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -105,28 +112,29 @@ namespace sckz
         renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
         renderPassInfo.pClearValues    = clearValues.data();
 
-        std::cout << commandBuffer << " " << renderPassInfo.framebuffer << " " << renderPassInfo.renderPass
-                  << std::endl;
-
         vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, filterPipeline.GetPipeline());
 
         VkDescriptorSet ds;
 
-        filterPipeline.BindShaderData(nullptr, &fbo.GetImage(), nullptr, *descriptorPool, &ds);
+        if (fbo != nullptr)
+        {
 
-        vkCmdBindDescriptorSets(commandBuffer,
-                                VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                filterPipeline.GetPieplineLayout(),
-                                0,
-                                1,
-                                &ds,
-                                0,
-                                nullptr);
+            filterPipeline.BindShaderData(nullptr, &fbo->GetImage(), nullptr, *descriptorPool, &ds);
 
-        vkCmdDraw(commandBuffer, 3, 1, 0, 0);
-        // Uses the wacky shader from Sascha to draw the image to the screen
+            vkCmdBindDescriptorSets(commandBuffer,
+                                    VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                    filterPipeline.GetPieplineLayout(),
+                                    0,
+                                    1,
+                                    &ds,
+                                    0,
+                                    nullptr);
+
+            vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+            // Uses the wacky shader from Sascha to draw the image to the screen
+        }
 
         vkCmdEndRenderPass(commandBuffer);
 
@@ -138,16 +146,13 @@ namespace sckz
 
     Fbo & Filter::FilterFbo(Fbo & fbo)
     {
-        Render(fbo);
-        return tempFbo;
-    }
-
-    void Filter::Render(Fbo & fbo)
-    {
         vkWaitForFences(*device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
+
+        RebuildCommandBuffer(&fbo);
+
         if (&fbo != lastRenderedFbo)
         {
-            RebuildCommandBuffer(fbo);
+            // RebuildCommandBuffer(&fbo);
             lastRenderedFbo = &fbo;
         }
 
@@ -170,7 +175,7 @@ namespace sckz
             throw std::runtime_error("failed to submit draw command buffer! (scene)");
         }
 
-        // vkQueueWaitIdle(*graphicsQueue);
+        return tempFbo;
     }
 
     void Filter::CreateSyncObjects()

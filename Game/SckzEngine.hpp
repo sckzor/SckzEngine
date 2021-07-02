@@ -1,7 +1,9 @@
 #pragma once
 #include "../SckzCore/Extra/Random.hpp"
+#include "../SckzCore/Vulkan/Combine.hpp"
 #include "../SckzCore/Vulkan/Entity.hpp"
 #include "../SckzCore/Vulkan/Fbo.hpp"
+#include "../SckzCore/Vulkan/Filter.hpp"
 #include "../SckzCore/Vulkan/Model.hpp"
 #include "../SckzCore/Vulkan/Scene.hpp"
 #include "../SckzCore/Vulkan/Vulkan.hpp"

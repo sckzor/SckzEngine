@@ -41,6 +41,12 @@ namespace sckz
                 fragmentUboCount = 1;
                 break;
 
+            case PipelineType::COMBINE_PIPELINE:
+                vertexUboCount   = 0;
+                samplerCount     = 2;
+                fragmentUboCount = 0;
+                break;
+
             default:
                 vertexUboCount   = 0;
                 samplerCount     = 0;

@@ -222,7 +222,7 @@ namespace sckz
         }
 
         VkRenderPassBeginInfo renderPassInfo {};
-        pipeline->GetFbo().GetRenderPassBeginInfo(renderPassInfo);
+        pipeline->GetFbo().GetRenderPassBeginInfo(&renderPassInfo);
 
         std::array<VkClearValue, 2> clearValues {};
         clearValues[0].color        = { 0.0f, 0.0f, 0.0f, 1.0f };

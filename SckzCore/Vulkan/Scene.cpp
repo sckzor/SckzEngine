@@ -74,6 +74,12 @@ namespace sckz
             delete filters[i];
         }
 
+        for (uint32_t i = 0; i < combines.size(); i++)
+        {
+            combines[i]->DestroyCombine();
+            delete combines[i];
+        }
+
         DestroySyncObjects();
         DestroyCommandPool();
         memory.DestroyMemory();
@@ -114,7 +120,12 @@ namespace sckz
 
         for (uint32_t i = 0; i < filters.size(); i++)
         {
-            filters[i]->RebuildSwapResources(msaaSamples, swapChainExtent);
+            filters[i]->RebuildSwapResources(descriptorPool, msaaSamples, swapChainExtent);
+        }
+
+        for (uint32_t i = 0; i < combines.size(); i++)
+        {
+            combines[i]->RebuildSwapResources(descriptorPool, msaaSamples, swapChainExtent);
         }
 
         particlePipeline.CreatePipeline(*device, fboImage);
@@ -189,7 +200,7 @@ namespace sckz
         }
 
         VkRenderPassBeginInfo renderPassInfo {};
-        fboImage.GetRenderPassBeginInfo(renderPassInfo);
+        fboImage.GetRenderPassBeginInfo(&renderPassInfo);
 
         std::array<VkClearValue, 2> clearValues {};
         clearValues[0].color        = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -447,6 +458,23 @@ namespace sckz
                                      msaaSamples,
                                      swapChainExtent);
         return *filters.back();
+    }
+
+    Combine & Scene::CreateCombine(const char * fragmentFile)
+    {
+        combines.push_back(new Combine());
+        combines.back()->CreateCombine(fragmentFile,
+                                       "Resources/fbo_vertex_normal.spv",
+                                       *device,
+                                       *physicalDevice,
+                                       memory,
+                                       descriptorPool,
+                                       *graphicsQueue,
+                                       commandPool,
+                                       format,
+                                       msaaSamples,
+                                       swapChainExtent);
+        return *combines.back();
     }
 
 } // namespace sckz

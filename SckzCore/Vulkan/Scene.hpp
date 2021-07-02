@@ -1,6 +1,7 @@
 #pragma once
 #include "../Include.hpp"
 #include "Camera.hpp"
+#include "Combine.hpp"
 #include "DescriptorPool.hpp"
 #include "Fbo.hpp"
 #include "Filter.hpp"
@@ -33,6 +34,7 @@ namespace sckz
 
         std::vector<Fbo *>              fbos;
         std::vector<Filter *>           filters;
+        std::vector<Combine *>          combines;
         std::vector<GraphicsPipeline *> pipelines; // Goes
         std::vector<Model *>            models;    // Goes
         std::vector<Camera *>           cameras;   // Goes
@@ -97,6 +99,7 @@ namespace sckz
         Light &          CreateLight();
         Fbo &            CreateFbo();
         Filter &         CreateFilter(const char * fragmentFile);
+        Combine &        CreateCombine(const char * fragmentFile);
         ParticleSystem & CreateParticleSystem(uint32_t     numStages,
                                               const char * texture,
                                               uint32_t     hStages,
