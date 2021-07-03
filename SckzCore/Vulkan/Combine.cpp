@@ -33,11 +33,11 @@ namespace sckz
                           swapChainExtent,
                           commandPool);
 
-        filterPipeline.CreatePipeline(*this->device,
-                                      tempFbo,
-                                      vertexFile,
-                                      fragmentFile,
-                                      GraphicsPipeline::PipelineType::COMBINE_PIPELINE);
+        combinePipeline.CreatePipeline(*this->device,
+                                       tempFbo,
+                                       vertexFile,
+                                       fragmentFile,
+                                       GraphicsPipeline::PipelineType::COMBINE_PIPELINE);
 
         CreateCommandBuffer();
         CreateSyncObjects();
@@ -53,8 +53,8 @@ namespace sckz
 
         tempFbo.RebuildSwapResources(msaaSamples, swapChainExtent);
 
-        filterPipeline.DestroyPipeline();
-        filterPipeline.CreatePipeline(*this->device, tempFbo);
+        combinePipeline.DestroyPipeline();
+        combinePipeline.CreatePipeline(*this->device, tempFbo);
 
         RebuildCommandBuffer(nullptr, nullptr);
 
@@ -66,7 +66,7 @@ namespace sckz
     {
         tempFbo.DestroyFBO();
         vkDestroyFence(*device, inFlightFence, nullptr);
-        filterPipeline.DestroyPipeline();
+        combinePipeline.DestroyPipeline();
         vkFreeCommandBuffers(*device, *commandPool, 1, &commandBuffer);
     }
 
@@ -115,17 +115,17 @@ namespace sckz
 
         vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, filterPipeline.GetPipeline());
+        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, combinePipeline.GetPipeline());
 
         VkDescriptorSet ds;
 
-        Image images[] = { fbo1->GetImage(), fbo2->GetImage() };
+        std::array<Image, 2> images = { fbo2->GetImage(), fbo1->GetImage() };
 
-        filterPipeline.BindShaderData(nullptr, images, nullptr, *descriptorPool, &ds);
+        combinePipeline.BindShaderData(nullptr, images.data(), nullptr, *descriptorPool, &ds);
 
         vkCmdBindDescriptorSets(commandBuffer,
                                 VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                filterPipeline.GetPieplineLayout(),
+                                combinePipeline.GetPieplineLayout(),
                                 0,
                                 1,
                                 &ds,

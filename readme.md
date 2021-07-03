@@ -83,6 +83,7 @@ Time behind schedule: 2 weeks
 - clang-format is needed to format all of the code that you might add
 - Valgrind for leak checking the code
 - VkTracer is needed for profiling Vulkan command and discovering performance sinks
+- RenderDoc for profiling images and stuff
 
 ## Latest Valgrind results
 

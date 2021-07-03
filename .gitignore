@@ -1,6 +1,7 @@
 .vscode/
 .VSCodeCounter/
 traces/
+captures/
 massif.out.*
 Game/SckzEngine
 SckzCore/SckzCore.a

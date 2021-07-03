@@ -13,7 +13,7 @@ namespace sckz
         VkDevice *            device;
         VkPhysicalDevice *    physicalDevice;
         Memory *              memory;
-        GraphicsPipeline      filterPipeline;
+        GraphicsPipeline      combinePipeline;
         VkCommandBuffer       commandBuffer;
         VkExtent2D            swapChainExtent;
         DescriptorPool *      descriptorPool;
@@ -22,6 +22,7 @@ namespace sckz
         VkFormat              format;
         VkFence               inFlightFence;
         VkSampleCountFlagBits msaaSamples;
+        std::vector<Image>    images;
         Fbo                   tempFbo;
         Fbo *                 lastRenderedFbo1;
         Fbo *                 lastRenderedFbo2;
