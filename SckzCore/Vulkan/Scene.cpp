@@ -98,7 +98,6 @@ namespace sckz
     void Scene::RebuildSwapResources(VkExtent2D newExtent)
     {
         swapChainExtent = newExtent;
-        isUpdated       = true;
         DestroySwapResources();
 
         fboImage.RebuildSwapResources(msaaSamples, swapChainExtent);
@@ -118,16 +117,6 @@ namespace sckz
             fbos[i]->RebuildSwapResources(msaaSamples, swapChainExtent);
         }
 
-        for (uint32_t i = 0; i < filters.size(); i++)
-        {
-            filters[i]->RebuildSwapResources(descriptorPool, msaaSamples, swapChainExtent);
-        }
-
-        for (uint32_t i = 0; i < combines.size(); i++)
-        {
-            combines[i]->RebuildSwapResources(descriptorPool, msaaSamples, swapChainExtent);
-        }
-
         particlePipeline.CreatePipeline(*device, fboImage);
 
         for (uint32_t i = 0; i < particleSystems.size(); i++)
@@ -139,6 +128,16 @@ namespace sckz
         for (uint32_t i = 0; i < cameras.size(); i++)
         {
             cameras[i]->UpdateExtent(swapChainExtent);
+        }
+
+        for (uint32_t i = 0; i < filters.size(); i++)
+        {
+            filters[i]->RebuildSwapResources(descriptorPool, msaaSamples, swapChainExtent);
+        }
+
+        for (uint32_t i = 0; i < combines.size(); i++)
+        {
+            combines[i]->RebuildSwapResources(descriptorPool, msaaSamples, swapChainExtent);
         }
     }
 
@@ -384,12 +383,12 @@ namespace sckz
             models[i]->Update(camera);
         }
 
+        vkWaitForFences(*device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
+
         for (uint32_t i = 0; i < particleSystems.size(); i++)
         {
             particleSystems[i]->Update(camera, deltaTime);
         }
-
-        vkWaitForFences(*device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
 
         RebuildCommandBuffer();
 
@@ -413,13 +412,7 @@ namespace sckz
         // vkQueueWaitIdle(*graphicsQueue); // TODO: GET RID OF THIS
     }
 
-    bool Scene::IsUpdated() { return isUpdated; }
-
-    Fbo & Scene::GetRenderedImage()
-    {
-        isUpdated = false;
-        return fboImage;
-    }
+    Fbo & Scene::GetRenderedImage() { return fboImage; }
 
     ParticleSystem & Scene::CreateParticleSystem(uint32_t     numStages,
                                                  const char * texture,

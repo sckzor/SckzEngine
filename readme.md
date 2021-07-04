@@ -77,6 +77,7 @@ Time behind schedule: 2 weeks
 - [x] Some strange bug where if a time.deltatime call is made in the first iteration of the main while loop then the movement/ rotation of an object will just lockup and not move at all?
 - [ ] Program breaks when the resolution becomes too large because the frame buffer gets bigger than the size of the memory blocks, I need to dynamically choose the size of the buffer based on the screen resolution.
 - [ ] The command pools bleed (but don't leak) memory because they are not garbage collected ever until the end of execution.
+- [ ] Model should not destroy command buffers probably.
 
 ## Build tools
 

@@ -47,8 +47,6 @@ namespace sckz
         VkSampleCountFlagBits maxMsaaSamples;
         int32_t               targetMsaaSamples = 1;
 
-        bool isUpdated;
-
     public:
         void CreateScene(VkPhysicalDevice & physicalDevice,
                          VkDevice &         device,
@@ -83,7 +81,6 @@ namespace sckz
         void SetMSAA(int32_t targetMsaaSamples);
 
         Fbo & GetRenderedImage();
-        bool  IsUpdated();
 
     public:
         GraphicsPipeline & CreatePipeline(const char * vertexFile, const char * fragmentFile);

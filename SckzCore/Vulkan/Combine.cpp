@@ -51,12 +51,15 @@ namespace sckz
         this->swapChainExtent = swapChainExtent;
         this->descriptorPool  = &descriptorPool;
 
+        vkFreeCommandBuffers(*device, *commandPool, 1, &commandBuffer);
+        combinePipeline.DestroyPipeline();
+
+        combinePipeline.CreatePipeline(*this->device, tempFbo);
+        CreateCommandBuffer();
+
         tempFbo.RebuildSwapResources(msaaSamples, swapChainExtent);
 
-        combinePipeline.DestroyPipeline();
-        combinePipeline.CreatePipeline(*this->device, tempFbo);
-
-        RebuildCommandBuffer(nullptr, nullptr);
+        // RebuildCommandBuffer(nullptr, nullptr);
 
         lastRenderedFbo1 = nullptr;
         lastRenderedFbo2 = nullptr;

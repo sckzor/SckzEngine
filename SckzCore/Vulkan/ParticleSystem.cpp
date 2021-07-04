@@ -173,7 +173,7 @@ namespace sckz
                 particles[i].scale       = 1;
                 particles[i].velocity    = glm::vec3(vx, vy, vz);
                 particles[i].elapsedTime = 0;
-                RebuildCommandBuffer();
+                updated                  = true;
                 break;
             }
         }
@@ -182,6 +182,12 @@ namespace sckz
     void ParticleSystem::Update(Camera & camera, float delataTime)
     {
         StaticVertexUniformBufferObject Subo {};
+
+        if (updated)
+        {
+            RebuildCommandBuffer();
+            updated = false;
+        }
 
         Subo.view = camera.GetView();
         Subo.proj = camera.GetProjection();

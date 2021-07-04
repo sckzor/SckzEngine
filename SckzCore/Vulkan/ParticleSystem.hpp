@@ -44,6 +44,7 @@ namespace sckz
         GraphicsPipeline *    pipeline;
         VkQueue *             queue;
         Memory *              memory;
+        bool                  updated = false;
 
         const float GRAVITY = -5.1f; //
 

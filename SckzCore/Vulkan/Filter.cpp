@@ -56,7 +56,7 @@ namespace sckz
         filterPipeline.DestroyPipeline();
         filterPipeline.CreatePipeline(*this->device, tempFbo);
 
-        RebuildCommandBuffer(nullptr);
+        // RebuildCommandBuffer(nullptr);
 
         lastRenderedFbo = nullptr;
     }
@@ -147,8 +147,6 @@ namespace sckz
     Fbo & Filter::FilterFbo(Fbo & fbo)
     {
         vkWaitForFences(*device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
-
-        // RebuildCommandBuffer(&fbo);
 
         if (&fbo != lastRenderedFbo)
         {
