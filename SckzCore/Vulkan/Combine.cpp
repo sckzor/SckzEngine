@@ -147,11 +147,9 @@ namespace sckz
     {
         vkWaitForFences(*device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
 
-        RebuildCommandBuffer(&fbo1, &fbo2);
-
         if (&fbo1 != lastRenderedFbo1 || &fbo2 != lastRenderedFbo2)
         {
-            // RebuildCommandBuffer(&fbo);
+            RebuildCommandBuffer(&fbo1, &fbo2);
             lastRenderedFbo1 = &fbo1;
             lastRenderedFbo2 = &fbo2;
         }

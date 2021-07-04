@@ -240,7 +240,8 @@ namespace sckz
         rasterizer.rasterizerDiscardEnable = VK_FALSE;
         rasterizer.polygonMode             = VK_POLYGON_MODE_FILL;
         rasterizer.lineWidth               = 1.0f;
-        if (this->type == PipelineType::FBO_PIPELINE || this->type == PipelineType::GUI_PIPELINE)
+        if (this->type == PipelineType::FBO_PIPELINE || this->type == PipelineType::GUI_PIPELINE
+            || this->type == PipelineType::COMBINE_PIPELINE)
         {
             rasterizer.cullMode = VK_CULL_MODE_FRONT_BIT;
         }
