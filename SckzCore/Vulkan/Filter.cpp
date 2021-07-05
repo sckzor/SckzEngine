@@ -51,7 +51,7 @@ namespace sckz
         this->swapChainExtent = swapChainExtent;
         this->descriptorPool  = &descriptorPool;
 
-        tempFbo.RebuildSwapResources(msaaSamples, swapChainExtent);
+        std::cout << &descriptorPool << std::endl;
 
         filterPipeline.DestroyPipeline();
         filterPipeline.CreatePipeline(*this->device, tempFbo);
@@ -59,6 +59,8 @@ namespace sckz
         // RebuildCommandBuffer(nullptr);
 
         lastRenderedFbo = nullptr;
+
+        tempFbo.RebuildSwapResources(msaaSamples, swapChainExtent);
     }
 
     void Filter::DestroyFilter()
@@ -91,9 +93,9 @@ namespace sckz
 
         VkCommandBufferInheritanceInfo inheritanceInfo {};
         inheritanceInfo.sType      = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
-        inheritanceInfo.renderPass = tempFbo.GetRenderPass();
+        inheritanceInfo.renderPass = filterPipeline.GetFbo().GetRenderPass();
         // Secondary command buffer also use the currently active framebuffer
-        inheritanceInfo.framebuffer = tempFbo.GetImageFramebuffer();
+        inheritanceInfo.framebuffer = filterPipeline.GetFbo().GetImageFramebuffer();
 
         beginInfo.pInheritanceInfo = &inheritanceInfo;
 
@@ -103,7 +105,11 @@ namespace sckz
         }
 
         VkRenderPassBeginInfo renderPassInfo {};
-        tempFbo.GetRenderPassBeginInfo(&renderPassInfo);
+        renderPassInfo.sType             = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        renderPassInfo.renderPass        = tempFbo.GetRenderPass();
+        renderPassInfo.framebuffer       = tempFbo.GetImageFramebuffer();
+        renderPassInfo.renderArea.offset = { 0, 0 };
+        renderPassInfo.renderArea.extent = swapChainExtent;
 
         std::array<VkClearValue, 2> clearValues {};
         clearValues[0].color        = { 0.0f, 0.0f, 0.0f, 1.0f };

@@ -51,13 +51,10 @@ namespace sckz
         this->swapChainExtent = swapChainExtent;
         this->descriptorPool  = &descriptorPool;
 
-        vkFreeCommandBuffers(*device, *commandPool, 1, &commandBuffer);
-        combinePipeline.DestroyPipeline();
-
-        combinePipeline.CreatePipeline(*this->device, tempFbo);
-        CreateCommandBuffer();
-
         tempFbo.RebuildSwapResources(msaaSamples, swapChainExtent);
+
+        combinePipeline.DestroyPipeline();
+        combinePipeline.CreatePipeline(*this->device, tempFbo);
 
         // RebuildCommandBuffer(nullptr, nullptr);
 
@@ -107,7 +104,11 @@ namespace sckz
         }
 
         VkRenderPassBeginInfo renderPassInfo {};
-        tempFbo.GetRenderPassBeginInfo(&renderPassInfo);
+        renderPassInfo.sType             = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        renderPassInfo.renderPass        = tempFbo.GetRenderPass();
+        renderPassInfo.framebuffer       = tempFbo.GetImageFramebuffer();
+        renderPassInfo.renderArea.offset = { 0, 0 };
+        renderPassInfo.renderArea.extent = swapChainExtent;
 
         std::array<VkClearValue, 2> clearValues {};
         clearValues[0].color        = { 0.0f, 0.0f, 0.0f, 1.0f };
