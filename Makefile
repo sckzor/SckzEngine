@@ -1,17 +1,21 @@
-CFLAGS  = -std=c++17 -O3 # 0 -g -DSCKZ_DEBUG
+CFLAGS  = -std=c++17 -O3 # -g -DSCKZ_DEBUG
 LDFLAGS = -lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
-INCLUDE = Include.hpp
+INCLUDE = ../Include.hpp
 MFLAGS = -j16
 
 export CFLAGS LDFLAGS INCLUDE
 
 all:
 	$(MAKE) $(MFLAGS) -C SckzCore -f SckzCore.mk
+	$(MAKE) $(MFLAGS) -C SckzExtras -f SckzExtras.mk
 	$(MAKE) $(MFLAGS) -C Shaders -f Shaders.mk
 	$(MAKE) $(MFLAGS) -C Game -f Game.mk
 
 core:
 	$(MAKE) $(MFLAGS) -C SckzCore -f SckzCore.mk
+
+extras:
+	$(MAKE) $(MFLAGS) -C SckzExtras -f SckzExtras.mk
 
 game:
 	$(MAKE) $(MFLAGS) -C Game -f Game.mk
@@ -24,6 +28,7 @@ clean:
 	$(MAKE) $(MFLAGS) -C SckzCore -f SckzCore.mk clean
 	$(MAKE) $(MFLAGS) -C Game -f Game.mk clean
 	$(MAKE) $(MFLAGS) -C Shaders -f Shaders.mk clean
+	$(MAKE) $(MFLAGS) -C SckzExtras -f SckzExtras.mk clean
 
 test:
 	$(MAKE) all

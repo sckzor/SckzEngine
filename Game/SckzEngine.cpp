@@ -50,8 +50,8 @@ int main()
 
     sckz::Fbo & fbo = s1.CreateFbo();
 
-    sckz::Filter  fil = s1.CreateFilter("Resources/fbo_fragment_invert.spv");
-    sckz::Combine cmb = s1.CreateCombine("Resources/fbo_fragment_combine_shader.spv");
+    sckz::Bloom bloom;
+    bloom.CreateBloom(s1);
 
     gui.SetScale(200, 200);
     gui.SetLocation(500, 300);
@@ -176,9 +176,7 @@ int main()
         {
             s1.Render(c1, vkan.GetDeltaT(), fbo);
 
-            sckz::Fbo & filteredImage = fil.FilterFbo(s1.GetRenderedImage());
-
-            sckz::Fbo & combinedImage = cmb.CombineFbos(filteredImage, s1.GetRenderedImage());
+            sckz::Fbo & bloomFbo = bloom.ApplyBloom();
 
             if (win.QueryKey('y'))
             {
@@ -187,7 +185,7 @@ int main()
             }
             else
             {
-                vkan.Present(combinedImage, f1);
+                vkan.Present(bloomFbo, f1);
             }
         }
 
