@@ -192,7 +192,7 @@ namespace sckz
         Subo.view = camera.GetView();
         Subo.proj = camera.GetProjection();
 
-        staticUniformBuffer.CopyDataToBuffer(&Subo, sizeof(Subo));
+        staticUniformBuffer.CopyDataToBuffer(&Subo, sizeof(Subo), 0);
 
         for (uint32_t i = 0; i < particles.size(); i++)
         {
@@ -245,7 +245,7 @@ namespace sckz
         PPubo.stageData.z = (hStages * vStages) * (particle.elapsedTime / lifeLength);
         PPubo.stageData.w = totalStages;
 
-        particle.uniformBuffer.CopyDataToBuffer(&PPubo, sizeof(PPubo));
+        particle.uniformBuffer.CopyDataToBuffer(&PPubo, sizeof(PPubo), 0);
     }
 
     VkCommandBuffer & ParticleSystem::GetCommandBuffer() { return commandBuffer; }

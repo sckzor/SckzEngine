@@ -46,6 +46,8 @@ namespace sckz
         std::array<Image, 3> * textures;
         std::vector<Light *> * lights;
 
+        Image * cubeTest;
+
         std::array<Buffer::SubBlock, 2> uniformBuffer;
         VkDescriptorSet                 descriptorSet;
 
@@ -63,7 +65,8 @@ namespace sckz
                           Buffer &               hostLocalBuffer,
                           DescriptorPool &       pool,
                           GraphicsPipeline &     pipeline,
-                          std::array<Image, 3> & textures);
+                          std::array<Image, 3> & textures,
+                          Image &                cubeTest);
 
         void DestroyEntity();
 

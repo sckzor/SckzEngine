@@ -166,7 +166,7 @@ namespace sckz
         Vubo.rotation.y = rotationPoint.y / swapChainExtent.height;
         Vubo.rotation.z = glm::radians(rotation);
 
-        uniformBuffer[0].CopyDataToBuffer(&Vubo, sizeof(Vubo));
+        uniformBuffer[0].CopyDataToBuffer(&Vubo, sizeof(Vubo), 0);
     }
 
     void Gui::SetLocation(float x, float y)

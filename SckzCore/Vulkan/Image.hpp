@@ -22,6 +22,7 @@ namespace sckz
         VkFormat             format;
         VkQueue *            queue;
         bool                 holdsRealImage;
+        bool                 isCube = false;
         uint32_t             mipLevels;
         VkImageLayout        imageLayout;
         VkExtent2D           size;
@@ -61,6 +62,18 @@ namespace sckz
                                 Memory &           memory,
                                 VkCommandPool &    pool,
                                 VkQueue &          queue);
+
+        void CreateCubeTextureImage(const char *       fileNameFront,
+                                    const char *       fileNameBack,
+                                    const char *       fileNameUp,
+                                    const char *       fileNameDown,
+                                    const char *       fileNameRight,
+                                    const char *       fileNameLeft,
+                                    VkDevice &         device,
+                                    VkPhysicalDevice & physicalDevice,
+                                    Memory &           memory,
+                                    VkCommandPool &    pool,
+                                    VkQueue &          queue);
 
         void CreateBlankTextureImage(VkDevice &         device,
                                      VkPhysicalDevice & physicalDevice,

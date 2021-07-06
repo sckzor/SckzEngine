@@ -36,6 +36,21 @@ namespace sckz
                                         "Resources/particle_vertex.spv",
                                         "Resources/particle_fragment.spv",
                                         GraphicsPipeline::PipelineType::PARTICLE_PIPELINE);
+
+        cubeMapTest.CreateCubeTextureImage("Resources/1.png",
+                                           "Resources/2.png",
+                                           "Resources/3.png",
+                                           "Resources/4.png",
+                                           "Resources/5.png",
+                                           "Resources/6.png",
+                                           device,
+                                           physicalDevice,
+                                           memory,
+                                           commandPool,
+                                           graphicsQueue);
+
+        cubeMapTest.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
+        cubeMapTest.CreateTextureSampler();
     }
 
     void Scene::DestroyScene()
@@ -347,7 +362,8 @@ namespace sckz
                                    &pipeline,
                                    descriptorPool,
                                    memory,
-                                   *graphicsQueue);
+                                   *graphicsQueue,
+                                   cubeMapTest);
         return *models.back();
     }
 

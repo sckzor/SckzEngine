@@ -160,12 +160,14 @@ namespace sckz
 
     void Buffer::SubBlock::DestroySubBlock() {};
 
-    void Buffer::SubBlock::CopyDataToBuffer(void * data, uint32_t dataSize)
+    void Buffer::SubBlock::CopyDataToBuffer(void * data, uint32_t dataSize, uint32_t offsetAmount)
     {
+        /*
         if (dataSize != this->size)
         {
             throw std::runtime_error("buffer size mis-match!"); // Throw error
         }
+        */
 
         void * location;
         vkMapMemory(*this->parent->parent->device,
@@ -176,7 +178,7 @@ namespace sckz
                     &location);
 
         char * OffsetLocation = (char *)location + this->offset; // stuff
-        memcpy(OffsetLocation, data, static_cast<size_t>(size));
+        memcpy(OffsetLocation + offsetAmount, (char *)data, static_cast<size_t>(dataSize));
         vkUnmapMemory(*this->parent->parent->device, *this->parent->parent->memoryBlock->memory);
     }
 } // namespace sckz

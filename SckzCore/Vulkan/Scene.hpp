@@ -43,6 +43,8 @@ namespace sckz
 
         VkFence inFlightFence;
 
+        Image cubeMapTest;
+
         VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT; // Goes
         VkSampleCountFlagBits maxMsaaSamples;
         int32_t               targetMsaaSamples = 1;

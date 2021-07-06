@@ -40,7 +40,15 @@ namespace sckz
         imageInfo.extent.height = height;
         imageInfo.extent.depth  = 1;
         imageInfo.mipLevels     = mipLevels;
-        imageInfo.arrayLayers   = 1;
+        if (isCube)
+        {
+            imageInfo.arrayLayers = 6;                                   // CUBEMAP: set this to 6 for cube map textures
+            imageInfo.flags       = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT; // CUBEMAP: add for cube map textures
+        }
+        else
+        {
+            imageInfo.arrayLayers = 1;
+        }
         imageInfo.format        = format;
         imageInfo.tiling        = tiling;
         imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -100,15 +108,29 @@ namespace sckz
     void Image::CreateImageView(VkImageAspectFlags aspectFlags)
     {
         VkImageViewCreateInfo viewInfo {};
-        viewInfo.sType                           = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        viewInfo.image                           = image;
-        viewInfo.viewType                        = VK_IMAGE_VIEW_TYPE_2D;
+        viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        viewInfo.image = image;
+        if (isCube)
+        {
+            viewInfo.viewType = VK_IMAGE_VIEW_TYPE_CUBE; // CUBEMAP: add for cube map textures
+        }
+        else
+        {
+            viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        }
         viewInfo.format                          = format;
         viewInfo.subresourceRange.aspectMask     = aspectFlags;
         viewInfo.subresourceRange.baseMipLevel   = 0;
         viewInfo.subresourceRange.levelCount     = mipLevels;
         viewInfo.subresourceRange.baseArrayLayer = 0;
-        viewInfo.subresourceRange.layerCount     = 1;
+        if (isCube)
+        {
+            viewInfo.subresourceRange.layerCount = 6;
+        }
+        else
+        {
+            viewInfo.subresourceRange.layerCount = 1;
+        }
 
         if (vkCreateImageView(*device, &viewInfo, nullptr, &imageView) != VK_SUCCESS)
         {
@@ -158,8 +180,103 @@ namespace sckz
 
         Buffer::SubBlock stagingBuffer = hostLocalBuffer.GetBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
 
-        stagingBuffer.CopyDataToBuffer(pixels, static_cast<size_t>(imageSize));
+        stagingBuffer.CopyDataToBuffer(pixels, static_cast<size_t>(imageSize), 0);
         stbi_image_free(pixels);
+
+        CreateImage(texWidth,
+                    texHeight,
+                    mipLevels,
+                    VK_SAMPLE_COUNT_1_BIT,
+                    VK_FORMAT_R8G8B8A8_SRGB,
+                    VK_IMAGE_TILING_OPTIMAL,
+                    VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+                    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                    *this->device,
+                    *this->physicalDevice,
+                    memory,
+                    queue,
+                    pool); // queue is the PRIVATE queue
+
+        CommandBuffer cmdBuffer;
+        cmdBuffer.BeginSingleUseCommandBuffer(device, pool, queue);
+        TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED,
+                              VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                              VK_IMAGE_ASPECT_COLOR_BIT,
+                              cmdBuffer.GetCommandBuffer());
+        cmdBuffer.EndSingleUseCommandBuffer();
+
+        stagingBuffer.CopyBufferToImage(image, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
+        // transitioned to VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL while generating mipmaps
+
+        stagingBuffer.DestroySubBlock();
+
+        GenerateMipmaps(VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight);
+    }
+
+    void Image::CreateCubeTextureImage(const char *       fileNameFront,
+                                       const char *       fileNameBack,
+                                       const char *       fileNameUp,
+                                       const char *       fileNameDown,
+                                       const char *       fileNameRight,
+                                       const char *       fileNameLeft,
+                                       VkDevice &         device,
+                                       VkPhysicalDevice & physicalDevice,
+                                       Memory &           memory,
+                                       VkCommandPool &    pool,
+                                       VkQueue &          queue)
+    {
+        this->device         = &device;
+        this->physicalDevice = &physicalDevice;
+        this->memory         = &memory;
+        this->isCube         = true;
+
+        hostLocalBuffer.CreateBuffer(*this->physicalDevice,
+                                     *this->device,
+                                     *this->memory,
+                                     0x7FFFFFF,
+                                     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                                     queue,
+                                     pool);
+
+        deviceLocalBuffer.CreateBuffer(*this->physicalDevice,
+                                       *this->device,
+                                       *this->memory,
+                                       0x7FFFFFF,
+                                       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                                       queue,
+                                       pool);
+        stbi_uc * pixels[6];
+
+        int texWidth, texHeight, texChannels;
+
+        pixels[0] = stbi_load(fileNameFront, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+        pixels[1] = stbi_load(fileNameBack, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+        pixels[2] = stbi_load(fileNameUp, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+        pixels[3] = stbi_load(fileNameDown, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+        pixels[4] = stbi_load(fileNameRight, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+        pixels[5] = stbi_load(fileNameLeft, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+
+        VkDeviceSize imageSize = texWidth * texHeight * 4 * 6; // CUBEMAP: multiply by 6 for cube map textures
+        VkDeviceSize layerSize = imageSize / 6;                // CUBEMAP: add for cube map textures
+        std::cout << imageSize << " " << layerSize << std::endl;
+        mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
+
+        size.width  = texWidth;
+        size.height = texHeight;
+
+        if (!pixels)
+        {
+            throw std::runtime_error("failed to load texture image!");
+        }
+
+        Buffer::SubBlock stagingBuffer = hostLocalBuffer.GetBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+
+        for (uint32_t i = 0; i < 6; i++)
+        {
+            std::cout << i << std::endl;
+            stagingBuffer.CopyDataToBuffer(pixels[i], static_cast<size_t>(layerSize), layerSize * i);
+            stbi_image_free(pixels[i]);
+        }
 
         CreateImage(texWidth,
                     texHeight,
@@ -231,7 +348,7 @@ namespace sckz
 
         Buffer::SubBlock stagingBuffer = hostLocalBuffer.GetBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
 
-        stagingBuffer.CopyDataToBuffer(dummyData, static_cast<size_t>(imageSize));
+        stagingBuffer.CopyDataToBuffer(dummyData, static_cast<size_t>(imageSize), 0);
         delete dummyData;
 
         CreateImage(texWidth,
@@ -304,7 +421,14 @@ namespace sckz
         barrier.subresourceRange.baseMipLevel   = 0;
         barrier.subresourceRange.levelCount     = mipLevels;
         barrier.subresourceRange.baseArrayLayer = 0;
-        barrier.subresourceRange.layerCount     = 1;
+        if (isCube)
+        {
+            barrier.subresourceRange.layerCount = 6; // CUBEMAP: set this to 6 for cube map textures
+        }
+        else
+        {
+            barrier.subresourceRange.layerCount = 1;
+        }
 
         VkPipelineStageFlags sourceStage;
         VkPipelineStageFlags destinationStage;
@@ -460,8 +584,15 @@ namespace sckz
         barrier.dstQueueFamilyIndex             = VK_QUEUE_FAMILY_IGNORED;
         barrier.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
         barrier.subresourceRange.baseArrayLayer = 0;
-        barrier.subresourceRange.layerCount     = 1;
-        barrier.subresourceRange.levelCount     = 1;
+        if (isCube)
+        {
+            barrier.subresourceRange.layerCount = 6;
+        }
+        else
+        {
+            barrier.subresourceRange.layerCount = 1;
+        }
+        barrier.subresourceRange.levelCount = 1;
 
         int32_t mipWidth  = texWidth;
         int32_t mipHeight = texHeight;

@@ -15,7 +15,8 @@ namespace sckz
                             GraphicsPipeline * pipeline,
                             DescriptorPool &   descriptorPool,
                             Memory &           memory,
-                            VkQueue &          queue)
+                            VkQueue &          queue,
+                            Image &            cubeTest)
     {
         this->colorFileName    = colorFileName;
         this->normalFileName   = normalFileName;
@@ -28,6 +29,7 @@ namespace sckz
         this->pipeline         = pipeline;
         this->queue            = &queue;
         this->memory           = &memory;
+        this->cubeTest         = &cubeTest;
 
         this->hostLocalBuffer.CreateBuffer(*this->physicalDevice,
                                            *this->device,
@@ -148,7 +150,7 @@ namespace sckz
         Buffer::SubBlock stagingBuffer;
         stagingBuffer = hostLocalBuffer.GetBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
 
-        stagingBuffer.CopyDataToBuffer(vertices.data(), bufferSize);
+        stagingBuffer.CopyDataToBuffer(vertices.data(), bufferSize, 0);
 
         vertexBuffer
             = &deviceLocalBuffer.GetBuffer(bufferSize,
@@ -166,7 +168,7 @@ namespace sckz
         Buffer::SubBlock stagingBuffer;
         stagingBuffer = hostLocalBuffer.GetBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
 
-        stagingBuffer.CopyDataToBuffer(indices.data(), bufferSize);
+        stagingBuffer.CopyDataToBuffer(indices.data(), bufferSize, 0);
 
         indexBuffer = &deviceLocalBuffer.GetBuffer(bufferSize,
                                                    VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
@@ -268,7 +270,14 @@ namespace sckz
     Entity & Model::CreateEntity()
     {
         Entity * entity = new Entity();
-        entity->CreateEntity(*physicalDevice, *device, *queue, hostLocalBuffer, *descriptorPool, *pipeline, textures);
+        entity->CreateEntity(*physicalDevice,
+                             *device,
+                             *queue,
+                             hostLocalBuffer,
+                             *descriptorPool,
+                             *pipeline,
+                             textures,
+                             *cubeTest);
         entities.push_back(entity);
         CreateCommandBuffer();
 
