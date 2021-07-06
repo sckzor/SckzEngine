@@ -22,7 +22,7 @@ Time behind schedule: 2 weeks
 
   - ~~April 30, '21 - FBOs / Swapchain~~
   - ~~May 31, '21 - Memory Manager / GUIs / Particles~~
-  - June 31, '21 - Animation / More Lighting / Shadows
+  - June 31, '21 - Animation / ~~More Lighting~~ / Shadows
 
 - September '21 - Have a prototype for the game functioning, continue adding to the engine
 
@@ -49,7 +49,7 @@ Time behind schedule: 2 weeks
 - [x] Finish the _vulkan_ memory manager.
 - [x] Optimize, Optimize, Optimize.
 - [x] Simple GUIs.
-- [ ] Advanced Lighting.
+- [x] Advanced Lighting.
 - [x] Bloom / Merge shader.
 - [ ] Shadows!
 - [x] FBO Class / Extensible pipelines for unique UBOs
