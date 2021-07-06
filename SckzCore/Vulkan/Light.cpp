@@ -53,5 +53,4 @@ namespace sckz
     }
 
     bool Light::IsSpotlight() { return isSpotLight; }
-
 } // namespace sckz

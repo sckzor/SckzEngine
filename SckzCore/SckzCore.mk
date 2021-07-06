@@ -19,7 +19,7 @@ build/Image.o: $(VK_PATH)/Image.cpp $(VK_PATH)/Image.hpp $(VK_PATH)/Memory.hpp $
 build/Memory.o: $(VK_PATH)/Memory.cpp $(VK_PATH)/Memory.hpp $(INCLUDE)
 	g++ $(CFLAGS) -c $(VK_PATH)/Memory.cpp -o build/Memory.o $(LDFLAGS)
 
-build/Entity.o: $(VK_PATH)/Entity.cpp $(VK_PATH)/Entity.hpp $(VK_PATH)/Buffer.hpp $(VK_PATH)/Image.hpp $(VK_PATH)/Camera.hpp $(VK_PATH)/GraphicsPipeline.hpp $(INCLUDE)
+build/Entity.o: ../SckzExtras/LightSort.hpp $(VK_PATH)/Entity.cpp $(VK_PATH)/Entity.hpp $(VK_PATH)/Buffer.hpp $(VK_PATH)/Image.hpp $(VK_PATH)/Camera.hpp $(VK_PATH)/GraphicsPipeline.hpp $(INCLUDE)
 	g++ $(CFLAGS) -c $(VK_PATH)/Entity.cpp -o build/Entity.o $(LDFLAGS)
 
 build/GraphicsPipeline.o: $(VK_PATH)/GraphicsPipeline.cpp $(VK_PATH)/GraphicsPipeline.hpp $(VK_PATH)/Fbo.hpp $(INCLUDE)

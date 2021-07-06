@@ -63,16 +63,19 @@ namespace sckz
         Fubo.extras.x = this->reflectivity;
         Fubo.extras.y = this->shineDamper;
 
+        std::vector<std::pair<Light *, float>> sortedLights = LightSort::GetNearestLights(*lights, location);
+
         for (int i = 0; i < MAX_LIGHTS; i++)
         {
-            if (i < lights->size())
+            if (i < sortedLights.size())
             {
-                Vubo.lightPosition[i] = (*lights)[i]->GetLocation();
-                Fubo.lightColor[i]    = glm::vec4((*lights)[i]->GetColor(), 0);
-                Fubo.attenuation[i]   = glm::vec4((*lights)[i]->GetAttenuation(), 0);
-                Fubo.direction[i]     = glm::vec4((*lights)[i]->GetDirection(), (*lights)[i]->IsSpotlight() ? 1 : 0);
-                Fubo.cutoffs[i].x     = glm::radians((*lights)[i]->GetCutoff());
-                Fubo.cutoffs[i].y     = glm::radians((*lights)[i]->GetOuterCutoff());
+                Vubo.lightPosition[i] = sortedLights[i].first->GetLocation();
+                Fubo.lightColor[i]    = glm::vec4(sortedLights[i].first->GetColor(), 0);
+                Fubo.attenuation[i]   = glm::vec4(sortedLights[i].first->GetAttenuation(), 0);
+                Fubo.direction[i]
+                    = glm::vec4(sortedLights[i].first->GetDirection(), sortedLights[i].first->IsSpotlight() ? 1 : 0);
+                Fubo.cutoffs[i].x = glm::radians(sortedLights[i].first->GetCutoff());
+                Fubo.cutoffs[i].y = glm::radians(sortedLights[i].first->GetOuterCutoff());
             }
             else
             {

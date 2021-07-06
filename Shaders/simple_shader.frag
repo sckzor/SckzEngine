@@ -76,18 +76,16 @@ void main()
             dampedFactor = level / CEL_SHADING_LEVELS;
         }
 
-        totalSpecular = totalSpecular + (dampedFactor * ubo.extras.x * ubo.lightColor[i].xyz) / attFactor;
-        totalDiffuse = totalDiffuse + (brightness * ubo.lightColor[i].xyz);
-
+        float intensity = 1;
         if(ubo.direction[i].w > 0.5)
         {
             float theta = dot(lightDirection, -normalize(ubo.direction[i].xyz));
             float epsilon = (ubo.cutoffs[i].x - ubo.cutoffs[i].y);
-            float intensity = clamp(-(theta - ubo.cutoffs[i].y) / epsilon, 0.0, 1.0);
-            
-            totalSpecular *= intensity;
-            totalDiffuse *= intensity;
+            intensity = clamp(-(theta - ubo.cutoffs[i].y) / epsilon, 0.0, 1.0);
         }
+
+        totalSpecular = totalSpecular + (dampedFactor * ubo.extras.x * ubo.lightColor[i].xyz) / attFactor * intensity;
+        totalDiffuse = totalDiffuse + (brightness * ubo.lightColor[i].xyz) * intensity;
     }
     totalDiffuse = max(totalDiffuse, 0.2);
 

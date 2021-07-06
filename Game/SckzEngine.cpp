@@ -37,7 +37,17 @@ int main()
                                       "Resources/barrelNormal.png",
                                       "Resources/barrelSpecular.png",
                                       p2);
-    sckz::Light &            l2 = s2.CreateLight(true);
+
+    sckz::Light & l2 = s1.CreateLight(true);
+    sckz::Light & l3 = s1.CreateLight(false);
+    l3.SetLocation(-50, 1, 0);
+    l3.SetColor(0, 0, 0);
+    sckz::Light & l4 = s1.CreateLight(false);
+    l4.SetLocation(-50, 1, 0);
+    l4.SetColor(0, 0, 0);
+    sckz::Light & l5 = s1.CreateLight(false);
+    l5.SetLocation(-50, 1, 0);
+    l5.SetColor(0, 0, 0);
 
     sckz::Entity & e1 = s1.CreateEntity(m1);
     sckz::Entity & e3 = s1.CreateEntity(m3);
@@ -62,11 +72,17 @@ int main()
     e1.SetLocation(-50, 1, 0);
     e1.SetScale(0.1, 0.1, 0.1);
 
-    l1.SetColor(1, 1, 1);
+    l1.SetColor(0, 0.5, 1);
     l1.SetLocation(0, 0, 0);
     l1.SetAttenuation(1, 0.01, 0.002);
     l1.SetDirection(0, -1, 0);
     l1.SetCutoff(12.5, 17.5);
+
+    l2.SetColor(1, 0.5, 0);
+    l2.SetLocation(0, 0, 0);
+    l2.SetAttenuation(1, 0.01, 0.002);
+    l2.SetDirection(-1, 0, 0);
+    l2.SetCutoff(12.5, 17.5);
 
     e2.SetShine(1, 10);
     e2.SetRotation(90, 0, 0);
@@ -76,10 +92,6 @@ int main()
     e3.SetShine(1, 30);
     e3.SetRotation(90, 0, 0);
     e3.SetLocation(0, 1, 0);
-
-    l2.SetColor(0.2, 0.2, 0.2);
-    l2.SetLocation(1, 1, 1);
-    l2.SetAttenuation(1, 0.01, 0.002);
 
     c1.SetLocation(0, 5, 0);
     c1.SetRotation(-90, 0, 0);
