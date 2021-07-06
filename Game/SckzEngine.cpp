@@ -39,15 +39,6 @@ int main()
                                       p2);
 
     sckz::Light & l2 = s1.CreateLight(true);
-    sckz::Light & l3 = s1.CreateLight(false);
-    l3.SetLocation(-50, 1, 0);
-    l3.SetColor(0, 0, 0);
-    sckz::Light & l4 = s1.CreateLight(false);
-    l4.SetLocation(-50, 1, 0);
-    l4.SetColor(0, 0, 0);
-    sckz::Light & l5 = s1.CreateLight(false);
-    l5.SetLocation(-50, 1, 0);
-    l5.SetColor(0, 0, 0);
 
     sckz::Entity & e1 = s1.CreateEntity(m1);
     sckz::Entity & e3 = s1.CreateEntity(m3);
