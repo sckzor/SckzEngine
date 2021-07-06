@@ -27,7 +27,7 @@ int main()
                                       "Resources/barrelSpecular.png",
                                       p1);
     sckz::Model & m3 = s1.CreateModel("Resources/room.obj", "Resources/RoomTextureAtlas.png", nullptr, nullptr, p1);
-    sckz::Light & l1 = s1.CreateLight();
+    sckz::Light & l1 = s1.CreateLight(true);
 
     sckz::ParticleSystem & pa1 = s1.CreateParticleSystem(1000, "Resources/fireParticles.png", 4, 4, 15);
 
@@ -37,9 +37,9 @@ int main()
                                       "Resources/barrelNormal.png",
                                       "Resources/barrelSpecular.png",
                                       p2);
-    sckz::Light &            l2 = s2.CreateLight();
+    sckz::Light &            l2 = s2.CreateLight(true);
 
-    // sckz::Entity & e1 = s1.CreateEntity(m1);
+    sckz::Entity & e1 = s1.CreateEntity(m1);
     sckz::Entity & e3 = s1.CreateEntity(m3);
     sckz::Camera & c1 = s1.CreateCamera(45, 0.1, 10);
 
@@ -57,14 +57,16 @@ int main()
     gui.SetLocation(500, 300);
     // gui.SetRotationPoint(100, 100);
 
-    // e1.SetShine(1, 10);
-    // e1.SetRotation(90, 0, 0);
-    // e1.SetLocation(0, 1, 0);
-    // e1.SetScale(0.1, 0.1, 0.1);
+    e1.SetShine(1, 10);
+    e1.SetRotation(90, 0, 0);
+    e1.SetLocation(-50, 1, 0);
+    e1.SetScale(0.1, 0.1, 0.1);
 
     l1.SetColor(1, 1, 1);
     l1.SetLocation(0, 0, 0);
     l1.SetAttenuation(1, 0.01, 0.002);
+    l1.SetDirection(0, -1, 0);
+    l1.SetCutoff(12.5, 17.5);
 
     e2.SetShine(1, 10);
     e2.SetRotation(90, 0, 0);
@@ -191,12 +193,29 @@ int main()
 
         if (win.QueryKey('5'))
         {
-            l1.SetLocation(c1.GetLocation().x, c1.GetLocation().y, c1.GetLocation().z);
+            l1.SetLocation(l1.GetLocation().x, l1.GetLocation().y + (vkan.GetDeltaT()), l1.GetLocation().z);
+        }
+        if (win.QueryKey('4'))
+        {
+            l1.SetLocation(l1.GetLocation().x, l1.GetLocation().y - (vkan.GetDeltaT()), l1.GetLocation().z);
+        }
+        if (win.QueryKey('1'))
+        {
+            l1.SetCutoff(l1.GetCutoff(), l1.GetOuterCutoff() + (vkan.GetDeltaT()));
+        }
+        if (win.QueryKey('2'))
+        {
+            l1.SetCutoff(l1.GetCutoff() + (vkan.GetDeltaT()), l1.GetOuterCutoff());
         }
 
         if (win.QueryKey('6'))
         {
-            // e1.SetRotation(e1.GetRotation().x, e1.GetRotation().y - (100 * vkan.GetDeltaT()), e1.GetRotation().z);
+            e3.SetRotation(e3.GetRotation().x, e3.GetRotation().y - (10 * vkan.GetDeltaT()), e3.GetRotation().z);
+        }
+
+        if (win.QueryKey('7'))
+        {
+            e3.SetRotation(e3.GetRotation().x, e3.GetRotation().y + (10 * vkan.GetDeltaT()), e3.GetRotation().z);
         }
 
         win.Update();

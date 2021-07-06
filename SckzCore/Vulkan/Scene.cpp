@@ -311,9 +311,11 @@ namespace sckz
         return entity;
     }
 
-    Light & Scene::CreateLight()
+    Light & Scene::CreateLight(bool isSpotlight)
     {
         lights.push_back(new Light());
+        lights.back()->CreateLight(isSpotlight);
+
         return *lights.back();
     }
 

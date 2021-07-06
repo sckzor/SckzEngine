@@ -60,8 +60,8 @@ namespace sckz
         Vubo.view = camera.GetView();
         Vubo.proj = camera.GetProjection();
 
-        Fubo.reflectivity.x = this->reflectivity;
-        Fubo.reflectivity.y = this->shineDamper;
+        Fubo.extras.x = this->reflectivity;
+        Fubo.extras.y = this->shineDamper;
 
         for (int i = 0; i < MAX_LIGHTS; i++)
         {
@@ -70,12 +70,16 @@ namespace sckz
                 Vubo.lightPosition[i] = (*lights)[i]->GetLocation();
                 Fubo.lightColor[i]    = glm::vec4((*lights)[i]->GetColor(), 0);
                 Fubo.attenuation[i]   = glm::vec4((*lights)[i]->GetAttenuation(), 0);
+                Fubo.direction[i]     = glm::vec4((*lights)[i]->GetDirection(), (*lights)[i]->IsSpotlight() ? 1 : 0);
+                Fubo.cutoffs[i].x     = glm::radians((*lights)[i]->GetCutoff());
+                Fubo.cutoffs[i].y     = glm::radians((*lights)[i]->GetOuterCutoff());
             }
             else
             {
                 Vubo.lightPosition[i] = glm::vec3(0, 0, 0);
                 Fubo.lightColor[i]    = glm::vec4(0, 0, 0, 0);
                 Fubo.attenuation[i]   = glm::vec4(1, 0, 0, 0);
+                Fubo.direction[i]     = glm::vec4(0, 0, 0, 0);
             }
         }
 

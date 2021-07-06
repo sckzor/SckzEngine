@@ -93,7 +93,7 @@ namespace sckz
 
         Camera &         CreateCamera(float fov, float near, float far);
         Entity &         CreateEntity(Model & model);
-        Light &          CreateLight();
+        Light &          CreateLight(bool isSpotlight);
         Fbo &            CreateFbo();
         Filter &         CreateFilter(const char * fragmentFile);
         Combine &        CreateCombine(const char * fragmentFile);

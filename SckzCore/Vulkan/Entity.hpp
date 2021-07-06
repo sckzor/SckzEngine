@@ -28,9 +28,11 @@ namespace sckz
         {
             alignas(16) glm::vec4 lightColor[MAX_LIGHTS];
             alignas(16) glm::vec4 attenuation[MAX_LIGHTS];
+            alignas(16) glm::vec4 direction[MAX_LIGHTS];
+            alignas(16) glm::vec4 cutoffs[MAX_LIGHTS];
             // Use Vec4 instead of vec3 for alignment, it takes up the same amount of bytes as aligning it properly and
             // this is easier
-            alignas(16) glm::vec2 reflectivity;
+            alignas(16) glm::vec4 extras; // Reflectivity is s, shine damper is y, cutoff is z and outer cut off is w
         };
 
     private:

@@ -13,23 +13,14 @@ layout(binding = 4) uniform UniformBufferObject
 {
     vec4 lightColor[MAX_LIGHTS];
     vec4 attenuation[MAX_LIGHTS];
+    vec4 direction[MAX_LIGHTS];
+    vec4 cutoffs[MAX_LIGHTS];
     // Use Vec4 instead of vec3 for alignment, it takes up the same amount of bytes as aligning it properly and
     // this is easier
     
-    vec2 reflectivity;
+    vec4 extras; // Reflectivity is xy, Cut off and outer cut off are zw
 }
 ubo;
-
-mat3 sx = mat3( 
-    1.0, 2.0, 1.0, 
-    0.0, 0.0, 0.0, 
-   -1.0, -2.0, -1.0 
-);
-mat3 sy = mat3( 
-    1.0, 0.0, -1.0, 
-    2.0, 0.0, -2.0, 
-    1.0, 0.0, -1.0 
-);
 
 layout(location = 0) in vec2 fragTexCoord;
 layout(location = 1) in vec3 surfaceNormal;
@@ -73,13 +64,11 @@ void main()
             brightness = level / CEL_SHADING_LEVELS;
         }
 
-        totalDiffuse = totalDiffuse + (brightness * ubo.lightColor[i].xyz);
-
         vec3 lightDirection = -unitLightVector;
         vec3 reflectedLightDirection = reflect(lightDirection, unitNormal);
         float specularFactor = dot(reflectedLightDirection, unitToCameraVector);
         specularFactor = max(specularFactor, 0.0);
-        float dampedFactor = pow(specularFactor, ubo.reflectivity.y);
+        float dampedFactor = pow(specularFactor, ubo.extras.y);
 
         if(CEL_SHADING_LEVELS > 0)
         {
@@ -87,7 +76,18 @@ void main()
             dampedFactor = level / CEL_SHADING_LEVELS;
         }
 
-        totalSpecular = totalSpecular + (dampedFactor * ubo.reflectivity.x * ubo.lightColor[i].xyz) / attFactor;
+        totalSpecular = totalSpecular + (dampedFactor * ubo.extras.x * ubo.lightColor[i].xyz) / attFactor;
+        totalDiffuse = totalDiffuse + (brightness * ubo.lightColor[i].xyz);
+
+        if(ubo.direction[i].w > 0.5)
+        {
+            float theta = dot(lightDirection, -normalize(ubo.direction[i].xyz));
+            float epsilon = (ubo.cutoffs[i].x - ubo.cutoffs[i].y);
+            float intensity = clamp(-(theta - ubo.cutoffs[i].y) / epsilon, 0.0, 1.0);
+            
+            totalSpecular *= intensity;
+            totalDiffuse *= intensity;
+        }
     }
     totalDiffuse = max(totalDiffuse, 0.2);
 
@@ -104,7 +104,6 @@ void main()
     }
 
     outColor = vec4(totalDiffuse, 1.0) * texture(texSampler, fragTexCoord) + vec4(totalSpecular, 1.0);
-
     
 }
 
