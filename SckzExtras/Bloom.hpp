@@ -1,3 +1,4 @@
+#pragma once
 #include "../Include.hpp"
 #include "../SckzCore/Vulkan/Combine.hpp"
 #include "../SckzCore/Vulkan/Fbo.hpp"

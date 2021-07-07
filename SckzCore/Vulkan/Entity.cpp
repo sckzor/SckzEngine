@@ -8,8 +8,7 @@ namespace sckz
                               Buffer &               hostLocalBuffer,
                               DescriptorPool &       descriptorPool,
                               GraphicsPipeline &     pipeline,
-                              std::array<Image, 3> & textures,
-                              Image &                cubeTest)
+                              std::array<Image, 3> & textures)
     {
         this->physicalDevice  = &physicalDevice;
         this->queue           = &queue;
@@ -18,16 +17,13 @@ namespace sckz
         this->pipeline        = &pipeline;
         this->textures        = &textures;
         this->hostLocalBuffer = &hostLocalBuffer;
-        this->cubeTest        = &cubeTest;
 
         this->scale = glm::vec3(1.0f, 1.0f, 1.0f);
 
         CreateUniformBuffers();
 
-        std::array<Image, 4> alltex = { textures[0], textures[1], textures[2], cubeTest };
-
         this->pipeline->BindShaderData(&uniformBuffer[0],
-                                       alltex.data(),
+                                       textures.data(),
                                        &uniformBuffer[1],
                                        *this->descriptorPool,
                                        &descriptorSet);

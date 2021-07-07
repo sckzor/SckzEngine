@@ -205,7 +205,10 @@ namespace sckz
                               cmdBuffer.GetCommandBuffer());
         cmdBuffer.EndSingleUseCommandBuffer();
 
-        stagingBuffer.CopyBufferToImage(image, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
+        stagingBuffer.CopyBufferToImage(image,
+                                        static_cast<uint32_t>(texWidth),
+                                        static_cast<uint32_t>(texHeight),
+                                        isCube);
         // transitioned to VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL while generating mipmaps
 
         stagingBuffer.DestroySubBlock();
@@ -258,8 +261,7 @@ namespace sckz
 
         VkDeviceSize imageSize = texWidth * texHeight * 4 * 6; // CUBEMAP: multiply by 6 for cube map textures
         VkDeviceSize layerSize = imageSize / 6;                // CUBEMAP: add for cube map textures
-        std::cout << imageSize << " " << layerSize << std::endl;
-        mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
+        mipLevels              = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
 
         size.width  = texWidth;
         size.height = texHeight;
@@ -273,7 +275,6 @@ namespace sckz
 
         for (uint32_t i = 0; i < 6; i++)
         {
-            std::cout << i << std::endl;
             stagingBuffer.CopyDataToBuffer(pixels[i], static_cast<size_t>(layerSize), layerSize * i);
             stbi_image_free(pixels[i]);
         }
@@ -300,7 +301,10 @@ namespace sckz
                               cmdBuffer.GetCommandBuffer());
         cmdBuffer.EndSingleUseCommandBuffer();
 
-        stagingBuffer.CopyBufferToImage(image, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
+        stagingBuffer.CopyBufferToImage(image,
+                                        static_cast<uint32_t>(texWidth),
+                                        static_cast<uint32_t>(texHeight),
+                                        isCube);
         // transitioned to VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL while generating mipmaps
 
         stagingBuffer.DestroySubBlock();
@@ -373,7 +377,10 @@ namespace sckz
                               cmdBuffer.GetCommandBuffer());
         cmdBuffer.EndSingleUseCommandBuffer();
 
-        stagingBuffer.CopyBufferToImage(image, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
+        stagingBuffer.CopyBufferToImage(image,
+                                        static_cast<uint32_t>(texWidth),
+                                        static_cast<uint32_t>(texHeight),
+                                        isCube);
         // transitioned to VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL while generating mipmaps
 
         stagingBuffer.DestroySubBlock();
@@ -529,8 +536,15 @@ namespace sckz
         VkImageSubresourceLayers subresourceLayers;
         subresourceLayers.aspectMask     = aspectMask;
         subresourceLayers.baseArrayLayer = 0;
-        subresourceLayers.layerCount     = 1;
-        subresourceLayers.mipLevel       = mipLevels - 1;
+        if (isCube)
+        {
+            subresourceLayers.layerCount = 6;
+        }
+        else
+        {
+            subresourceLayers.layerCount = 1;
+        }
+        subresourceLayers.mipLevel = mipLevels - 1;
 
         VkImageCopy copyData;
         copyData.dstOffset      = noOffset;
@@ -750,4 +764,5 @@ namespace sckz
     VkSampler & Image::GetSampler() { return sampler; }
 
     VkFormat Image::GetFormat() { return format; }
+
 } // namespace sckz

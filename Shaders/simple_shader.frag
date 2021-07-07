@@ -8,9 +8,8 @@ const float CEL_SHADING_LEVELS = -1; // Use -1 to disable
 layout(binding = 1) uniform sampler2D texSampler; // Normal color texture.
 layout(binding = 2) uniform sampler2D norSampler; // Red is X, Green is Y, Blue is Z (as per normal (no pun intended))
 layout(binding = 3) uniform sampler2D speSampler; // Red Channel is Specular Map, Green is glow map
-layout(binding = 4) uniform samplerCube cubeTest;
 
-layout(binding = 5) uniform UniformBufferObject
+layout(binding = 4) uniform UniformBufferObject
 {
     vec4 lightColor[MAX_LIGHTS];
     vec4 attenuation[MAX_LIGHTS];
@@ -102,9 +101,6 @@ void main()
         }
     }
 
-    outColor = vec4(totalDiffuse, 1.0) * texture(texSampler, fragTexCoord) + vec4(totalSpecular, 1.0);
-
-    outColor = texture(cubeTest, vec3(0.5, 0.5, 0.5));
-    
+    outColor = vec4(totalDiffuse, 1.0) * texture(texSampler, fragTexCoord) + vec4(totalSpecular, 1.0);    
 }
 

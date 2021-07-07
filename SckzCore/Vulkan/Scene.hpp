@@ -2,6 +2,7 @@
 #include "../../Include.hpp"
 #include "Camera.hpp"
 #include "Combine.hpp"
+#include "CubeMap.hpp"
 #include "DescriptorPool.hpp"
 #include "Fbo.hpp"
 #include "Filter.hpp"
@@ -31,6 +32,7 @@ namespace sckz
         Memory   memory;
 
         GraphicsPipeline particlePipeline;
+        GraphicsPipeline cubeMapPipeline;
 
         std::vector<Fbo *>              fbos;
         std::vector<Filter *>           filters;
@@ -43,7 +45,7 @@ namespace sckz
 
         VkFence inFlightFence;
 
-        Image cubeMapTest;
+        CubeMap cubeMapTest;
 
         VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT; // Goes
         VkSampleCountFlagBits maxMsaaSamples;

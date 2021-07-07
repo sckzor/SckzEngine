@@ -37,13 +37,19 @@ namespace sckz
 
             case PipelineType::MODEL_PIPELINE:
                 vertexUboCount   = 1;
-                samplerCount     = 4;
+                samplerCount     = 3;
                 fragmentUboCount = 1;
                 break;
 
             case PipelineType::COMBINE_PIPELINE:
                 vertexUboCount   = 0;
                 samplerCount     = 2;
+                fragmentUboCount = 0;
+                break;
+
+            case PipelineType::CUBEMAP_PIPELINE:
+                vertexUboCount   = 1;
+                samplerCount     = 1;
                 fragmentUboCount = 0;
                 break;
 
@@ -202,7 +208,7 @@ namespace sckz
         auto bindingDescription    = Vertex::GetBindingDescription();
         auto attributeDescriptions = Vertex::GetAttributeDescriptions();
 
-        if (this->type == PipelineType::MODEL_PIPELINE)
+        if (this->type == PipelineType::MODEL_PIPELINE || this->type == PipelineType::CUBEMAP_PIPELINE)
         {
             vertexInputInfo.vertexBindingDescriptionCount   = 1;
             vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
@@ -244,6 +250,10 @@ namespace sckz
             || this->type == PipelineType::COMBINE_PIPELINE)
         {
             rasterizer.cullMode = VK_CULL_MODE_FRONT_BIT;
+        }
+        else if (this->type == PipelineType::CUBEMAP_PIPELINE)
+        {
+            rasterizer.cullMode = VK_CULL_MODE_NONE;
         }
         else
         {

@@ -15,8 +15,7 @@ namespace sckz
                             GraphicsPipeline * pipeline,
                             DescriptorPool &   descriptorPool,
                             Memory &           memory,
-                            VkQueue &          queue,
-                            Image &            cubeTest)
+                            VkQueue &          queue)
     {
         this->colorFileName    = colorFileName;
         this->normalFileName   = normalFileName;
@@ -29,7 +28,6 @@ namespace sckz
         this->pipeline         = pipeline;
         this->queue            = &queue;
         this->memory           = &memory;
-        this->cubeTest         = &cubeTest;
 
         this->hostLocalBuffer.CreateBuffer(*this->physicalDevice,
                                            *this->device,
@@ -270,14 +268,7 @@ namespace sckz
     Entity & Model::CreateEntity()
     {
         Entity * entity = new Entity();
-        entity->CreateEntity(*physicalDevice,
-                             *device,
-                             *queue,
-                             hostLocalBuffer,
-                             *descriptorPool,
-                             *pipeline,
-                             textures,
-                             *cubeTest);
+        entity->CreateEntity(*physicalDevice, *device, *queue, hostLocalBuffer, *descriptorPool, *pipeline, textures);
         entities.push_back(entity);
         CreateCommandBuffer();
 

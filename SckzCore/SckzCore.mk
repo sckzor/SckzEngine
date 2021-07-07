@@ -4,8 +4,8 @@ all: SckzCore.a
 
 # C++ based make information
 
-SckzCore.a:build/Scene.o build/Gui.o build/ParticleSystem.o build/Buffer.o build/Combine.o build/CommandBuffer.o build/Filter.o build/HelperMethods.o build/Image.o build/Memory.o build/Model.o build/Entity.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o build/Light.o  build/Camera.o build/Fbo.o $(INCLUDE)
-	ar rvs SckzCore.a build/Buffer.o build/ParticleSystem.o build/Gui.o build/Combine.o build/Scene.o build/Filter.o build/HelperMethods.o build/CommandBuffer.o build/Image.o build/Memory.o build/Model.o build/Entity.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o build/Camera.o build/Light.o build/Fbo.o
+SckzCore.a:build/Scene.o build/CubeMap.o build/Gui.o build/ParticleSystem.o build/Buffer.o build/Combine.o build/CommandBuffer.o build/Filter.o build/HelperMethods.o build/Image.o build/Memory.o build/Model.o build/Entity.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o build/Light.o  build/Camera.o build/Fbo.o $(INCLUDE)
+	ar rvs SckzCore.a build/CubeMap.o build/Buffer.o build/ParticleSystem.o build/Gui.o build/Combine.o build/Scene.o build/Filter.o build/HelperMethods.o build/CommandBuffer.o build/Image.o build/Memory.o build/Model.o build/Entity.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o build/Camera.o build/Light.o build/Fbo.o
 
 build/Buffer.o: $(VK_PATH)/Buffer.cpp $(VK_PATH)/Buffer.hpp $(VK_PATH)/Memory.hpp $(VK_PATH)/CommandBuffer.hpp $(INCLUDE)
 	g++ $(CFLAGS) -c $(VK_PATH)/Buffer.cpp -o build/Buffer.o $(LDFLAGS)
@@ -40,7 +40,7 @@ build/Camera.o: $(VK_PATH)/Camera.cpp $(VK_PATH)/Camera.hpp $(INCLUDE)
 build/Light.o: $(VK_PATH)/Light.cpp $(VK_PATH)/Light.hpp $(INCLUDE)
 	g++ $(CFLAGS) -c $(VK_PATH)/Light.cpp -o build/Light.o $(LDFLAGS)
 
-build/Scene.o: $(VK_PATH)/Scene.cpp $(VK_PATH)/Camera.hpp $(VK_PATH)/Fbo.hpp $(VK_PATH)/ParticleSystem.hpp $(VK_PATH)/DescriptorPool.hpp $(VK_PATH)/CommandBuffer.hpp $(VK_PATH)/GraphicsPipeline.hpp $(VK_PATH)/Image.hpp $(VK_PATH)/Model.hpp $(INCLUDE)
+build/Scene.o: $(VK_PATH)/Scene.cpp $(VK_PATH)/CubeMap.hpp $(VK_PATH)/Camera.hpp $(VK_PATH)/Fbo.hpp $(VK_PATH)/ParticleSystem.hpp $(VK_PATH)/DescriptorPool.hpp $(VK_PATH)/CommandBuffer.hpp $(VK_PATH)/GraphicsPipeline.hpp $(VK_PATH)/Image.hpp $(VK_PATH)/Model.hpp $(INCLUDE)
 	g++ $(CFLAGS) -c $(VK_PATH)/Scene.cpp -o build/Scene.o $(LDFLAGS)
 
 build/HelperMethods.o: $(VK_PATH)/HelperMethods.cpp $(VK_PATH)/HelperMethods.hpp  $(INCLUDE)
@@ -63,6 +63,9 @@ build/Filter.o: $(VK_PATH)/Filter.cpp $(VK_PATH)/Filter.hpp $(VK_PATH)/CommandBu
 
 build/Combine.o: $(VK_PATH)/Combine.cpp $(VK_PATH)/Combine.hpp $(VK_PATH)/CommandBuffer.hpp $(VK_PATH)/GraphicsPipeline.hpp $(VK_PATH)/Image.hpp $(VK_PATH)/Memory.hpp $(INCLUDE)
 	g++ $(CFLAGS) -c $(VK_PATH)/Combine.cpp -o build/Combine.o $(LDFLAGS)
+
+build/CubeMap.o: $(VK_PATH)/CubeMap.cpp $(VK_PATH)/CubeMap.hpp $(VK_PATH)/GraphicsPipeline.hpp $(VK_PATH)/Image.hpp $(VK_PATH)/Scene.hpp $(VK_PATH)/Vertex.hpp $(INCLUDE)
+	g++ $(CFLAGS) -c $(VK_PATH)/CubeMap.cpp -o build/CubeMap.o $(LDFLAGS)
 
 clean:
 	rm -f build/*.o

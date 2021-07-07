@@ -21,7 +21,7 @@ int main()
     sckz::GraphicsPipeline & f1 = vkan.CreateFBOPipeline("Resources/fbo_fragment_normal.spv");
 
     sckz::GraphicsPipeline & p1 = s1.CreatePipeline("Resources/simple_vertex.spv", "Resources/simple_fragment.spv");
-    sckz::Model &            m1 = s1.CreateModel("Resources/barrel.obj",
+    sckz::Model &            m1 = s1.CreateModel("Resources/cubemap.obj",
                                       "Resources/barrelColor.png",
                                       "Resources/barrelNormal.png",
                                       "Resources/barrelSpecular.png",
@@ -40,12 +40,12 @@ int main()
 
     sckz::Light & l2 = s1.CreateLight(true);
 
-    sckz::Entity & e1 = s1.CreateEntity(m1);
+    // sckz::Entity & e1 = s1.CreateEntity(m1);
     sckz::Entity & e3 = s1.CreateEntity(m3);
-    sckz::Camera & c1 = s1.CreateCamera(45, 0.1, 10);
+    sckz::Camera & c1 = s1.CreateCamera(45, 0.1, 100);
 
-    sckz::Entity & e2 = s2.CreateEntity(m2);
-    sckz::Camera & c2 = s2.CreateCamera(45, 0.1, 10);
+    // sckz::Entity & e2 = s2.CreateEntity(m2);
+    sckz::Camera & c2 = s2.CreateCamera(45, 0.1, 100);
 
     sckz::Gui & gui = vkan.CreateGUI("Resources/icon.png");
 
@@ -57,12 +57,12 @@ int main()
     gui.SetScale(200, 200);
     gui.SetLocation(500, 300);
     // gui.SetRotationPoint(100, 100);
-
+    /*
     e1.SetShine(1, 10);
     e1.SetRotation(90, 0, 0);
-    e1.SetLocation(-50, 1, 0);
+    e1.SetLocation(0, 0, 0);
     e1.SetScale(0.1, 0.1, 0.1);
-
+    */
     l1.SetColor(0, 0.5, 1);
     l1.SetLocation(0, 0, 0);
     l1.SetAttenuation(1, 0.01, 0.002);
@@ -75,16 +75,16 @@ int main()
     l2.SetDirection(-1, 0, 0);
     l2.SetCutoff(12.5, 17.5);
 
-    e2.SetShine(1, 10);
-    e2.SetRotation(90, 0, 0);
-    e2.SetLocation(0, 1, 0);
-    e2.SetScale(0.1, 0.1, 0.1);
+    // e2.SetShine(1, 10);
+    // e2.SetRotation(90, 0, 0);
+    // e2.SetLocation(0, 0, 0);
+    // e2.SetScale(0.1, 0.1, 0.1);
 
     e3.SetShine(1, 30);
     e3.SetRotation(90, 0, 0);
-    e3.SetLocation(0, 1, 0);
+    e3.SetLocation(0, 0, 0);
 
-    c1.SetLocation(0, 5, 0);
+    c1.SetLocation(0, 0, 0);
     c1.SetRotation(-90, 0, 0);
     c2.SetLocation(0, 5, 0);
     c2.SetRotation(-90, 0, 0);

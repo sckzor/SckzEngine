@@ -131,7 +131,7 @@ namespace sckz
         parent->parent->cmdBuffer.EndSingleUseCommandBuffer();
     }
 
-    void Buffer::SubBlock::CopyBufferToImage(VkImage & image, uint32_t width, uint32_t height)
+    void Buffer::SubBlock::CopyBufferToImage(VkImage & image, uint32_t width, uint32_t height, bool isCube)
     {
         parent->parent->cmdBuffer.BeginSingleUseCommandBuffer(*parent->parent->device,
                                                               *parent->parent->pool,
@@ -144,9 +144,16 @@ namespace sckz
         region.imageSubresource.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
         region.imageSubresource.mipLevel       = 0;
         region.imageSubresource.baseArrayLayer = 0;
-        region.imageSubresource.layerCount     = 1;
-        region.imageOffset                     = { 0, 0, 0 };
-        region.imageExtent                     = { width, height, 1 };
+        if (isCube)
+        {
+            region.imageSubresource.layerCount = 6;
+        }
+        else
+        {
+            region.imageSubresource.layerCount = 1;
+        }
+        region.imageOffset = { 0, 0, 0 };
+        region.imageExtent = { width, height, 1 };
 
         vkCmdCopyBufferToImage(parent->parent->cmdBuffer.GetCommandBuffer(),
                                this->parent->buffer,

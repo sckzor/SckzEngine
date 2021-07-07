@@ -34,7 +34,7 @@ namespace sckz
 
             void CopyBufferToBuffer(Buffer::SubBlock & buffer);
 
-            void CopyBufferToImage(VkImage & image, uint32_t width, uint32_t height);
+            void CopyBufferToImage(VkImage & image, uint32_t width, uint32_t height, bool isCube);
 
             void CopyDataToBuffer(void * data, uint32_t dataSize, uint32_t offset);
 

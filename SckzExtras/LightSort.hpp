@@ -1,3 +1,4 @@
+#pragma once
 #include "../Include.hpp"
 #include "../SckzCore/Vulkan/Light.hpp"
 

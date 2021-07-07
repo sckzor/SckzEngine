@@ -25,8 +25,6 @@ namespace sckz
 
         Memory * memory;
 
-        Image * cubeTest;
-
         Buffer::SubBlock * indexBuffer;
         Buffer::SubBlock * vertexBuffer;
 
@@ -57,8 +55,7 @@ namespace sckz
                          GraphicsPipeline * pipeline,
                          DescriptorPool &   descriptorPool,
                          Memory &           memory,
-                         VkQueue &          queue,
-                         Image &            cubeTest);
+                         VkQueue &          queue);
 
         void DestroyModel();
 

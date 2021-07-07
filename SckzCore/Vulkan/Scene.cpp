@@ -37,20 +37,25 @@ namespace sckz
                                         "Resources/particle_fragment.spv",
                                         GraphicsPipeline::PipelineType::PARTICLE_PIPELINE);
 
-        cubeMapTest.CreateCubeTextureImage("Resources/1.png",
-                                           "Resources/2.png",
-                                           "Resources/3.png",
-                                           "Resources/4.png",
-                                           "Resources/5.png",
-                                           "Resources/6.png",
-                                           device,
-                                           physicalDevice,
-                                           memory,
-                                           commandPool,
-                                           graphicsQueue);
+        cubeMapPipeline.CreatePipeline(*this->device,
+                                       fboImage,
+                                       "Resources/skybox_vertex.spv",
+                                       "Resources/skybox_fragment.spv",
+                                       GraphicsPipeline::PipelineType::CUBEMAP_PIPELINE);
 
-        cubeMapTest.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
-        cubeMapTest.CreateTextureSampler();
+        cubeMapTest.CreateCubeMap("Resources/1.png",
+                                  "Resources/2.png",
+                                  "Resources/3.png",
+                                  "Resources/4.png",
+                                  "Resources/5.png",
+                                  "Resources/6.png",
+                                  device,
+                                  physicalDevice,
+                                  memory,
+                                  commandPool,
+                                  graphicsQueue,
+                                  cubeMapPipeline,
+                                  descriptorPool);
     }
 
     void Scene::DestroyScene()
@@ -235,6 +240,8 @@ namespace sckz
             buffers.push_back((particleSystems[j]->GetCommandBuffer()));
         }
 
+        buffers.push_back(cubeMapTest.GetCommandBuffer());
+
         vkCmdExecuteCommands(primaryCmdBuffer, buffers.size(), buffers.data());
 
         vkCmdEndRenderPass(primaryCmdBuffer);
@@ -362,8 +369,7 @@ namespace sckz
                                    &pipeline,
                                    descriptorPool,
                                    memory,
-                                   *graphicsQueue,
-                                   cubeMapTest);
+                                   *graphicsQueue);
         return *models.back();
     }
 
@@ -400,6 +406,8 @@ namespace sckz
         {
             models[i]->Update(camera);
         }
+
+        cubeMapTest.Update(glm::vec3(-50, 1, 0), camera);
 
         vkWaitForFences(*device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
 

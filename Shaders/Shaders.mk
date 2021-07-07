@@ -1,6 +1,6 @@
 RESOURCES_DIR = ../Resources
 
-Shaders:SimpleShaders BlueShaders FBOShaders GUIShaders ParticleShaders
+Shaders:SimpleShaders BlueShaders FBOShaders GUIShaders ParticleShaders SkyBoxShaders
 
 SimpleShaders: $(RESOURCES_DIR)/simple_vertex.spv $(RESOURCES_DIR)/simple_fragment.spv
 
@@ -52,6 +52,14 @@ $(RESOURCES_DIR)/gui_vertex_normal.spv: gui_shader.vert
 
 $(RESOURCES_DIR)/gui_fragment_normal.spv: gui_shader.frag
 	glslc gui_shader.frag -o $(RESOURCES_DIR)/gui_fragment_normal.spv
+
+SkyBoxShaders: $(RESOURCES_DIR)/skybox_vertex.spv $(RESOURCES_DIR)/skybox_fragment.spv
+
+$(RESOURCES_DIR)/skybox_vertex.spv: skybox.vert
+	glslc skybox.vert -o $(RESOURCES_DIR)/skybox_vertex.spv
+
+$(RESOURCES_DIR)/skybox_fragment.spv: skybox.frag
+	glslc skybox.frag -o $(RESOURCES_DIR)/skybox_fragment.spv
 
 
 BlueShaders: $(RESOURCES_DIR)/blue_fragment.spv

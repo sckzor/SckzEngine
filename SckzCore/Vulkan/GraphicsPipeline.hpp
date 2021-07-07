@@ -16,7 +16,8 @@ namespace sckz
             GUI_PIPELINE,
             MODEL_PIPELINE,
             PARTICLE_PIPELINE,
-            COMBINE_PIPELINE
+            COMBINE_PIPELINE,
+            CUBEMAP_PIPELINE
         };
 
     private:
