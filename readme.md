@@ -99,6 +99,21 @@ Time behind schedule: 2 weeks
 ==15983==         suppressed: 0 bytes in 0 blocks
 ```
 
+## Cube map notes
+
+```
+      +-----+
+      | -x  |  The arrows represent which way the bottom of the texture points
+      |  v  |
++-----+-----+-----+-----+
+| +z  | -y  |  -z |  +y |
+|  >  |  o  |  <  |   o |
+*-----+-----+-----+-----+
+      |  ^  |
+      | +x  |
+      +-----+
+```
+
 I believe that all of the "memory leak" is caused by strage behavior of the Vulkan library... The errors though,
 those were caused by me and I need to fix them at some point.
 

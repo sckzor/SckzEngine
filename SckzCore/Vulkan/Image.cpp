@@ -636,13 +636,27 @@ namespace sckz
             blit.srcSubresource.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
             blit.srcSubresource.mipLevel       = i - 1;
             blit.srcSubresource.baseArrayLayer = 0;
-            blit.srcSubresource.layerCount     = 1;
-            blit.dstOffsets[0]                 = { 0, 0, 0 };
+            if (isCube)
+            {
+                blit.srcSubresource.layerCount = 6;
+            }
+            else
+            {
+                blit.srcSubresource.layerCount = 1;
+            }
+            blit.dstOffsets[0]             = { 0, 0, 0 };
             blit.dstOffsets[1]             = { mipWidth > 1 ? mipWidth / 2 : 1, mipHeight > 1 ? mipHeight / 2 : 1, 1 };
             blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
             blit.dstSubresource.mipLevel   = i;
             blit.dstSubresource.baseArrayLayer = 0;
-            blit.dstSubresource.layerCount     = 1;
+            if (isCube)
+            {
+                blit.dstSubresource.layerCount = 6;
+            }
+            else
+            {
+                blit.dstSubresource.layerCount = 1;
+            }
 
             vkCmdBlitImage(cmdBuffer.GetCommandBuffer(),
                            image,
@@ -736,12 +750,21 @@ namespace sckz
         vkGetPhysicalDeviceProperties(*physicalDevice, &properties);
 
         VkSamplerCreateInfo samplerInfo {};
-        samplerInfo.sType                   = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-        samplerInfo.magFilter               = VK_FILTER_LINEAR;
-        samplerInfo.minFilter               = VK_FILTER_LINEAR;
-        samplerInfo.addressModeU            = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-        samplerInfo.addressModeV            = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-        samplerInfo.addressModeW            = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerInfo.sType     = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+        samplerInfo.magFilter = VK_FILTER_LINEAR;
+        samplerInfo.minFilter = VK_FILTER_LINEAR;
+        if (isCube)
+        {
+            samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+            samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+            samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        }
+        else
+        {
+            samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+            samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+            samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        }
         samplerInfo.anisotropyEnable        = VK_TRUE;
         samplerInfo.maxAnisotropy           = properties.limits.maxSamplerAnisotropy;
         samplerInfo.borderColor             = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
@@ -758,6 +781,7 @@ namespace sckz
             throw std::runtime_error("failed to create texture sampler!");
         }
     }
+    bool Image::operator!=(Image & other) { return image != other.image; }
 
     VkImageView & Image::GetImageView() { return imageView; }
 

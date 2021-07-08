@@ -15,7 +15,8 @@ namespace sckz
                             GraphicsPipeline * pipeline,
                             DescriptorPool &   descriptorPool,
                             Memory &           memory,
-                            VkQueue &          queue)
+                            VkQueue &          queue,
+                            CubeMap &          environmentMap)
     {
         this->colorFileName    = colorFileName;
         this->normalFileName   = normalFileName;
@@ -28,6 +29,7 @@ namespace sckz
         this->pipeline         = pipeline;
         this->queue            = &queue;
         this->memory           = &memory;
+        this->environmentMap   = &environmentMap;
 
         this->hostLocalBuffer.CreateBuffer(*this->physicalDevice,
                                            *this->device,
@@ -45,9 +47,14 @@ namespace sckz
                                              *this->queue,
                                              commandPool);
 
+        blankTexture.CreateBlankTextureImage(*this->device, *this->physicalDevice, memory, commandPool, queue);
+        blankTexture.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
+        blankTexture.CreateTextureSampler();
+
         CreateTexture(textures[0], colorFileName);
         CreateTexture(textures[1], normalFileName);
         CreateTexture(textures[2], spacularFileName);
+        textures[3] = environmentMap.GetImage();
 
         LoadModel();
         CreateVertexBuffer();
@@ -60,15 +67,14 @@ namespace sckz
     {
         if (fileName == nullptr)
         {
-            image.CreateBlankTextureImage(*this->device, *this->physicalDevice, *memory, *commandPool, *queue);
+            image = blankTexture;
         }
         else
         {
             image.CreateTextureImage(fileName, *this->device, *this->physicalDevice, *memory, *commandPool, *queue);
+            image.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
+            image.CreateTextureSampler();
         }
-
-        image.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
-        image.CreateTextureSampler();
     }
 
     void Model::DestroyModel()
@@ -85,9 +91,15 @@ namespace sckz
 
         hostLocalBuffer.DestroyBuffer();
         deviceLocalBuffer.DestroyBuffer();
-        textures[0].DestroyImage();
-        textures[1].DestroyImage();
-        textures[2].DestroyImage();
+        for (uint32_t i = 0; i < textures.size() - 1; i++)
+        {
+            if (textures[i] != blankTexture)
+            {
+
+                textures[i].DestroyImage();
+            }
+        }
+        blankTexture.DestroyImage();
     }
 
     void Model::Update(Camera & camera)
@@ -265,10 +277,21 @@ namespace sckz
 
     VkCommandBuffer & Model::GetCommandBuffer() { return commandBuffer; }
 
-    Entity & Model::CreateEntity()
+    Entity & Model::CreateEntity(bool isReflectRefractive)
     {
         Entity * entity = new Entity();
-        entity->CreateEntity(*physicalDevice, *device, *queue, hostLocalBuffer, *descriptorPool, *pipeline, textures);
+        if (isReflectRefractive)
+        {
+            entity
+                ->CreateEntity(*physicalDevice, *device, *queue, hostLocalBuffer, *descriptorPool, *pipeline, textures);
+        }
+        else
+        {
+            std::array<Image, 4> noCubeMap = { textures[0], textures[1], textures[2], blankTexture };
+            entity
+                ->CreateEntity(*physicalDevice, *device, *queue, hostLocalBuffer, *descriptorPool, *pipeline, textures);
+        }
+
         entities.push_back(entity);
         CreateCommandBuffer();
 

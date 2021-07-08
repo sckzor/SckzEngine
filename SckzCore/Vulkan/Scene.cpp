@@ -43,25 +43,28 @@ namespace sckz
                                        "Resources/skybox_fragment.spv",
                                        GraphicsPipeline::PipelineType::CUBEMAP_PIPELINE);
 
-        cubeMapTest.CreateCubeMap("Resources/1.png",
-                                  "Resources/2.png",
-                                  "Resources/3.png",
-                                  "Resources/4.png",
-                                  "Resources/5.png",
-                                  "Resources/6.png",
+        cubeMapTest.CreateCubeMap("Resources/posz.jpg",
+                                  "Resources/negz.jpg",
+                                  "Resources/posx.jpg",
+                                  "Resources/negx.jpg",
+                                  "Resources/posy.jpg",
+                                  "Resources/negy.jpg",
                                   device,
                                   physicalDevice,
                                   memory,
                                   commandPool,
                                   graphicsQueue,
                                   cubeMapPipeline,
-                                  descriptorPool);
+                                  descriptorPool,
+                                  50);
     }
 
     void Scene::DestroyScene()
     {
         DestroySwapResources();
 
+        cubeMapTest.DestroyCubeMap();
+        cubeMapPipeline.DestroyPipeline();
         fboImage.DestroyFBO();
 
         for (uint32_t i = 0; i < models.size(); i++)
@@ -325,9 +328,9 @@ namespace sckz
         return targetSampleBits;
     }
 
-    Entity & Scene::CreateEntity(Model & model)
+    Entity & Scene::CreateEntity(Model & model, bool isReflectRefractive)
     {
-        Entity & entity = model.CreateEntity();
+        Entity & entity = model.CreateEntity(isReflectRefractive);
         CreateCommandBuffer();
         entity.LoadLights(lights);
         return entity;
@@ -369,7 +372,8 @@ namespace sckz
                                    &pipeline,
                                    descriptorPool,
                                    memory,
-                                   *graphicsQueue);
+                                   *graphicsQueue,
+                                   cubeMapTest);
         return *models.back();
     }
 

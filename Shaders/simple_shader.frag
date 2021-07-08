@@ -8,8 +8,9 @@ const float CEL_SHADING_LEVELS = -1; // Use -1 to disable
 layout(binding = 1) uniform sampler2D texSampler; // Normal color texture.
 layout(binding = 2) uniform sampler2D norSampler; // Red is X, Green is Y, Blue is Z (as per normal (no pun intended))
 layout(binding = 3) uniform sampler2D speSampler; // Red Channel is Specular Map, Green is glow map
+layout(binding = 4) uniform samplerCube cubeMap; // Red Channel is Specular Map, Green is glow map
 
-layout(binding = 4) uniform UniformBufferObject
+layout(binding = 5) uniform UniformBufferObject
 {
     vec4 lightColor[MAX_LIGHTS];
     vec4 attenuation[MAX_LIGHTS];
@@ -19,6 +20,8 @@ layout(binding = 4) uniform UniformBufferObject
     // this is easier
     
     vec4 extras; // Reflectivity is xy, Cut off and outer cut off are zw
+
+    float reflectRefractFactor;
 }
 ubo;
 
@@ -27,6 +30,8 @@ layout(location = 1) in vec3 surfaceNormal;
 layout(location = 2) in vec3 toLightVector[MAX_LIGHTS];
 layout(location = 6) in vec3 toCameraVector;
 layout(location = 7) in vec3 camLocation;
+layout(location = 8) in vec3 reflectedVector;
+layout(location = 9) in vec3 refractedVector;
 
 layout(location = 0) out vec4 outColor;
 
@@ -101,6 +106,15 @@ void main()
         }
     }
 
-    outColor = vec4(totalDiffuse, 1.0) * texture(texSampler, fragTexCoord) + vec4(totalSpecular, 1.0);    
+    outColor = vec4(totalDiffuse, 1.0) * texture(texSampler, fragTexCoord) + vec4(totalSpecular, 1.0);
+
+    ivec2 cubeSize = textureSize(cubeMap, 0);
+    if(!(cubeSize.x == 1 && cubeSize.y == 0))
+    {
+        vec4 reflectedColor = texture(cubeMap, reflectedVector);
+        vec4 refractedColor = texture(cubeMap, refractedVector);
+        vec4 cubeMapColor = mix(reflectedColor, refractedColor, 0.5);
+        outColor = mix(outColor, cubeMapColor, ubo.reflectRefractFactor);
+    }    
 }
 

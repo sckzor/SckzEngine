@@ -33,6 +33,8 @@ namespace sckz
         GraphicsPipeline * pipeline;
         DescriptorPool *   descriptorPool;
 
+        float size;
+
         Buffer          hostLocalBuffer;
         Buffer          deviceLocalBuffer;
         Buffer          stagingLocalBuffer;
@@ -43,8 +45,14 @@ namespace sckz
         Buffer::SubBlock * indexBuffer;
         Buffer::SubBlock   uniformBuffer;
 
-        std::vector<Vertex>   vertices;
-        std::vector<uint32_t> indices;
+        std::vector<Vertex> vertices
+            = { { { -1, -1, 1 }, { 0, 0, 0 }, { 0, 0 } }, { { -1, 1, 1 }, { 0, 0, 0 }, { 0, 0 } },
+                { { -1, 1, -1 }, { 0, 0, 0 }, { 0, 0 } }, { { -1, -1, -1 }, { 0, 0, 0 }, { 0, 0 } },
+                { { 1, 1, -1 }, { 0, 0, 0 }, { 0, 0 } },  { { 1, -1, -1 }, { 0, 0, 0 }, { 0, 0 } },
+                { { 1, 1, 1 }, { 0, 0, 0 }, { 0, 0 } },   { { 1, -1, 1 }, { 0, 0, 0 }, { 0, 0 } } };
+
+        std::vector<uint32_t> indices = { 0, 1, 2, 0, 2, 3, 3, 2, 4, 3, 4, 5, 5, 4, 6, 5, 6, 7,
+                                          7, 6, 1, 7, 1, 0, 3, 5, 7, 3, 7, 0, 4, 2, 1, 4, 1, 6 };
 
     public:
         void CreateCubeMap(const char *       front,
@@ -59,11 +67,13 @@ namespace sckz
                            VkCommandPool &    pool,
                            VkQueue &          queue,
                            GraphicsPipeline & graphicsPipeline,
-                           DescriptorPool &   descriptorPool);
+                           DescriptorPool &   descriptorPool,
+                           float              size);
 
         void DestroyCubeMap();
 
         VkCommandBuffer & GetCommandBuffer();
+        Image &           GetImage();
 
         void Update(glm::vec3 location, Camera & camera);
 
@@ -72,7 +82,5 @@ namespace sckz
         void CreateIndexBuffer();
         void CreateCommandBuffer();
         void CreateUniformBuffer();
-
-        void LoadModel();
     };
 } // namespace sckz

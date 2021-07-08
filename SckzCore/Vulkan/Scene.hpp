@@ -96,7 +96,7 @@ namespace sckz
                             GraphicsPipeline & pipeline);
 
         Camera &         CreateCamera(float fov, float near, float far);
-        Entity &         CreateEntity(Model & model);
+        Entity &         CreateEntity(Model & model, bool isReflectRefractive);
         Light &          CreateLight(bool isSpotlight);
         Fbo &            CreateFbo();
         Filter &         CreateFilter(const char * fragmentFile);

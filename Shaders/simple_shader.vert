@@ -10,6 +10,8 @@ layout(binding = 0) uniform UniformBufferObject
     mat4 proj;
 
     vec3 lightPosition[MAX_LIGHTS];
+
+    float refractiveIndexRatio;
 }
 ubo;
 
@@ -22,6 +24,8 @@ layout(location = 1) out vec3 surfaceNormal;
 layout(location = 2) out vec3 toLightVector[MAX_LIGHTS];
 layout(location = 6) out vec3 toCameraVector;
 layout(location = 7) out vec3 camLocation;
+layout(location = 8) out vec3 reflectedVector;
+layout(location = 9) out vec3 refractedVector;
 
 void main()
 {
@@ -41,4 +45,7 @@ void main()
     camLocation = (inverse(ubo.view) * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 
     toCameraVector = camLocation - worldPosition.xyz;
+
+    reflectedVector = reflect(normalize(toCameraVector), normalize(inNormal));
+    refractedVector = refract(normalize(toCameraVector), normalize(inNormal), ubo.refractiveIndexRatio);
 }

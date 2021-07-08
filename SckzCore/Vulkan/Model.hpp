@@ -2,6 +2,7 @@
 #include "../../Include.hpp"
 #include "Buffer.hpp"
 #include "Camera.hpp"
+#include "CubeMap.hpp"
 #include "DescriptorPool.hpp"
 #include "Entity.hpp"
 #include "Fbo.hpp"
@@ -14,7 +15,7 @@ namespace sckz
     class Model
     {
     private:
-        std::array<Image, 3> textures;
+        std::array<Image, 4> textures;
 
         std::vector<Vertex>   vertices;
         std::vector<uint32_t> indices;
@@ -42,6 +43,10 @@ namespace sckz
         const char * spacularFileName;
         const char * modelFileName;
 
+        CubeMap * environmentMap;
+
+        Image blankTexture;
+
         std::vector<Entity *> entities;
 
     public:
@@ -55,7 +60,8 @@ namespace sckz
                          GraphicsPipeline * pipeline,
                          DescriptorPool &   descriptorPool,
                          Memory &           memory,
-                         VkQueue &          queue);
+                         VkQueue &          queue,
+                         CubeMap &          environmentMap);
 
         void DestroyModel();
 
@@ -63,7 +69,7 @@ namespace sckz
 
         void RebuildSwapResources(DescriptorPool & descriptorPool, VkExtent2D swapChainExtent);
 
-        Entity & CreateEntity();
+        Entity & CreateEntity(bool isReflectRefractive);
 
         void CreateCommandBuffer();
 

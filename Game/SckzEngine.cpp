@@ -21,7 +21,7 @@ int main()
     sckz::GraphicsPipeline & f1 = vkan.CreateFBOPipeline("Resources/fbo_fragment_normal.spv");
 
     sckz::GraphicsPipeline & p1 = s1.CreatePipeline("Resources/simple_vertex.spv", "Resources/simple_fragment.spv");
-    sckz::Model &            m1 = s1.CreateModel("Resources/cubemap.obj",
+    sckz::Model &            m1 = s1.CreateModel("Resources/barrel.obj",
                                       "Resources/barrelColor.png",
                                       "Resources/barrelNormal.png",
                                       "Resources/barrelSpecular.png",
@@ -40,8 +40,8 @@ int main()
 
     sckz::Light & l2 = s1.CreateLight(true);
 
-    // sckz::Entity & e1 = s1.CreateEntity(m1);
-    sckz::Entity & e3 = s1.CreateEntity(m3);
+    sckz::Entity & e1 = s1.CreateEntity(m1, true);
+    sckz::Entity & e3 = s1.CreateEntity(m3, false);
     sckz::Camera & c1 = s1.CreateCamera(45, 0.1, 100);
 
     // sckz::Entity & e2 = s2.CreateEntity(m2);
@@ -57,12 +57,13 @@ int main()
     gui.SetScale(200, 200);
     gui.SetLocation(500, 300);
     // gui.SetRotationPoint(100, 100);
-    /*
+
     e1.SetShine(1, 10);
     e1.SetRotation(90, 0, 0);
     e1.SetLocation(0, 0, 0);
     e1.SetScale(0.1, 0.1, 0.1);
-    */
+    e1.SetReflectRefractValues(1 / 1.33, 0.6);
+
     l1.SetColor(0, 0.5, 1);
     l1.SetLocation(0, 0, 0);
     l1.SetAttenuation(1, 0.01, 0.002);
@@ -83,6 +84,7 @@ int main()
     e3.SetShine(1, 30);
     e3.SetRotation(90, 0, 0);
     e3.SetLocation(0, 0, 0);
+    e3.SetReflectRefractValues(1, 0);
 
     c1.SetLocation(0, 0, 0);
     c1.SetRotation(-90, 0, 0);
@@ -113,22 +115,22 @@ int main()
 
         if (win.QueryKey('z'))
         {
-            c1.SetRotation(c1.GetRotation().x, c1.GetRotation().y, c1.GetRotation().z - (10 * vkan.GetDeltaT()));
+            c1.SetRotation(c1.GetRotation().x, c1.GetRotation().y, c1.GetRotation().z - (30 * vkan.GetDeltaT()));
         }
 
         if (win.QueryKey('c'))
         {
-            c1.SetRotation(c1.GetRotation().x, c1.GetRotation().y, c1.GetRotation().z + (10 * vkan.GetDeltaT()));
+            c1.SetRotation(c1.GetRotation().x, c1.GetRotation().y, c1.GetRotation().z + (30 * vkan.GetDeltaT()));
         }
 
         if (win.QueryKey('q'))
         {
-            c1.SetRotation(c1.GetRotation().x - (10 * vkan.GetDeltaT()), c1.GetRotation().y, c1.GetRotation().z);
+            c1.SetRotation(c1.GetRotation().x - (30 * vkan.GetDeltaT()), c1.GetRotation().y, c1.GetRotation().z);
         }
 
         if (win.QueryKey('e'))
         {
-            c1.SetRotation(c1.GetRotation().x + (10 * vkan.GetDeltaT()), c1.GetRotation().y, c1.GetRotation().z);
+            c1.SetRotation(c1.GetRotation().x + (30 * vkan.GetDeltaT()), c1.GetRotation().y, c1.GetRotation().z);
         }
 
         if (win.QueryKey(GLFW_KEY_LEFT_SHIFT))

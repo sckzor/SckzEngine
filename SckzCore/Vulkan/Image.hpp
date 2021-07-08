@@ -106,5 +106,7 @@ namespace sckz
         VkImageView & GetImageView();
         VkSampler &   GetSampler();
         VkFormat      GetFormat();
+
+        bool operator!=(Image & other);
     };
 } // namespace sckz

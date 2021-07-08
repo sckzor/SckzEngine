@@ -14,7 +14,8 @@ namespace sckz
                                 VkCommandPool &    pool,
                                 VkQueue &          queue,
                                 GraphicsPipeline & pipeline,
-                                DescriptorPool &   descriptorPool)
+                                DescriptorPool &   descriptorPool,
+                                float              size)
     {
         this->device         = &device;
         this->physicalDevice = &physicalDevice;
@@ -23,6 +24,14 @@ namespace sckz
         this->queue          = &queue;
         this->descriptorPool = &descriptorPool;
         this->pipeline       = &pipeline;
+        this->size           = size;
+
+        for (uint32_t i = 0; i < vertices.size(); i++)
+        {
+            vertices[i].pos.x *= size;
+            vertices[i].pos.y *= size;
+            vertices[i].pos.z *= size;
+        }
 
         cubeMapTexture
             .CreateCubeTextureImage(front, back, up, down, right, left, device, physicalDevice, memory, pool, queue);
@@ -45,8 +54,6 @@ namespace sckz
                                              *this->queue,
                                              pool);
 
-        LoadModel();
-
         CreateVertexBuffer();
         CreateIndexBuffer();
         CreateUniformBuffer();
@@ -55,7 +62,13 @@ namespace sckz
         CreateCommandBuffer();
     }
 
-    void CubeMap::DestroyCubeMap() { }
+    void CubeMap::DestroyCubeMap()
+    {
+        vkFreeCommandBuffers(*device, *pool, 1, &commandBuffer);
+        hostLocalBuffer.DestroyBuffer();
+        deviceLocalBuffer.DestroyBuffer();
+        cubeMapTexture.DestroyImage();
+    }
 
     VkCommandBuffer & CubeMap::GetCommandBuffer() { return commandBuffer; }
 
@@ -168,6 +181,10 @@ namespace sckz
         // Vubo.model = glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 2.0f, 2.0f));
         Vubo.view = camera.GetView();
         Vubo.proj = camera.GetProjection();
+
+        Vubo.view[3][0] = 0;
+        Vubo.view[3][1] = 0;
+        Vubo.view[3][2] = 0;
         uniformBuffer.CopyDataToBuffer(&Vubo, sizeof(Vubo), 0);
     }
 
@@ -177,45 +194,5 @@ namespace sckz
         uniformBuffer         = hostLocalBuffer.GetBuffer(VuboSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
     }
 
-    void CubeMap::LoadModel()
-    {
-        tinyobj::attrib_t                attrib;
-        std::vector<tinyobj::shape_t>    shapes;
-        std::vector<tinyobj::material_t> materials;
-        std::string                      warn, err;
-
-        if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, "Resources/cubemap.obj"))
-        {
-            throw std::runtime_error(warn + err);
-        }
-
-        std::unordered_map<Vertex, uint32_t> uniqueVertices {};
-
-        for (const auto & shape : shapes)
-        {
-            for (const auto & index : shape.mesh.indices)
-            {
-                Vertex vertex {};
-
-                vertex.pos = { attrib.vertices[3 * index.vertex_index + 0] * 50,
-                               attrib.vertices[3 * index.vertex_index + 1] * 50,
-                               attrib.vertices[3 * index.vertex_index + 2] * 50 };
-
-                vertex.texCoord = { attrib.texcoords[2 * index.texcoord_index + 0],
-                                    1.0f - attrib.texcoords[2 * index.texcoord_index + 1] };
-
-                vertex.normal = { attrib.normals[3 * index.normal_index + 0],
-                                  attrib.normals[3 * index.normal_index + 1],
-                                  attrib.normals[3 * index.normal_index + 2] };
-
-                if (uniqueVertices.count(vertex) == 0)
-                {
-                    uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
-                    vertices.push_back(vertex);
-                }
-
-                indices.push_back(uniqueVertices[vertex]);
-            }
-        }
-    }
+    Image & CubeMap::GetImage() { return cubeMapTexture; }
 } // namespace sckz

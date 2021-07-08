@@ -23,6 +23,8 @@ namespace sckz
             alignas(16) glm::mat4 proj;
 
             alignas(16) glm::vec3 lightPosition[MAX_LIGHTS];
+
+            alignas(16) float refractiveIndexRatio;
         };
 
         struct FragmentUniformBufferObject
@@ -34,6 +36,7 @@ namespace sckz
             // Use Vec4 instead of vec3 for alignment, it takes up the same amount of bytes as aligning it properly and
             // this is easier
             alignas(16) glm::vec4 extras; // Reflectivity is s, shine damper is y, cutoff is z and outer cut off is w
+            alignas(16) float reflectRefractFactor;
         };
 
     private:
@@ -43,7 +46,7 @@ namespace sckz
         VkDevice *             device;
         DescriptorPool *       descriptorPool;
         GraphicsPipeline *     pipeline;
-        std::array<Image, 3> * textures;
+        std::array<Image, 4> * textures;
         std::vector<Light *> * lights;
 
         std::array<Buffer::SubBlock, 2> uniformBuffer;
@@ -52,6 +55,9 @@ namespace sckz
         glm::vec3 location;
         glm::vec3 rotation;
         glm::vec3 scale;
+
+        float refractiveIndexRatio;
+        float reflectRefractFactor;
 
         float shineDamper;
         float reflectivity;
@@ -63,7 +69,7 @@ namespace sckz
                           Buffer &               hostLocalBuffer,
                           DescriptorPool &       pool,
                           GraphicsPipeline &     pipeline,
-                          std::array<Image, 3> & textures);
+                          std::array<Image, 4> & textures);
 
         void DestroyEntity();
 
@@ -81,6 +87,8 @@ namespace sckz
         void LoadLights(std::vector<Light *> & lights);
 
         void SetShine(float reflectivity, float shineDamper);
+
+        void SetReflectRefractValues(float refractiveIndexRatio, float reflectRefractFactor);
 
         glm::vec3 GetLocation();
         glm::vec3 GetRotation();

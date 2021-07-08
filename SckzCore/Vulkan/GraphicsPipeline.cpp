@@ -37,7 +37,7 @@ namespace sckz
 
             case PipelineType::MODEL_PIPELINE:
                 vertexUboCount   = 1;
-                samplerCount     = 3;
+                samplerCount     = 4;
                 fragmentUboCount = 1;
                 break;
 
@@ -247,14 +247,15 @@ namespace sckz
         rasterizer.polygonMode             = VK_POLYGON_MODE_FILL;
         rasterizer.lineWidth               = 1.0f;
         if (this->type == PipelineType::FBO_PIPELINE || this->type == PipelineType::GUI_PIPELINE
-            || this->type == PipelineType::COMBINE_PIPELINE)
+            || this->type == PipelineType::COMBINE_PIPELINE || this->type == PipelineType::CUBEMAP_PIPELINE)
         {
             rasterizer.cullMode = VK_CULL_MODE_FRONT_BIT;
         }
+        /*
         else if (this->type == PipelineType::CUBEMAP_PIPELINE)
         {
             rasterizer.cullMode = VK_CULL_MODE_NONE;
-        }
+        }*/
         else
         {
             rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
@@ -296,7 +297,7 @@ namespace sckz
             colorBlendAttachment.alphaBlendOp        = VK_BLEND_OP_ADD;
             colorBlendAttachment.blendEnable         = VK_TRUE;
         }
-        else if (type == PipelineType::PARTICLE_PIPELINE)
+        else if (type == PipelineType::PARTICLE_PIPELINE || type == PipelineType::CUBEMAP_PIPELINE)
         {
             colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
             colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE;

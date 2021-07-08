@@ -8,7 +8,7 @@ namespace sckz
                               Buffer &               hostLocalBuffer,
                               DescriptorPool &       descriptorPool,
                               GraphicsPipeline &     pipeline,
-                              std::array<Image, 3> & textures)
+                              std::array<Image, 4> & textures)
     {
         this->physicalDevice  = &physicalDevice;
         this->queue           = &queue;
@@ -48,6 +48,12 @@ namespace sckz
         this->shineDamper  = shineDamper;
     }
 
+    void Entity::SetReflectRefractValues(float refractiveIndexRatio, float reflectRefractFactor)
+    {
+        this->refractiveIndexRatio = refractiveIndexRatio;
+        this->reflectRefractFactor = reflectRefractFactor;
+    }
+
     void Entity::Update(Camera & camera)
     {
         VertexUniformBufferObject   Vubo {};
@@ -61,8 +67,12 @@ namespace sckz
         Vubo.view = camera.GetView();
         Vubo.proj = camera.GetProjection();
 
+        Vubo.refractiveIndexRatio = refractiveIndexRatio;
+
         Fubo.extras.x = this->reflectivity;
         Fubo.extras.y = this->shineDamper;
+
+        Fubo.reflectRefractFactor = reflectRefractFactor;
 
         std::vector<std::pair<Light *, float>> sortedLights = LightSort::GetNearestLights(*lights, location);
 
