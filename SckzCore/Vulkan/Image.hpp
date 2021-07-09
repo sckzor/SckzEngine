@@ -43,7 +43,8 @@ namespace sckz
                          VkPhysicalDevice &    physicalDevice,
                          Memory &              memory,
                          VkQueue &             queue,
-                         VkCommandPool &       pool);
+                         VkCommandPool &       pool,
+                         bool                  isCube);
 
         void CreateImage(VkDevice & device,
                          VkImage &  image,

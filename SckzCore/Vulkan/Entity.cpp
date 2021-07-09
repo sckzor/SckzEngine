@@ -8,6 +8,7 @@ namespace sckz
                               Buffer &               hostLocalBuffer,
                               DescriptorPool &       descriptorPool,
                               GraphicsPipeline &     pipeline,
+                              GraphicsPipeline &     cubeMapPipeline,
                               std::array<Image, 4> & textures)
     {
         this->physicalDevice  = &physicalDevice;
@@ -15,6 +16,7 @@ namespace sckz
         this->device          = &device;
         this->descriptorPool  = &descriptorPool;
         this->pipeline        = &pipeline;
+        this->cubeMapPipeline = &cubeMapPipeline;
         this->textures        = &textures;
         this->hostLocalBuffer = &hostLocalBuffer;
 
@@ -27,6 +29,12 @@ namespace sckz
                                        &uniformBuffer[1],
                                        *this->descriptorPool,
                                        &descriptorSet);
+
+        this->cubeMapPipeline->BindShaderData(&uniformBuffer[0],
+                                              textures.data(),
+                                              &uniformBuffer[1],
+                                              *this->descriptorPool,
+                                              &descriptorSet);
     }
 
     void Entity::DestroyEntity() { }
@@ -40,6 +48,12 @@ namespace sckz
                                        &uniformBuffer[1],
                                        *this->descriptorPool,
                                        &descriptorSet);
+
+        this->cubeMapPipeline->BindShaderData(&uniformBuffer[0],
+                                              this->textures->data(),
+                                              &uniformBuffer[1],
+                                              *this->descriptorPool,
+                                              &descriptorSet);
     }
 
     void Entity::SetShine(float reflectivity, float shineDamper)

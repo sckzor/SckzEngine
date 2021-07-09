@@ -251,11 +251,6 @@ namespace sckz
         {
             rasterizer.cullMode = VK_CULL_MODE_FRONT_BIT;
         }
-        /*
-        else if (this->type == PipelineType::CUBEMAP_PIPELINE)
-        {
-            rasterizer.cullMode = VK_CULL_MODE_NONE;
-        }*/
         else
         {
             rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;

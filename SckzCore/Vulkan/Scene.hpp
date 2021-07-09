@@ -21,31 +21,36 @@ namespace sckz
         VkDevice *         device;         // Stays
         VkQueue *          graphicsQueue;  // Stays
 
-        VkCommandBuffer primaryCmdBuffer; // Duplicated
-        VkExtent2D      swapChainExtent;  // Stays
+        VkCommandBuffer primaryCmdBuffer;     // Duplicated
+        VkCommandBuffer primaryCmdBufferCube; // Duplicated
+        VkExtent2D      swapChainExtent;      // Stays
 
         DescriptorPool descriptorPool; // Duplicated
         VkCommandPool  commandPool;    // Duplicated
 
         Fbo      fboImage;
+        Fbo      cubeMapImage;
         VkFormat format;
         Memory   memory;
 
         GraphicsPipeline particlePipeline;
         GraphicsPipeline cubeMapPipeline;
+        GraphicsPipeline cubeMapPipelineCube;
 
         std::vector<Fbo *>              fbos;
         std::vector<Filter *>           filters;
         std::vector<Combine *>          combines;
-        std::vector<GraphicsPipeline *> pipelines; // Goes
-        std::vector<Model *>            models;    // Goes
-        std::vector<Camera *>           cameras;   // Goes
+        std::vector<GraphicsPipeline *> pipelines;        // Goes
+        std::vector<GraphicsPipeline *> cubeMapPipelines; // Goes
+        std::vector<Model *>            models;           // Goes
+        std::vector<Camera *>           cameras;          // Goes
         std::vector<Light *>            lights;
         std::vector<ParticleSystem *>   particleSystems;
 
         VkFence inFlightFence;
 
         CubeMap cubeMapTest;
+        CubeMap cubeMapTestCube;
 
         VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT; // Goes
         VkSampleCountFlagBits maxMsaaSamples;
@@ -67,7 +72,8 @@ namespace sckz
         void CreateCommandBuffer(); // Missing implementation
         void CreateSyncObjects();
 
-        void RebuildCommandBuffer(); // Missing implementation
+        void RebuildCommandBuffer();     // Missing implementation
+        void RebuildCubeCommandBuffer(); // Missing implementation
 
     private:
         void DestroyCommandPool();

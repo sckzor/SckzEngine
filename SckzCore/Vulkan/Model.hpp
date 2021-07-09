@@ -30,12 +30,14 @@ namespace sckz
         Buffer::SubBlock * vertexBuffer;
 
         VkCommandBuffer commandBuffer;
+        VkCommandBuffer cubeMapCommandBuffer;
 
         VkDevice *         device;
         VkPhysicalDevice * physicalDevice;
         VkCommandPool *    commandPool;
         DescriptorPool *   descriptorPool;
         GraphicsPipeline * pipeline;
+        GraphicsPipeline * cubeMapPipeline;
         VkQueue *          queue;
 
         const char * colorFileName;
@@ -43,7 +45,7 @@ namespace sckz
         const char * spacularFileName;
         const char * modelFileName;
 
-        CubeMap * environmentMap;
+        Image * environmentMap;
 
         Image blankTexture;
 
@@ -57,11 +59,12 @@ namespace sckz
                          VkCommandPool &    commandPool,
                          VkDevice &         device,
                          VkPhysicalDevice & physicalDevice,
-                         GraphicsPipeline * pipeline,
+                         GraphicsPipeline & pipeline,
+                         GraphicsPipeline & cubeMapPipeline,
                          DescriptorPool &   descriptorPool,
                          Memory &           memory,
                          VkQueue &          queue,
-                         CubeMap &          environmentMap);
+                         Image &            environmentMap);
 
         void DestroyModel();
 
@@ -72,6 +75,7 @@ namespace sckz
         Entity & CreateEntity(bool isReflectRefractive);
 
         void CreateCommandBuffer();
+        void CreateCubeMapCommandBuffer();
 
     public:
         void CreateTexture(Image & image, const char * fileName);
@@ -81,6 +85,7 @@ namespace sckz
 
     public:
         VkCommandBuffer & GetCommandBuffer();
+        VkCommandBuffer & GetCubeMapCommandBuffer();
         Buffer::SubBlock  GetIndexBuffer();
         Buffer::SubBlock  GetVertexBuffer();
         uint32_t          GetNumIndices();

@@ -9,7 +9,8 @@ namespace sckz
                         VkFormat              format,
                         VkSampleCountFlagBits msaaSamples,
                         VkExtent2D            swapChainExtent,
-                        VkCommandPool &       pool)
+                        VkCommandPool &       pool,
+                        bool                  isCube)
     {
         this->physicalDevice  = &physicalDevice;
         this->device          = &device;
@@ -19,6 +20,7 @@ namespace sckz
         this->msaaSamples     = msaaSamples;
         this->swapChainExtent = swapChainExtent;
         this->pool            = &pool;
+        this->isCube          = isCube;
 
         CreateImage();
         CreateRenderPass();
@@ -52,8 +54,21 @@ namespace sckz
     {
         VkFormat colorFormat = renderedImage.GetFormat();
 
-        colorImage.CreateImage(swapChainExtent.width,
-                               swapChainExtent.height,
+        uint32_t width;
+        uint32_t height;
+        if (isCube)
+        {
+            width  = swapChainExtent.width;
+            height = swapChainExtent.width;
+        }
+        else
+        {
+            width  = swapChainExtent.width;
+            height = swapChainExtent.height;
+        }
+
+        colorImage.CreateImage(width,
+                               height,
                                1,
                                msaaSamples,
                                colorFormat,
@@ -65,7 +80,8 @@ namespace sckz
                                *physicalDevice,
                                *memory,
                                *graphicsQueue,
-                               *pool);
+                               *pool,
+                               isCube);
         colorImage.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
     }
 
@@ -73,8 +89,21 @@ namespace sckz
     {
         VkFormat depthFormat = HelperMethods::FindDepthFormat(*physicalDevice);
 
-        depthImage.CreateImage(swapChainExtent.width,
-                               swapChainExtent.height,
+        uint32_t width;
+        uint32_t height;
+        if (isCube)
+        {
+            width  = swapChainExtent.width;
+            height = swapChainExtent.width;
+        }
+        else
+        {
+            width  = swapChainExtent.width;
+            height = swapChainExtent.height;
+        }
+
+        depthImage.CreateImage(width,
+                               height,
                                1,
                                msaaSamples,
                                depthFormat,
@@ -86,7 +115,8 @@ namespace sckz
                                *physicalDevice,
                                *memory,
                                *graphicsQueue,
-                               *pool);
+                               *pool,
+                               isCube);
         depthImage.CreateImageView(VK_IMAGE_ASPECT_DEPTH_BIT);
     }
 
@@ -106,14 +136,34 @@ namespace sckz
             attachments.push_back(renderedImage.GetImageView());
         }
 
+        uint32_t width;
+        uint32_t height;
+        if (isCube)
+        {
+            width  = swapChainExtent.width;
+            height = swapChainExtent.width;
+        }
+        else
+        {
+            width  = swapChainExtent.width;
+            height = swapChainExtent.height;
+        }
+
         VkFramebufferCreateInfo framebufferInfo {};
         framebufferInfo.sType           = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         framebufferInfo.renderPass      = renderPass;
         framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
         framebufferInfo.pAttachments    = attachments.data();
-        framebufferInfo.width           = swapChainExtent.width;
-        framebufferInfo.height          = swapChainExtent.height;
-        framebufferInfo.layers          = 1;
+        framebufferInfo.width           = width;
+        framebufferInfo.height          = height;
+        if (isCube)
+        {
+            framebufferInfo.layers = 6;
+        }
+        else
+        {
+            framebufferInfo.layers = 1; // Change to 6
+        }
 
         if (vkCreateFramebuffer(*device, &framebufferInfo, nullptr, &renderedImageFrameBuffer) != VK_SUCCESS)
         {
@@ -123,8 +173,21 @@ namespace sckz
 
     void Fbo::CreateImage()
     {
-        renderedImage.CreateImage(swapChainExtent.width,
-                                  swapChainExtent.height,
+        uint32_t width;
+        uint32_t height;
+        if (isCube)
+        {
+            width  = swapChainExtent.width;
+            height = swapChainExtent.width;
+        }
+        else
+        {
+            width  = swapChainExtent.width;
+            height = swapChainExtent.height;
+        }
+
+        renderedImage.CreateImage(width,
+                                  height,
                                   1,
                                   VK_SAMPLE_COUNT_1_BIT,
                                   this->format,
@@ -137,7 +200,9 @@ namespace sckz
                                   *this->physicalDevice,
                                   *memory,
                                   *this->graphicsQueue,
-                                  *pool);
+                                  *pool,
+                                  isCube);
+
         renderedImage.CreateTextureSampler();
         renderedImage.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
     }
@@ -165,6 +230,7 @@ namespace sckz
         colorAttachment.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         colorAttachment.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
+
         if (msaaSamples == VK_SAMPLE_COUNT_1_BIT)
         {
             colorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -233,7 +299,7 @@ namespace sckz
             attachments.push_back(colorAttachmentResolve);
         }
 
-        VkRenderPassCreateInfo renderPassInfo {};
+        VkRenderPassCreateInfo renderPassInfo {}; // chnage to VkRenderPassMultiviewCreateInfo
         renderPassInfo.sType           = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
         renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
         renderPassInfo.pAttachments    = attachments.data();
@@ -243,6 +309,21 @@ namespace sckz
 
         renderPassInfo.dependencyCount = 1;
         renderPassInfo.pDependencies   = &dependency;
+
+        VkRenderPassMultiviewCreateInfo multipassInfo {};
+
+        if (isCube)
+        {
+            uint32_t viewMasks[]               = { 0b00111111 };
+            uint32_t correlationMasks[]        = { 0 };
+            multipassInfo.sType                = VK_STRUCTURE_TYPE_RENDER_PASS_MULTIVIEW_CREATE_INFO;
+            multipassInfo.subpassCount         = 0;
+            multipassInfo.pViewMasks           = nullptr;
+            multipassInfo.correlationMaskCount = 0;
+            multipassInfo.pCorrelationMasks    = nullptr;
+
+            renderPassInfo.pNext = &multipassInfo;
+        }
 
         if (vkCreateRenderPass(*device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS)
         {

@@ -12,11 +12,12 @@ namespace sckz
                             VkCommandPool &    commandPool,
                             VkDevice &         device,
                             VkPhysicalDevice & physicalDevice,
-                            GraphicsPipeline * pipeline,
+                            GraphicsPipeline & pipeline,
+                            GraphicsPipeline & cubeMapPipeline,
                             DescriptorPool &   descriptorPool,
                             Memory &           memory,
                             VkQueue &          queue,
-                            CubeMap &          environmentMap)
+                            Image &            environmentMap)
     {
         this->colorFileName    = colorFileName;
         this->normalFileName   = normalFileName;
@@ -26,7 +27,8 @@ namespace sckz
         this->physicalDevice   = &physicalDevice;
         this->commandPool      = &commandPool;
         this->descriptorPool   = &descriptorPool;
-        this->pipeline         = pipeline;
+        this->pipeline         = &pipeline;
+        this->cubeMapPipeline  = &cubeMapPipeline;
         this->queue            = &queue;
         this->memory           = &memory;
         this->environmentMap   = &environmentMap;
@@ -54,13 +56,14 @@ namespace sckz
         CreateTexture(textures[0], colorFileName);
         CreateTexture(textures[1], normalFileName);
         CreateTexture(textures[2], spacularFileName);
-        textures[3] = environmentMap.GetImage();
+        textures[3] = environmentMap;
 
         LoadModel();
         CreateVertexBuffer();
         CreateIndexBuffer();
 
         CreateCommandBuffer();
+        CreateCubeMapCommandBuffer();
     }
 
     void Model::CreateTexture(Image & image, const char * fileName)
@@ -275,21 +278,109 @@ namespace sckz
         }
     }
 
+    void Model::CreateCubeMapCommandBuffer()
+    {
+        VkCommandBufferAllocateInfo allocInfo {};
+        allocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocInfo.commandPool        = *commandPool;
+        allocInfo.level              = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
+        allocInfo.commandBufferCount = 1;
+
+        if (vkAllocateCommandBuffers(*device, &allocInfo, &cubeMapCommandBuffer) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to allocate command buffers!");
+        }
+
+        VkCommandBufferBeginInfo beginInfo {};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
+
+        VkCommandBufferInheritanceInfo inheritanceInfo {};
+        inheritanceInfo.sType      = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
+        inheritanceInfo.renderPass = cubeMapPipeline->GetFbo().GetRenderPass();
+        // Secondary command buffer also use the currently active framebuffer
+        inheritanceInfo.framebuffer = cubeMapPipeline->GetFbo().GetImageFramebuffer();
+
+        beginInfo.pInheritanceInfo = &inheritanceInfo;
+
+        if (vkBeginCommandBuffer(cubeMapCommandBuffer, &beginInfo) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to begin recording command buffer!");
+        }
+
+        VkRenderPassBeginInfo renderPassInfo {};
+        cubeMapPipeline->GetFbo().GetRenderPassBeginInfo(&renderPassInfo);
+
+        std::array<VkClearValue, 2> clearValues {};
+        clearValues[0].color        = { 0.0f, 0.0f, 0.0f, 1.0f };
+        clearValues[1].depthStencil = { 1.0f, 0 };
+
+        renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+        renderPassInfo.pClearValues    = clearValues.data();
+
+        vkCmdBindPipeline(cubeMapCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, cubeMapPipeline->GetPipeline());
+
+        VkBuffer     rawVertexBuffer[1];
+        VkDeviceSize offsets[1];
+
+        rawVertexBuffer[0] = vertexBuffer->parent->buffer;
+        offsets[0]         = vertexBuffer->offset;
+
+        vkCmdBindVertexBuffers(cubeMapCommandBuffer, 0, 1, rawVertexBuffer, offsets);
+
+        vkCmdBindIndexBuffer(cubeMapCommandBuffer,
+                             indexBuffer->parent->buffer,
+                             indexBuffer->offset,
+                             VK_INDEX_TYPE_UINT32);
+
+        for (uint32_t j = 0; j < entities.size(); j++)
+        {
+            vkCmdBindDescriptorSets(commandBuffer,
+                                    VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                    cubeMapPipeline->GetPieplineLayout(),
+                                    0,
+                                    1,
+                                    &entities[j]->GetDescriptorSet(),
+                                    0,
+                                    nullptr);
+
+            vkCmdDrawIndexed(cubeMapCommandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+        }
+
+        if (vkEndCommandBuffer(cubeMapCommandBuffer) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to record command buffer!");
+        }
+    }
+
     VkCommandBuffer & Model::GetCommandBuffer() { return commandBuffer; }
+    VkCommandBuffer & Model::GetCubeMapCommandBuffer() { return cubeMapCommandBuffer; }
 
     Entity & Model::CreateEntity(bool isReflectRefractive)
     {
         Entity * entity = new Entity();
         if (isReflectRefractive)
         {
-            entity
-                ->CreateEntity(*physicalDevice, *device, *queue, hostLocalBuffer, *descriptorPool, *pipeline, textures);
+            entity->CreateEntity(*physicalDevice,
+                                 *device,
+                                 *queue,
+                                 hostLocalBuffer,
+                                 *descriptorPool,
+                                 *pipeline,
+                                 *cubeMapPipeline,
+                                 textures);
         }
         else
         {
             std::array<Image, 4> noCubeMap = { textures[0], textures[1], textures[2], blankTexture };
-            entity
-                ->CreateEntity(*physicalDevice, *device, *queue, hostLocalBuffer, *descriptorPool, *pipeline, textures);
+            entity->CreateEntity(*physicalDevice,
+                                 *device,
+                                 *queue,
+                                 hostLocalBuffer,
+                                 *descriptorPool,
+                                 *pipeline,
+                                 *cubeMapPipeline,
+                                 textures);
         }
 
         entities.push_back(entity);
@@ -304,5 +395,9 @@ namespace sckz
 
     uint32_t Model::GetNumIndices() { return static_cast<uint32_t>(indices.size()); }
 
-    void Model::DestroySwapResources() { vkFreeCommandBuffers(*device, *commandPool, 1, &commandBuffer); }
+    void Model::DestroySwapResources()
+    {
+        vkFreeCommandBuffers(*device, *commandPool, 1, &commandBuffer);
+        vkFreeCommandBuffers(*device, *commandPool, 1, &cubeMapCommandBuffer);
+    }
 } // namespace sckz

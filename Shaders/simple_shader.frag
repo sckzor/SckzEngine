@@ -109,7 +109,7 @@ void main()
     outColor = vec4(totalDiffuse, 1.0) * texture(texSampler, fragTexCoord) + vec4(totalSpecular, 1.0);
 
     ivec2 cubeSize = textureSize(cubeMap, 0);
-    if(!(cubeSize.x == 1 && cubeSize.y == 0))
+    if(!(cubeSize.x == 1 && cubeSize.y == 1))
     {
         vec4 reflectedColor = texture(cubeMap, reflectedVector);
         vec4 refractedColor = texture(cubeMap, refractedVector);

@@ -596,7 +596,8 @@ namespace sckz
                                physicalDevice,
                                memory,
                                graphicsQueue,
-                               commandPool);
+                               commandPool,
+                               false);
         colorImage.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
     }
 
@@ -616,7 +617,8 @@ namespace sckz
                                physicalDevice,
                                memory,
                                graphicsQueue,
-                               commandPool);
+                               commandPool,
+                               false);
         depthImage.CreateImageView(VK_IMAGE_ASPECT_DEPTH_BIT);
     }
 

@@ -17,7 +17,8 @@ namespace sckz
                             VkPhysicalDevice &    physicalDevice,
                             Memory &              memory,
                             VkQueue &             queue,
-                            VkCommandPool &       pool)
+                            VkCommandPool &       pool,
+                            bool                  isCube)
     {
         size.width           = width;
         size.height          = height;
@@ -27,6 +28,7 @@ namespace sckz
         this->queue          = &queue;
         this->mipLevels      = mipLevels;
         this->memory         = &memory;
+        this->isCube         = isCube;
         this->pool           = &pool;
         this->sampler        = VK_NULL_HANDLE;
         holdsRealImage       = true;
@@ -195,7 +197,8 @@ namespace sckz
                     *this->physicalDevice,
                     memory,
                     queue,
-                    pool); // queue is the PRIVATE queue
+                    pool,
+                    false); // queue is the PRIVATE queue
 
         CommandBuffer cmdBuffer;
         cmdBuffer.BeginSingleUseCommandBuffer(device, pool, queue);
@@ -231,7 +234,6 @@ namespace sckz
         this->device         = &device;
         this->physicalDevice = &physicalDevice;
         this->memory         = &memory;
-        this->isCube         = true;
 
         hostLocalBuffer.CreateBuffer(*this->physicalDevice,
                                      *this->device,
@@ -291,7 +293,8 @@ namespace sckz
                     *this->physicalDevice,
                     memory,
                     queue,
-                    pool); // queue is the PRIVATE queue
+                    pool,
+                    true); // queue is the PRIVATE queue
 
         CommandBuffer cmdBuffer;
         cmdBuffer.BeginSingleUseCommandBuffer(device, pool, queue);
@@ -367,7 +370,8 @@ namespace sckz
                     *this->physicalDevice,
                     memory,
                     queue,
-                    pool); // queue is the PRIVATE queue
+                    pool,
+                    false); // queue is the PRIVATE queue
 
         CommandBuffer cmdBuffer;
         cmdBuffer.BeginSingleUseCommandBuffer(device, pool, queue);

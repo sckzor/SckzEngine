@@ -29,7 +29,18 @@ namespace sckz
                            format,
                            msaaSamples,
                            swapChainExtent,
-                           commandPool);
+                           commandPool,
+                           false);
+
+        cubeMapImage.CreateFBO(physicalDevice,
+                               device,
+                               memory,
+                               graphicsQueue,
+                               format,
+                               msaaSamples,
+                               swapChainExtent,
+                               commandPool,
+                               true);
 
         particlePipeline.CreatePipeline(*this->device,
                                         fboImage,
@@ -42,6 +53,12 @@ namespace sckz
                                        "Resources/skybox_vertex.spv",
                                        "Resources/skybox_fragment.spv",
                                        GraphicsPipeline::PipelineType::CUBEMAP_PIPELINE);
+
+        cubeMapPipelineCube.CreatePipeline(*this->device,
+                                           fboImage,
+                                           "Resources/skybox_vertex.spv",
+                                           "Resources/skybox_fragment.spv",
+                                           GraphicsPipeline::PipelineType::CUBEMAP_PIPELINE);
 
         cubeMapTest.CreateCubeMap("Resources/posz.jpg",
                                   "Resources/negz.jpg",
@@ -57,6 +74,21 @@ namespace sckz
                                   cubeMapPipeline,
                                   descriptorPool,
                                   50);
+
+        cubeMapTestCube.CreateCubeMap("Resources/posz.jpg",
+                                      "Resources/negz.jpg",
+                                      "Resources/posx.jpg",
+                                      "Resources/negx.jpg",
+                                      "Resources/posy.jpg",
+                                      "Resources/negy.jpg",
+                                      device,
+                                      physicalDevice,
+                                      memory,
+                                      commandPool,
+                                      graphicsQueue,
+                                      cubeMapPipelineCube,
+                                      descriptorPool,
+                                      50);
     }
 
     void Scene::DestroyScene()
@@ -255,6 +287,45 @@ namespace sckz
         }
     }
 
+    void Scene::RebuildCubeCommandBuffer()
+    {
+        VkCommandBufferBeginInfo beginInfo {};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+        if (vkBeginCommandBuffer(primaryCmdBufferCube, &beginInfo) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to begin recording command buffer!");
+        }
+
+        VkRenderPassBeginInfo renderPassInfo {};
+        cubeMapImage.GetRenderPassBeginInfo(&renderPassInfo);
+
+        std::array<VkClearValue, 2> clearValues {};
+        clearValues[0].color        = { 0.0f, 0.0f, 0.0f, 1.0f };
+        clearValues[1].depthStencil = { 1.0f, 0 };
+
+        renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+        renderPassInfo.pClearValues    = clearValues.data();
+
+        vkCmdBeginRenderPass(primaryCmdBufferCube, &renderPassInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
+        std::vector<VkCommandBuffer> buffers;
+        for (size_t j = 0; j < models.size(); j++)
+        {
+            buffers.push_back((models[j]->GetCubeMapCommandBuffer()));
+        }
+
+        buffers.push_back(cubeMapTestCube.GetCommandBuffer());
+
+        vkCmdExecuteCommands(primaryCmdBufferCube, buffers.size(), buffers.data());
+
+        vkCmdEndRenderPass(primaryCmdBufferCube);
+
+        if (vkEndCommandBuffer(primaryCmdBufferCube) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to record command buffer!");
+        }
+    }
+
     void Scene::CreateCommandBuffer()
     {
         VkCommandBufferAllocateInfo allocInfo {};
@@ -269,6 +340,13 @@ namespace sckz
         }
 
         RebuildCommandBuffer();
+
+        if (vkAllocateCommandBuffers(*device, &allocInfo, &primaryCmdBufferCube) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to allocate command buffers!");
+        }
+
+        RebuildCubeCommandBuffer();
     }
 
     VkSampleCountFlagBits Scene::GetTargetSampleCount(int32_t targetSampleCount) // TODO: make this mutable
@@ -352,6 +430,14 @@ namespace sckz
                                          vertexFile,
                                          fragmentFile,
                                          GraphicsPipeline::PipelineType::MODEL_PIPELINE);
+
+        cubeMapPipelines.push_back(new GraphicsPipeline());
+        cubeMapPipelines.back()->CreatePipeline(*device,
+                                                cubeMapImage,
+                                                vertexFile,
+                                                fragmentFile,
+                                                GraphicsPipeline::PipelineType::MODEL_PIPELINE);
+
         return *pipelines.back();
     }
 
@@ -362,6 +448,9 @@ namespace sckz
                                GraphicsPipeline & pipeline)
     {
         models.push_back(new Model());
+        auto it    = find(pipelines.begin(), pipelines.end(), &pipeline);
+        int  index = it - pipelines.begin();
+
         models.back()->CreateModel(colorFile,
                                    normalFile,
                                    specularFile,
@@ -369,11 +458,12 @@ namespace sckz
                                    commandPool,
                                    *device,
                                    *physicalDevice,
-                                   &pipeline,
+                                   pipeline,
+                                   *cubeMapPipelines[index],
                                    descriptorPool,
                                    memory,
                                    *graphicsQueue,
-                                   cubeMapTest);
+                                   cubeMapImage.GetImage());
         return *models.back();
     }
 
@@ -387,7 +477,8 @@ namespace sckz
                                format,
                                msaaSamples,
                                swapChainExtent,
-                               commandPool);
+                               commandPool,
+                               false);
         return *fbos.back();
     }
 
@@ -429,8 +520,9 @@ namespace sckz
         submitInfo.waitSemaphoreCount     = 0;
         submitInfo.pWaitDstStageMask      = waitStages;
 
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers    = &primaryCmdBuffer;
+        submitInfo.commandBufferCount                 = 2;
+        std::array<VkCommandBuffer, 2> commandBuffers = { primaryCmdBuffer, primaryCmdBufferCube };
+        submitInfo.pCommandBuffers                    = commandBuffers.data();
 
         vkResetFences(*device, 1, &inFlightFence);
 

@@ -30,6 +30,8 @@ namespace sckz
 
         Memory * memory;
 
+        bool isCube;
+
     public:
         void CreateFBO(VkPhysicalDevice &    physicalDevice,
                        VkDevice &            device,
@@ -38,7 +40,8 @@ namespace sckz
                        VkFormat              format,
                        VkSampleCountFlagBits msaaSamples,
                        VkExtent2D            swapChainExtent,
-                       VkCommandPool &       pool);
+                       VkCommandPool &       pool,
+                       bool                  isCube);
 
         void CreateDummyFBO(VkRenderPass & renderPass, VkSampleCountFlagBits msaaSamples, VkExtent2D swapChainExtent);
         void RebuildSwapResources(VkSampleCountFlagBits msaaSamples, VkExtent2D swapChainExtent);

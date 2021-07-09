@@ -31,7 +31,8 @@ namespace sckz
                           format,
                           msaaSamples,
                           swapChainExtent,
-                          commandPool);
+                          commandPool,
+                          false);
 
         combinePipeline.CreatePipeline(*this->device,
                                        tempFbo,

@@ -46,6 +46,7 @@ namespace sckz
         VkDevice *             device;
         DescriptorPool *       descriptorPool;
         GraphicsPipeline *     pipeline;
+        GraphicsPipeline *     cubeMapPipeline;
         std::array<Image, 4> * textures;
         std::vector<Light *> * lights;
 
@@ -69,6 +70,7 @@ namespace sckz
                           Buffer &               hostLocalBuffer,
                           DescriptorPool &       pool,
                           GraphicsPipeline &     pipeline,
+                          GraphicsPipeline &     cubeMapPipeline,
                           std::array<Image, 4> & textures);
 
         void DestroyEntity();
