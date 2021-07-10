@@ -12,7 +12,7 @@ int main()
 
     win.SetIcon("Resources/icon.png");
 
-    vkan.SetFPS(-1);
+    // vkan.SetFPS(-1);
 
     sckz::Scene & s1 = vkan.CreateScene();
     sckz::Scene & s2 = vkan.CreateScene();

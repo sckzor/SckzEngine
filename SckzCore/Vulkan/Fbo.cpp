@@ -156,14 +156,8 @@ namespace sckz
         framebufferInfo.pAttachments    = attachments.data();
         framebufferInfo.width           = width;
         framebufferInfo.height          = height;
-        if (isCube)
-        {
-            framebufferInfo.layers = 6;
-        }
-        else
-        {
-            framebufferInfo.layers = 1; // Change to 6
-        }
+
+        framebufferInfo.layers = 1; // Change to 6
 
         if (vkCreateFramebuffer(*device, &framebufferInfo, nullptr, &renderedImageFrameBuffer) != VK_SUCCESS)
         {
@@ -317,10 +311,10 @@ namespace sckz
             uint32_t viewMasks[]               = { 0b00111111 };
             uint32_t correlationMasks[]        = { 0 };
             multipassInfo.sType                = VK_STRUCTURE_TYPE_RENDER_PASS_MULTIVIEW_CREATE_INFO;
-            multipassInfo.subpassCount         = 0;
-            multipassInfo.pViewMasks           = nullptr;
-            multipassInfo.correlationMaskCount = 0;
-            multipassInfo.pCorrelationMasks    = nullptr;
+            multipassInfo.subpassCount         = 1;
+            multipassInfo.pViewMasks           = viewMasks;
+            multipassInfo.correlationMaskCount = 1;
+            multipassInfo.pCorrelationMasks    = correlationMasks;
 
             renderPassInfo.pNext = &multipassInfo;
         }

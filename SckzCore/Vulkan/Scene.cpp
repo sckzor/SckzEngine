@@ -55,7 +55,7 @@ namespace sckz
                                        GraphicsPipeline::PipelineType::CUBEMAP_PIPELINE);
 
         cubeMapPipelineCube.CreatePipeline(*this->device,
-                                           fboImage,
+                                           cubeMapImage,
                                            "Resources/skybox_vertex.spv",
                                            "Resources/skybox_fragment.spv",
                                            GraphicsPipeline::PipelineType::CUBEMAP_PIPELINE);
@@ -156,6 +156,7 @@ namespace sckz
         DestroySwapResources();
 
         fboImage.RebuildSwapResources(msaaSamples, swapChainExtent);
+        cubeMapImage.RebuildSwapResources(msaaSamples, swapChainExtent);
         for (uint32_t i = 0; i < pipelines.size(); i++)
         {
             pipelines[i]->CreatePipeline(*device, fboImage);
@@ -173,6 +174,8 @@ namespace sckz
         }
 
         particlePipeline.CreatePipeline(*device, fboImage);
+        cubeMapPipeline.CreatePipeline(*device, fboImage);
+        cubeMapPipelineCube.CreatePipeline(*device, cubeMapImage);
 
         for (uint32_t i = 0; i < particleSystems.size(); i++)
         {
@@ -314,9 +317,11 @@ namespace sckz
             buffers.push_back((models[j]->GetCubeMapCommandBuffer()));
         }
 
+        std::cout << cubeMapImage.GetImage().GetImage() << std::endl;
+
         buffers.push_back(cubeMapTestCube.GetCommandBuffer());
 
-        vkCmdExecuteCommands(primaryCmdBufferCube, buffers.size(), buffers.data());
+        vkCmdExecuteCommands(primaryCmdBufferCube, buffers.size(), buffers.data()); // Broken here
 
         vkCmdEndRenderPass(primaryCmdBufferCube);
 
@@ -512,6 +517,7 @@ namespace sckz
         }
 
         RebuildCommandBuffer();
+        RebuildCubeCommandBuffer();
 
         VkSubmitInfo submitInfo {};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;

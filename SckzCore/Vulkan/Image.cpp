@@ -788,6 +788,7 @@ namespace sckz
     bool Image::operator!=(Image & other) { return image != other.image; }
 
     VkImageView & Image::GetImageView() { return imageView; }
+    VkImage &     Image::GetImage() { return image; }
 
     VkSampler & Image::GetSampler() { return sampler; }
 

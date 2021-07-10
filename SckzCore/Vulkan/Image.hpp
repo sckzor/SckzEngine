@@ -104,6 +104,7 @@ namespace sckz
         void EndCommandBuffer();
 
     public:
+        VkImage &     GetImage();
         VkImageView & GetImageView();
         VkSampler &   GetSampler();
         VkFormat      GetFormat();

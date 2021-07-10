@@ -335,7 +335,7 @@ namespace sckz
 
         for (uint32_t j = 0; j < entities.size(); j++)
         {
-            vkCmdBindDescriptorSets(commandBuffer,
+            vkCmdBindDescriptorSets(cubeMapCommandBuffer,
                                     VK_PIPELINE_BIND_POINT_GRAPHICS,
                                     cubeMapPipeline->GetPieplineLayout(),
                                     0,
@@ -385,6 +385,7 @@ namespace sckz
 
         entities.push_back(entity);
         CreateCommandBuffer();
+        CreateCubeMapCommandBuffer();
 
         return *entity;
     }
