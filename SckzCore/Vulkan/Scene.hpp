@@ -35,22 +35,19 @@ namespace sckz
 
         GraphicsPipeline particlePipeline;
         GraphicsPipeline cubeMapPipeline;
-        GraphicsPipeline cubeMapPipelineCube;
 
         std::vector<Fbo *>              fbos;
         std::vector<Filter *>           filters;
         std::vector<Combine *>          combines;
-        std::vector<GraphicsPipeline *> pipelines;        // Goes
-        std::vector<GraphicsPipeline *> cubeMapPipelines; // Goes
-        std::vector<Model *>            models;           // Goes
-        std::vector<Camera *>           cameras;          // Goes
+        std::vector<GraphicsPipeline *> pipelines; // Goes
+        std::vector<Model *>            models;    // Goes
+        std::vector<Camera *>           cameras;   // Goes
         std::vector<Light *>            lights;
         std::vector<ParticleSystem *>   particleSystems;
 
         VkFence inFlightFence;
 
         CubeMap cubeMapTest;
-        CubeMap cubeMapTestCube;
 
         VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT; // Goes
         VkSampleCountFlagBits maxMsaaSamples;
@@ -93,7 +90,10 @@ namespace sckz
         Fbo & GetRenderedImage();
 
     public:
-        GraphicsPipeline & CreatePipeline(const char * vertexFile, const char * fragmentFile);
+        GraphicsPipeline & CreatePipeline(const char * complexVertexFile,
+                                          const char * complexFragmentFile,
+                                          const char * simpleVertexFile,
+                                          const char * simpleFragmentFile);
 
         Model & CreateModel(const char *       modelFile,
                             const char *       colorFile,

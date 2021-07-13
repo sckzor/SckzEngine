@@ -38,6 +38,9 @@ namespace sckz
                                       tempFbo,
                                       vertexFile,
                                       fragmentFile,
+                                      tempFbo,
+                                      nullptr,
+                                      nullptr,
                                       GraphicsPipeline::PipelineType::FBO_PIPELINE);
 
         CreateCommandBuffer();
@@ -55,7 +58,7 @@ namespace sckz
         std::cout << &descriptorPool << std::endl;
 
         filterPipeline.DestroyPipeline();
-        filterPipeline.CreatePipeline(*this->device, tempFbo);
+        filterPipeline.CreatePipeline(*this->device, tempFbo, tempFbo);
 
         // RebuildCommandBuffer(nullptr);
 
@@ -94,9 +97,9 @@ namespace sckz
 
         VkCommandBufferInheritanceInfo inheritanceInfo {};
         inheritanceInfo.sType      = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
-        inheritanceInfo.renderPass = filterPipeline.GetFbo().GetRenderPass();
+        inheritanceInfo.renderPass = filterPipeline.GetComplexFbo().GetRenderPass();
         // Secondary command buffer also use the currently active framebuffer
-        inheritanceInfo.framebuffer = filterPipeline.GetFbo().GetImageFramebuffer();
+        inheritanceInfo.framebuffer = filterPipeline.GetComplexFbo().GetImageFramebuffer();
 
         beginInfo.pInheritanceInfo = &inheritanceInfo;
 
@@ -121,18 +124,18 @@ namespace sckz
 
         vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, filterPipeline.GetPipeline());
+        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, filterPipeline.GetComplexPipeline());
 
         VkDescriptorSet ds;
 
         if (fbo != nullptr)
         {
 
-            filterPipeline.BindShaderData(nullptr, &fbo->GetImage(), nullptr, *descriptorPool, &ds);
+            filterPipeline.BindComplexShaderData(nullptr, &fbo->GetImage(), nullptr, *descriptorPool, &ds);
 
             vkCmdBindDescriptorSets(commandBuffer,
                                     VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                    filterPipeline.GetPieplineLayout(),
+                                    filterPipeline.GetComplexPieplineLayout(),
                                     0,
                                     1,
                                     &ds,

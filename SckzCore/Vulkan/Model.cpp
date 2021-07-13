@@ -13,7 +13,6 @@ namespace sckz
                             VkDevice &         device,
                             VkPhysicalDevice & physicalDevice,
                             GraphicsPipeline & pipeline,
-                            GraphicsPipeline & cubeMapPipeline,
                             DescriptorPool &   descriptorPool,
                             Memory &           memory,
                             VkQueue &          queue,
@@ -28,7 +27,6 @@ namespace sckz
         this->commandPool      = &commandPool;
         this->descriptorPool   = &descriptorPool;
         this->pipeline         = &pipeline;
-        this->cubeMapPipeline  = &cubeMapPipeline;
         this->queue            = &queue;
         this->memory           = &memory;
         this->environmentMap   = &environmentMap;
@@ -225,9 +223,9 @@ namespace sckz
 
         VkCommandBufferInheritanceInfo inheritanceInfo {};
         inheritanceInfo.sType      = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
-        inheritanceInfo.renderPass = pipeline->GetFbo().GetRenderPass();
+        inheritanceInfo.renderPass = pipeline->GetComplexFbo().GetRenderPass();
         // Secondary command buffer also use the currently active framebuffer
-        inheritanceInfo.framebuffer = pipeline->GetFbo().GetImageFramebuffer();
+        inheritanceInfo.framebuffer = pipeline->GetComplexFbo().GetImageFramebuffer();
 
         beginInfo.pInheritanceInfo = &inheritanceInfo;
 
@@ -237,7 +235,7 @@ namespace sckz
         }
 
         VkRenderPassBeginInfo renderPassInfo {};
-        pipeline->GetFbo().GetRenderPassBeginInfo(&renderPassInfo);
+        pipeline->GetComplexFbo().GetRenderPassBeginInfo(&renderPassInfo);
 
         std::array<VkClearValue, 2> clearValues {};
         clearValues[0].color        = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -246,7 +244,7 @@ namespace sckz
         renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
         renderPassInfo.pClearValues    = clearValues.data();
 
-        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetPipeline());
+        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetComplexPipeline());
 
         VkBuffer     rawVertexBuffer[1];
         VkDeviceSize offsets[1];
@@ -262,7 +260,7 @@ namespace sckz
         {
             vkCmdBindDescriptorSets(commandBuffer,
                                     VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                    pipeline->GetPieplineLayout(),
+                                    pipeline->GetComplexPieplineLayout(),
                                     0,
                                     1,
                                     &entities[j]->GetDescriptorSet(),
@@ -297,9 +295,9 @@ namespace sckz
 
         VkCommandBufferInheritanceInfo inheritanceInfo {};
         inheritanceInfo.sType      = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
-        inheritanceInfo.renderPass = cubeMapPipeline->GetFbo().GetRenderPass();
+        inheritanceInfo.renderPass = pipeline->GetSimpleFbo().GetRenderPass();
         // Secondary command buffer also use the currently active framebuffer
-        inheritanceInfo.framebuffer = cubeMapPipeline->GetFbo().GetImageFramebuffer();
+        inheritanceInfo.framebuffer = pipeline->GetSimpleFbo().GetImageFramebuffer();
 
         beginInfo.pInheritanceInfo = &inheritanceInfo;
 
@@ -309,7 +307,7 @@ namespace sckz
         }
 
         VkRenderPassBeginInfo renderPassInfo {};
-        cubeMapPipeline->GetFbo().GetRenderPassBeginInfo(&renderPassInfo);
+        pipeline->GetSimpleFbo().GetRenderPassBeginInfo(&renderPassInfo);
 
         std::array<VkClearValue, 2> clearValues {};
         clearValues[0].color        = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -318,7 +316,7 @@ namespace sckz
         renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
         renderPassInfo.pClearValues    = clearValues.data();
 
-        vkCmdBindPipeline(cubeMapCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, cubeMapPipeline->GetPipeline());
+        vkCmdBindPipeline(cubeMapCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetSimplePipeline());
 
         VkBuffer     rawVertexBuffer[1];
         VkDeviceSize offsets[1];
@@ -337,7 +335,7 @@ namespace sckz
         {
             vkCmdBindDescriptorSets(cubeMapCommandBuffer,
                                     VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                    cubeMapPipeline->GetPieplineLayout(),
+                                    pipeline->GetSimplePieplineLayout(),
                                     0,
                                     1,
                                     &entities[j]->GetDescriptorSet(),
@@ -361,26 +359,14 @@ namespace sckz
         Entity * entity = new Entity();
         if (isReflectRefractive)
         {
-            entity->CreateEntity(*physicalDevice,
-                                 *device,
-                                 *queue,
-                                 hostLocalBuffer,
-                                 *descriptorPool,
-                                 *pipeline,
-                                 *cubeMapPipeline,
-                                 textures);
+            entity
+                ->CreateEntity(*physicalDevice, *device, *queue, hostLocalBuffer, *descriptorPool, *pipeline, textures);
         }
         else
         {
             std::array<Image, 4> noCubeMap = { textures[0], textures[1], textures[2], blankTexture };
-            entity->CreateEntity(*physicalDevice,
-                                 *device,
-                                 *queue,
-                                 hostLocalBuffer,
-                                 *descriptorPool,
-                                 *pipeline,
-                                 *cubeMapPipeline,
-                                 textures);
+            entity
+                ->CreateEntity(*physicalDevice, *device, *queue, hostLocalBuffer, *descriptorPool, *pipeline, textures);
         }
 
         entities.push_back(entity);

@@ -15,7 +15,14 @@ namespace sckz
     class CubeMap
     {
     private:
-        struct VertexUniformBufferObject
+        struct SimpleVertexUniformBufferObject
+        {
+            alignas(16) glm::mat4 model;
+            alignas(16) glm::mat4 view[CUBEMAP_SIDES];
+            alignas(16) glm::mat4 proj;
+        };
+
+        struct ComplexVertexUniformBufferObject
         {
             alignas(16) glm::mat4 model;
             alignas(16) glm::mat4 view;
@@ -38,12 +45,15 @@ namespace sckz
         Buffer          hostLocalBuffer;
         Buffer          deviceLocalBuffer;
         Buffer          stagingLocalBuffer;
-        VkDescriptorSet descriptorSet;
-        VkCommandBuffer commandBuffer;
+        VkDescriptorSet complexDescriptorSet;
+        VkDescriptorSet simpleDescriptorSet;
+        VkCommandBuffer complexCommandBuffer;
+        VkCommandBuffer simpleCommandBuffer;
 
         Buffer::SubBlock * vertexBuffer;
         Buffer::SubBlock * indexBuffer;
-        Buffer::SubBlock   uniformBuffer;
+        Buffer::SubBlock   simpleUniformBuffer;
+        Buffer::SubBlock   complexUniformBuffer;
 
         std::vector<Vertex> vertices
             = { { { -1, -1, 1 }, { 0, 0, 0 }, { 0, 0 } }, { { -1, 1, 1 }, { 0, 0, 0 }, { 0, 0 } },
@@ -72,7 +82,8 @@ namespace sckz
 
         void DestroyCubeMap();
 
-        VkCommandBuffer & GetCommandBuffer();
+        VkCommandBuffer & GetSimpleCommandBuffer();
+        VkCommandBuffer & GetComplexCommandBuffer();
         Image &           GetImage();
 
         void Update(glm::vec3 location, Camera & camera);
@@ -80,7 +91,8 @@ namespace sckz
     private:
         void CreateVertexBuffer();
         void CreateIndexBuffer();
-        void CreateCommandBuffer();
+        void CreateSimpleCommandBuffer();
+        void CreateComplexCommandBuffer();
         void CreateUniformBuffer();
     };
 } // namespace sckz

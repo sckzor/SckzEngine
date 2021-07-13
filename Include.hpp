@@ -26,3 +26,5 @@
 #include <thread>
 #include <unordered_map>
 #include <vector>
+
+static const uint32_t CUBEMAP_SIDES = 6;

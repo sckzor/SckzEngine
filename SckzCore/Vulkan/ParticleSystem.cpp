@@ -49,7 +49,11 @@ namespace sckz
         for (uint32_t i = 0; i < particles.size(); i++)
         {
             std::array<Buffer::SubBlock, 2> ubos = { staticUniformBuffer, particles[i].uniformBuffer };
-            this->pipeline->BindShaderData(ubos.data(), &texture, nullptr, descriptorPool, &particles[i].descriptorSet);
+            this->pipeline->BindComplexShaderData(ubos.data(),
+                                                  &texture,
+                                                  nullptr,
+                                                  descriptorPool,
+                                                  &particles[i].descriptorSet);
             particles[i].scale = 0;
         }
 
@@ -74,7 +78,11 @@ namespace sckz
         for (uint32_t i = 0; i < particles.size(); i++)
         {
             std::array<Buffer::SubBlock, 2> ubos = { staticUniformBuffer, particles[i].uniformBuffer };
-            this->pipeline->BindShaderData(ubos.data(), &texture, nullptr, descriptorPool, &particles[i].descriptorSet);
+            this->pipeline->BindComplexShaderData(ubos.data(),
+                                                  &texture,
+                                                  nullptr,
+                                                  descriptorPool,
+                                                  &particles[i].descriptorSet);
         }
 
         CreateCommandBuffer();
@@ -116,9 +124,9 @@ namespace sckz
 
         VkCommandBufferInheritanceInfo inheritanceInfo {};
         inheritanceInfo.sType      = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
-        inheritanceInfo.renderPass = pipeline->GetFbo().GetRenderPass();
+        inheritanceInfo.renderPass = pipeline->GetComplexFbo().GetRenderPass();
         // Secondary command buffer also use the currently active framebuffer
-        inheritanceInfo.framebuffer = pipeline->GetFbo().GetImageFramebuffer();
+        inheritanceInfo.framebuffer = pipeline->GetComplexFbo().GetImageFramebuffer();
 
         beginInfo.pInheritanceInfo = &inheritanceInfo;
 
@@ -128,7 +136,7 @@ namespace sckz
         }
 
         VkRenderPassBeginInfo renderPassInfo {};
-        pipeline->GetFbo().GetRenderPassBeginInfo(&renderPassInfo);
+        pipeline->GetComplexFbo().GetRenderPassBeginInfo(&renderPassInfo);
 
         std::array<VkClearValue, 2> clearValues {};
         clearValues[0].color        = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -137,7 +145,7 @@ namespace sckz
         renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
         renderPassInfo.pClearValues    = clearValues.data();
 
-        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetPipeline());
+        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetComplexPipeline());
 
         for (uint32_t i = 0; i < particles.size(); i++)
         {
@@ -145,7 +153,7 @@ namespace sckz
             {
                 vkCmdBindDescriptorSets(commandBuffer,
                                         VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                        pipeline->GetPieplineLayout(),
+                                        pipeline->GetComplexPieplineLayout(),
                                         0,
                                         1,
                                         &particles[i].descriptorSet,

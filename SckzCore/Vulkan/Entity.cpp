@@ -8,7 +8,6 @@ namespace sckz
                               Buffer &               hostLocalBuffer,
                               DescriptorPool &       descriptorPool,
                               GraphicsPipeline &     pipeline,
-                              GraphicsPipeline &     cubeMapPipeline,
                               std::array<Image, 4> & textures)
     {
         this->physicalDevice  = &physicalDevice;
@@ -16,7 +15,6 @@ namespace sckz
         this->device          = &device;
         this->descriptorPool  = &descriptorPool;
         this->pipeline        = &pipeline;
-        this->cubeMapPipeline = &cubeMapPipeline;
         this->textures        = &textures;
         this->hostLocalBuffer = &hostLocalBuffer;
 
@@ -24,17 +22,13 @@ namespace sckz
 
         CreateUniformBuffers();
 
-        this->pipeline->BindShaderData(&uniformBuffer[0],
-                                       textures.data(),
-                                       &uniformBuffer[1],
-                                       *this->descriptorPool,
-                                       &descriptorSet);
-
-        this->cubeMapPipeline->BindShaderData(&uniformBuffer[0],
+        this->pipeline->BindComplexShaderData(&complexUniformBuffers[0],
                                               textures.data(),
-                                              &uniformBuffer[1],
+                                              &complexUniformBuffers[1],
                                               *this->descriptorPool,
                                               &descriptorSet);
+
+        this->pipeline->BindSimpleShaderData(&simpleUniformBuffer, &textures[0], *this->descriptorPool, &descriptorSet);
     }
 
     void Entity::DestroyEntity() { }
@@ -43,17 +37,16 @@ namespace sckz
     {
         DestroyEntity();
         CreateUniformBuffers();
-        this->pipeline->BindShaderData(&uniformBuffer[0],
-                                       this->textures->data(),
-                                       &uniformBuffer[1],
-                                       *this->descriptorPool,
-                                       &descriptorSet);
-
-        this->cubeMapPipeline->BindShaderData(&uniformBuffer[0],
-                                              this->textures->data(),
-                                              &uniformBuffer[1],
+        this->pipeline->BindComplexShaderData(&complexUniformBuffers[0],
+                                              textures->data(),
+                                              &complexUniformBuffers[1],
                                               *this->descriptorPool,
                                               &descriptorSet);
+
+        this->pipeline->BindSimpleShaderData(&simpleUniformBuffer,
+                                             &textures->at(0),
+                                             *this->descriptorPool,
+                                             &descriptorSet);
     }
 
     void Entity::SetShine(float reflectivity, float shineDamper)
@@ -70,8 +63,8 @@ namespace sckz
 
     void Entity::Update(Camera & camera)
     {
-        VertexUniformBufferObject   Vubo {};
-        FragmentUniformBufferObject Fubo {};
+        ComplexVertexUniformBufferObject   Vubo {};
+        ComplexFragmentUniformBufferObject Fubo {};
         Vubo.model = glm::scale(glm::mat4(1.0f), scale);
         Vubo.model = glm::rotate(Vubo.model, glm::radians(rotation.x), glm::vec3(1.0, 0.0, 0.0));
         Vubo.model = glm::rotate(Vubo.model, glm::radians(rotation.y), glm::vec3(0.0, 1.0, 0.0));
@@ -111,16 +104,31 @@ namespace sckz
             }
         }
 
-        uniformBuffer[0].CopyDataToBuffer(&Vubo, sizeof(Vubo), 0);
-        uniformBuffer[1].CopyDataToBuffer(&Fubo, sizeof(Fubo), 0);
+        complexUniformBuffers[0].CopyDataToBuffer(&Vubo, sizeof(Vubo), 0);
+        complexUniformBuffers[1].CopyDataToBuffer(&Fubo, sizeof(Fubo), 0);
+
+        SimpleVertexUniformBufferObject SVubo {};
+
+        SVubo.model = Vubo.model;
+
+        SVubo.proj = camera.GetProjection();
+
+        for (uint32_t i = 0; i < CUBEMAP_SIDES; i++)
+        {
+            SVubo.view[i] = camera.GetCubeMapView(i);
+        }
     }
 
     void Entity::CreateUniformBuffers()
     {
-        VkDeviceSize VuboSize = sizeof(VertexUniformBufferObject);
-        VkDeviceSize FuboSize = sizeof(FragmentUniformBufferObject);
-        uniformBuffer[0]      = hostLocalBuffer->GetBuffer(VuboSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
-        uniformBuffer[1]      = hostLocalBuffer->GetBuffer(FuboSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+        VkDeviceSize ComplexVUboSize = sizeof(ComplexVertexUniformBufferObject);
+        VkDeviceSize ComplexFUboSize = sizeof(ComplexFragmentUniformBufferObject);
+        complexUniformBuffers[0]     = hostLocalBuffer->GetBuffer(ComplexVUboSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+        complexUniformBuffers[1]     = hostLocalBuffer->GetBuffer(ComplexFUboSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+
+        VkDeviceSize SimpleVUboSize = sizeof(SimpleVertexUniformBufferObject);
+
+        simpleUniformBuffer = hostLocalBuffer->GetBuffer(SimpleVUboSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
     }
 
     void Entity::SetLocation(float x, float y, float z)

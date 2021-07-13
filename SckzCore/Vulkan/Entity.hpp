@@ -11,12 +11,19 @@
 
 namespace sckz
 {
-    static const int MAX_LIGHTS = 4;
-
     class Entity
     {
     private:
-        struct VertexUniformBufferObject
+        static const int MAX_LIGHTS = 4;
+
+        struct SimpleVertexUniformBufferObject
+        {
+            alignas(16) glm::mat4 model;
+            alignas(16) glm::mat4 view[CUBEMAP_SIDES];
+            alignas(16) glm::mat4 proj;
+        };
+
+        struct ComplexVertexUniformBufferObject
         {
             alignas(16) glm::mat4 model;
             alignas(16) glm::mat4 view;
@@ -27,7 +34,7 @@ namespace sckz
             alignas(16) float refractiveIndexRatio;
         };
 
-        struct FragmentUniformBufferObject
+        struct ComplexFragmentUniformBufferObject
         {
             alignas(16) glm::vec4 lightColor[MAX_LIGHTS];
             alignas(16) glm::vec4 attenuation[MAX_LIGHTS];
@@ -46,11 +53,11 @@ namespace sckz
         VkDevice *             device;
         DescriptorPool *       descriptorPool;
         GraphicsPipeline *     pipeline;
-        GraphicsPipeline *     cubeMapPipeline;
         std::array<Image, 4> * textures;
         std::vector<Light *> * lights;
 
-        std::array<Buffer::SubBlock, 2> uniformBuffer;
+        std::array<Buffer::SubBlock, 2> complexUniformBuffers;
+        Buffer::SubBlock                simpleUniformBuffer;
         VkDescriptorSet                 descriptorSet;
 
         glm::vec3 location;
@@ -70,7 +77,6 @@ namespace sckz
                           Buffer &               hostLocalBuffer,
                           DescriptorPool &       pool,
                           GraphicsPipeline &     pipeline,
-                          GraphicsPipeline &     cubeMapPipeline,
                           std::array<Image, 4> & textures);
 
         void DestroyEntity();

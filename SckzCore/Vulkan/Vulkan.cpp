@@ -746,6 +746,9 @@ namespace sckz
                                    dummyFbo,
                                    "Resources/gui_vertex_normal.spv",
                                    "Resources/gui_fragment_normal.spv",
+                                   dummyFbo,
+                                   nullptr,
+                                   nullptr,
                                    GraphicsPipeline::PipelineType::GUI_PIPELINE);
     }
 
@@ -784,10 +787,10 @@ namespace sckz
         descriptorPool.CreateDescriptorPool(device, swapChainImages.size());
 
         dummyFbo.CreateDummyFBO(renderPass, VK_SAMPLE_COUNT_1_BIT, swapChainExtent);
-        guiPipeline.CreatePipeline(device, dummyFbo);
+        guiPipeline.CreatePipeline(device, dummyFbo, dummyFbo);
         for (uint32_t i = 0; i < fboPipelines.size(); i++)
         {
-            fboPipelines[i]->CreatePipeline(device, dummyFbo);
+            fboPipelines[i]->CreatePipeline(device, dummyFbo, dummyFbo);
         }
 
         for (uint32_t i = 0; i < guis.size(); i++)
@@ -863,15 +866,15 @@ namespace sckz
             renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
             renderPassInfo.pClearValues    = clearValues.data();
 
-            vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetPipeline());
+            vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetComplexPipeline());
 
             VkDescriptorSet ds;
 
-            pipeline->BindShaderData(nullptr, &fbo->GetImage(), nullptr, descriptorPool, &ds);
+            pipeline->BindComplexShaderData(nullptr, &fbo->GetImage(), nullptr, descriptorPool, &ds);
 
             vkCmdBindDescriptorSets(commandBuffers[i],
                                     VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                    pipeline->GetPieplineLayout(),
+                                    pipeline->GetComplexPieplineLayout(),
                                     0,
                                     1,
                                     &ds,
@@ -1099,6 +1102,9 @@ namespace sckz
                                             dummyFbo,
                                             "Resources/fbo_vertex_normal.spv",
                                             fragShader,
+                                            dummyFbo,
+                                            nullptr,
+                                            nullptr,
                                             GraphicsPipeline::PipelineType::FBO_PIPELINE);
 
         return *fboPipelines.back();

@@ -26,13 +26,31 @@ namespace sckz
         view = glm::rotate(view, glm::radians(rotation.z), glm::vec3(0, 0, 1));
         view = glm::translate(view, location);
 
-        projection = glm::perspective(glm::radians(fov), extent.width / (float)extent.height, near, far);
+        projection        = glm::perspective(glm::radians(fov), extent.width / (float)extent.height, near, far);
+        cubeMapProjection = glm::perspective(glm::radians(90.0f), extent.width / (float)extent.height, near, far);
+
+        cubeMapViews[0] = glm::mat4x4(1.0f);
+        cubeMapViews[0] = glm::rotate(view, glm::radians(90.0f), glm::vec3(1, 0, 0));
+
+        for (uint32_t i = 0; i < 4; i++)
+        {
+            cubeMapViews[i + 1] = glm::mat4x4(1.0f);
+            cubeMapViews[i + 1] = glm::rotate(view, glm::radians(90.0f * i), glm::vec3(0, 1, 0));
+        }
+
+        cubeMapViews[5] = glm::mat4x4(1.0f);
+        cubeMapViews[5] = glm::rotate(view, glm::radians(270.0f), glm::vec3(1, 0, 0));
+
         projection[1][1] *= -1;
+        cubeMapProjection[1][1] *= -1;
     }
 
     glm::mat4 Camera::GetProjection() { return projection; }
 
     glm::mat4 Camera::GetView() { return view; }
+
+    glm::mat4 Camera::GetCubeMapView(uint32_t side) { return cubeMapViews[side]; }
+    glm::mat4 Camera::GetCubeMapProjection(uint32_t side) { return cubeMapProjection; }
 
     glm::vec3 Camera::GetRotation() { return rotation; }
 

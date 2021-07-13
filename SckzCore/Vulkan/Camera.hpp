@@ -9,6 +9,9 @@ namespace sckz
         glm::mat4 view;
         glm::mat4 projection;
 
+        glm::mat4 cubeMapViews[CUBEMAP_SIDES];
+        glm::mat4 cubeMapProjection;
+
         glm::vec3 location;
         glm::vec3 rotation;
 
@@ -28,6 +31,8 @@ namespace sckz
 
     public:
         glm::mat4 GetView();
+        glm::mat4 GetCubeMapView(uint32_t side);
+        glm::mat4 GetCubeMapProjection(uint32_t side);
         glm::mat4 GetProjection();
 
         glm::vec3 GetRotation();

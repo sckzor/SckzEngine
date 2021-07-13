@@ -46,19 +46,19 @@ namespace sckz
                                         fboImage,
                                         "Resources/particle_vertex.spv",
                                         "Resources/particle_fragment.spv",
+                                        cubeMapImage,
+                                        nullptr,
+                                        nullptr,
                                         GraphicsPipeline::PipelineType::PARTICLE_PIPELINE);
 
         cubeMapPipeline.CreatePipeline(*this->device,
                                        fboImage,
                                        "Resources/skybox_vertex.spv",
                                        "Resources/skybox_fragment.spv",
+                                       cubeMapImage,
+                                       "Resources/skybox_vertex.spv",
+                                       "Resources/skybox_fragment.spv",
                                        GraphicsPipeline::PipelineType::CUBEMAP_PIPELINE);
-
-        cubeMapPipelineCube.CreatePipeline(*this->device,
-                                           cubeMapImage,
-                                           "Resources/skybox_vertex.spv",
-                                           "Resources/skybox_fragment.spv",
-                                           GraphicsPipeline::PipelineType::CUBEMAP_PIPELINE);
 
         cubeMapTest.CreateCubeMap("Resources/posz.jpg",
                                   "Resources/negz.jpg",
@@ -74,21 +74,6 @@ namespace sckz
                                   cubeMapPipeline,
                                   descriptorPool,
                                   50);
-
-        cubeMapTestCube.CreateCubeMap("Resources/posz.jpg",
-                                      "Resources/negz.jpg",
-                                      "Resources/posx.jpg",
-                                      "Resources/negx.jpg",
-                                      "Resources/posy.jpg",
-                                      "Resources/negy.jpg",
-                                      device,
-                                      physicalDevice,
-                                      memory,
-                                      commandPool,
-                                      graphicsQueue,
-                                      cubeMapPipelineCube,
-                                      descriptorPool,
-                                      50);
     }
 
     void Scene::DestroyScene()
@@ -159,7 +144,7 @@ namespace sckz
         cubeMapImage.RebuildSwapResources(msaaSamples, swapChainExtent);
         for (uint32_t i = 0; i < pipelines.size(); i++)
         {
-            pipelines[i]->CreatePipeline(*device, fboImage);
+            pipelines[i]->CreatePipeline(*device, fboImage, cubeMapImage);
         }
 
         descriptorPool.CreateDescriptorPool(*device, 1);
@@ -173,9 +158,8 @@ namespace sckz
             fbos[i]->RebuildSwapResources(msaaSamples, swapChainExtent);
         }
 
-        particlePipeline.CreatePipeline(*device, fboImage);
-        cubeMapPipeline.CreatePipeline(*device, fboImage);
-        cubeMapPipelineCube.CreatePipeline(*device, cubeMapImage);
+        particlePipeline.CreatePipeline(*device, fboImage, cubeMapImage);
+        cubeMapPipeline.CreatePipeline(*device, fboImage, cubeMapImage);
 
         for (uint32_t i = 0; i < particleSystems.size(); i++)
         {
@@ -278,7 +262,7 @@ namespace sckz
             buffers.push_back((particleSystems[j]->GetCommandBuffer()));
         }
 
-        buffers.push_back(cubeMapTest.GetCommandBuffer());
+        buffers.push_back(cubeMapTest.GetComplexCommandBuffer());
 
         vkCmdExecuteCommands(primaryCmdBuffer, buffers.size(), buffers.data());
 
@@ -319,7 +303,7 @@ namespace sckz
 
         std::cout << cubeMapImage.GetImage().GetImage() << std::endl;
 
-        buffers.push_back(cubeMapTestCube.GetCommandBuffer());
+        buffers.push_back(cubeMapTest.GetSimpleCommandBuffer());
 
         vkCmdExecuteCommands(primaryCmdBufferCube, buffers.size(), buffers.data()); // Broken here
 
@@ -427,21 +411,20 @@ namespace sckz
         return *lights.back();
     }
 
-    GraphicsPipeline & Scene::CreatePipeline(const char * vertexFile, const char * fragmentFile)
+    GraphicsPipeline & Scene::CreatePipeline(const char * complexVertexFile,
+                                             const char * complexFragmentFile,
+                                             const char * simpleVertexFile,
+                                             const char * simpleFragmentFile)
     {
         pipelines.push_back(new GraphicsPipeline());
         pipelines.back()->CreatePipeline(*device,
                                          fboImage,
-                                         vertexFile,
-                                         fragmentFile,
+                                         complexVertexFile,
+                                         complexFragmentFile,
+                                         cubeMapImage,
+                                         simpleVertexFile,
+                                         simpleFragmentFile,
                                          GraphicsPipeline::PipelineType::MODEL_PIPELINE);
-
-        cubeMapPipelines.push_back(new GraphicsPipeline());
-        cubeMapPipelines.back()->CreatePipeline(*device,
-                                                cubeMapImage,
-                                                vertexFile,
-                                                fragmentFile,
-                                                GraphicsPipeline::PipelineType::MODEL_PIPELINE);
 
         return *pipelines.back();
     }
@@ -453,8 +436,6 @@ namespace sckz
                                GraphicsPipeline & pipeline)
     {
         models.push_back(new Model());
-        auto it    = find(pipelines.begin(), pipelines.end(), &pipeline);
-        int  index = it - pipelines.begin();
 
         models.back()->CreateModel(colorFile,
                                    normalFile,
@@ -464,7 +445,6 @@ namespace sckz
                                    *device,
                                    *physicalDevice,
                                    pipeline,
-                                   *cubeMapPipelines[index],
                                    descriptorPool,
                                    memory,
                                    *graphicsQueue,

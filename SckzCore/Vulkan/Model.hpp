@@ -37,7 +37,6 @@ namespace sckz
         VkCommandPool *    commandPool;
         DescriptorPool *   descriptorPool;
         GraphicsPipeline * pipeline;
-        GraphicsPipeline * cubeMapPipeline;
         VkQueue *          queue;
 
         const char * colorFileName;
@@ -60,7 +59,6 @@ namespace sckz
                          VkDevice &         device,
                          VkPhysicalDevice & physicalDevice,
                          GraphicsPipeline & pipeline,
-                         GraphicsPipeline & cubeMapPipeline,
                          DescriptorPool &   descriptorPool,
                          Memory &           memory,
                          VkQueue &          queue,

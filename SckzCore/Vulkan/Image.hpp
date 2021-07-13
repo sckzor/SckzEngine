@@ -82,7 +82,7 @@ namespace sckz
                                      VkCommandPool &    pool,
                                      VkQueue &          queue);
 
-        void CopyImage(Image & dst, VkImageAspectFlagBits aspectMask);
+        void CopyImage(Image & dst, VkImageAspectFlagBits aspectMask, int32_t faceIndex);
         void GenerateMipmaps(VkFormat imageFormat, int32_t texWidth, int32_t texHeight);
 
         void TransitionImageLayout(VkImageLayout         oldLayout,

@@ -157,7 +157,7 @@ namespace sckz
         framebufferInfo.width           = width;
         framebufferInfo.height          = height;
 
-        framebufferInfo.layers = 1; // Change to 6
+        framebufferInfo.layers = 1;
 
         if (vkCreateFramebuffer(*device, &framebufferInfo, nullptr, &renderedImageFrameBuffer) != VK_SUCCESS)
         {
@@ -313,7 +313,7 @@ namespace sckz
             multipassInfo.sType                = VK_STRUCTURE_TYPE_RENDER_PASS_MULTIVIEW_CREATE_INFO;
             multipassInfo.subpassCount         = 1;
             multipassInfo.pViewMasks           = viewMasks;
-            multipassInfo.correlationMaskCount = 1;
+            multipassInfo.correlationMaskCount = 0;
             multipassInfo.pCorrelationMasks    = correlationMasks;
 
             renderPassInfo.pNext = &multipassInfo;
@@ -327,9 +327,9 @@ namespace sckz
 
     void Fbo::CopyToFbo(Fbo & dst)
     {
-        colorImage.CopyImage(dst.colorImage, VK_IMAGE_ASPECT_COLOR_BIT);
-        depthImage.CopyImage(dst.depthImage, VK_IMAGE_ASPECT_DEPTH_BIT);
-        renderedImage.CopyImage(dst.renderedImage, VK_IMAGE_ASPECT_COLOR_BIT);
+        colorImage.CopyImage(dst.colorImage, VK_IMAGE_ASPECT_COLOR_BIT, -1);
+        depthImage.CopyImage(dst.depthImage, VK_IMAGE_ASPECT_DEPTH_BIT, -1);
+        renderedImage.CopyImage(dst.renderedImage, VK_IMAGE_ASPECT_COLOR_BIT, -1);
     }
 
     void Fbo::GetRenderPassBeginInfo(VkRenderPassBeginInfo * renderPassInfo)

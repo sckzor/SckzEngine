@@ -38,6 +38,9 @@ namespace sckz
                                        tempFbo,
                                        vertexFile,
                                        fragmentFile,
+                                       tempFbo,
+                                       nullptr,
+                                       nullptr,
                                        GraphicsPipeline::PipelineType::COMBINE_PIPELINE);
 
         CreateCommandBuffer();
@@ -55,7 +58,7 @@ namespace sckz
         tempFbo.RebuildSwapResources(msaaSamples, swapChainExtent);
 
         combinePipeline.DestroyPipeline();
-        combinePipeline.CreatePipeline(*this->device, tempFbo);
+        combinePipeline.CreatePipeline(*this->device, tempFbo, tempFbo);
 
         // RebuildCommandBuffer(nullptr, nullptr);
 
@@ -120,17 +123,17 @@ namespace sckz
 
         vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, combinePipeline.GetPipeline());
+        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, combinePipeline.GetComplexPipeline());
 
         VkDescriptorSet ds;
 
         std::array<Image, 2> images = { fbo2->GetImage(), fbo1->GetImage() };
 
-        combinePipeline.BindShaderData(nullptr, images.data(), nullptr, *descriptorPool, &ds);
+        combinePipeline.BindComplexShaderData(nullptr, images.data(), nullptr, *descriptorPool, &ds);
 
         vkCmdBindDescriptorSets(commandBuffer,
                                 VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                combinePipeline.GetPieplineLayout(),
+                                combinePipeline.GetComplexPieplineLayout(),
                                 0,
                                 1,
                                 &ds,

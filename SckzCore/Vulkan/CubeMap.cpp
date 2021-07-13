@@ -58,19 +58,32 @@ namespace sckz
         CreateIndexBuffer();
         CreateUniformBuffer();
 
-        this->pipeline->BindShaderData(&uniformBuffer, &cubeMapTexture, nullptr, descriptorPool, &descriptorSet);
-        CreateCommandBuffer();
+        this->pipeline->BindComplexShaderData(&complexUniformBuffer,
+                                              &cubeMapTexture,
+                                              nullptr,
+                                              descriptorPool,
+                                              &simpleDescriptorSet);
+
+        this->pipeline->BindSimpleShaderData(&simpleUniformBuffer,
+                                             &cubeMapTexture,
+                                             descriptorPool,
+                                             &simpleDescriptorSet);
+        CreateSimpleCommandBuffer();
+        CreateComplexCommandBuffer();
     }
 
     void CubeMap::DestroyCubeMap()
     {
-        vkFreeCommandBuffers(*device, *pool, 1, &commandBuffer);
+        vkFreeCommandBuffers(*device, *pool, 1, &simpleCommandBuffer);
+        vkFreeCommandBuffers(*device, *pool, 1, &complexCommandBuffer);
         hostLocalBuffer.DestroyBuffer();
         deviceLocalBuffer.DestroyBuffer();
         cubeMapTexture.DestroyImage();
     }
 
-    VkCommandBuffer & CubeMap::GetCommandBuffer() { return commandBuffer; }
+    VkCommandBuffer & CubeMap::GetComplexCommandBuffer() { return complexCommandBuffer; }
+
+    VkCommandBuffer & CubeMap::GetSimpleCommandBuffer() { return simpleCommandBuffer; }
 
     void CubeMap::CreateVertexBuffer()
     {
@@ -107,7 +120,7 @@ namespace sckz
         stagingBuffer.DestroySubBlock();
     }
 
-    void CubeMap::CreateCommandBuffer()
+    void CubeMap::CreateComplexCommandBuffer()
     {
         VkCommandBufferAllocateInfo allocInfo {};
         allocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -115,7 +128,7 @@ namespace sckz
         allocInfo.level              = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
         allocInfo.commandBufferCount = 1;
 
-        if (vkAllocateCommandBuffers(*device, &allocInfo, &commandBuffer) != VK_SUCCESS)
+        if (vkAllocateCommandBuffers(*device, &allocInfo, &complexCommandBuffer) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to allocate command buffers!");
         }
@@ -126,19 +139,19 @@ namespace sckz
 
         VkCommandBufferInheritanceInfo inheritanceInfo {};
         inheritanceInfo.sType      = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
-        inheritanceInfo.renderPass = pipeline->GetFbo().GetRenderPass();
+        inheritanceInfo.renderPass = pipeline->GetComplexFbo().GetRenderPass();
         // Secondary command buffer also use the currently active framebuffer
-        inheritanceInfo.framebuffer = pipeline->GetFbo().GetImageFramebuffer();
+        inheritanceInfo.framebuffer = pipeline->GetComplexFbo().GetImageFramebuffer();
 
         beginInfo.pInheritanceInfo = &inheritanceInfo;
 
-        if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
+        if (vkBeginCommandBuffer(complexCommandBuffer, &beginInfo) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to begin recording command buffer!");
         }
 
         VkRenderPassBeginInfo renderPassInfo {};
-        pipeline->GetFbo().GetRenderPassBeginInfo(&renderPassInfo);
+        pipeline->GetComplexFbo().GetRenderPassBeginInfo(&renderPassInfo);
 
         std::array<VkClearValue, 2> clearValues {};
         clearValues[0].color        = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -147,7 +160,7 @@ namespace sckz
         renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
         renderPassInfo.pClearValues    = clearValues.data();
 
-        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetPipeline());
+        vkCmdBindPipeline(complexCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetComplexPipeline());
 
         VkBuffer     rawVertexBuffer[1];
         VkDeviceSize offsets[1];
@@ -155,21 +168,95 @@ namespace sckz
         rawVertexBuffer[0] = vertexBuffer->parent->buffer;
         offsets[0]         = vertexBuffer->offset;
 
-        vkCmdBindVertexBuffers(commandBuffer, 0, 1, rawVertexBuffer, offsets);
-        vkCmdBindIndexBuffer(commandBuffer, indexBuffer->parent->buffer, indexBuffer->offset, VK_INDEX_TYPE_UINT32);
+        vkCmdBindVertexBuffers(complexCommandBuffer, 0, 1, rawVertexBuffer, offsets);
+        vkCmdBindIndexBuffer(complexCommandBuffer,
+                             indexBuffer->parent->buffer,
+                             indexBuffer->offset,
+                             VK_INDEX_TYPE_UINT32);
 
-        vkCmdBindDescriptorSets(commandBuffer,
+        vkCmdBindDescriptorSets(complexCommandBuffer,
                                 VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                pipeline->GetPieplineLayout(),
+                                pipeline->GetComplexPieplineLayout(),
                                 0,
                                 1,
-                                &descriptorSet,
+                                &complexDescriptorSet,
                                 0,
                                 nullptr);
 
-        vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+        vkCmdDrawIndexed(complexCommandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 
-        if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
+        if (vkEndCommandBuffer(complexCommandBuffer) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to record command buffer!");
+        }
+    }
+
+    void CubeMap::CreateSimpleCommandBuffer()
+    {
+        VkCommandBufferAllocateInfo allocInfo {};
+        allocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocInfo.commandPool        = *pool;
+        allocInfo.level              = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
+        allocInfo.commandBufferCount = 1;
+
+        if (vkAllocateCommandBuffers(*device, &allocInfo, &simpleCommandBuffer) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to allocate command buffers!");
+        }
+
+        VkCommandBufferBeginInfo beginInfo {};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
+
+        VkCommandBufferInheritanceInfo inheritanceInfo {};
+        inheritanceInfo.sType      = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
+        inheritanceInfo.renderPass = pipeline->GetSimpleFbo().GetRenderPass();
+        // Secondary command buffer also use the currently active framebuffer
+        inheritanceInfo.framebuffer = pipeline->GetSimpleFbo().GetImageFramebuffer();
+
+        beginInfo.pInheritanceInfo = &inheritanceInfo;
+
+        if (vkBeginCommandBuffer(simpleCommandBuffer, &beginInfo) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to begin recording command buffer!");
+        }
+
+        VkRenderPassBeginInfo renderPassInfo {};
+        pipeline->GetSimpleFbo().GetRenderPassBeginInfo(&renderPassInfo);
+
+        std::array<VkClearValue, 2> clearValues {};
+        clearValues[0].color        = { 0.0f, 0.0f, 0.0f, 1.0f };
+        clearValues[1].depthStencil = { 1.0f, 0 };
+
+        renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+        renderPassInfo.pClearValues    = clearValues.data();
+
+        vkCmdBindPipeline(simpleCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetSimplePipeline());
+
+        VkBuffer     rawVertexBuffer[1];
+        VkDeviceSize offsets[1];
+
+        rawVertexBuffer[0] = vertexBuffer->parent->buffer;
+        offsets[0]         = vertexBuffer->offset;
+
+        vkCmdBindVertexBuffers(simpleCommandBuffer, 0, 1, rawVertexBuffer, offsets);
+        vkCmdBindIndexBuffer(simpleCommandBuffer,
+                             indexBuffer->parent->buffer,
+                             indexBuffer->offset,
+                             VK_INDEX_TYPE_UINT32);
+
+        vkCmdBindDescriptorSets(simpleCommandBuffer,
+                                VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                pipeline->GetSimplePieplineLayout(),
+                                0,
+                                1,
+                                &simpleDescriptorSet,
+                                0,
+                                nullptr);
+
+        vkCmdDrawIndexed(simpleCommandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+
+        if (vkEndCommandBuffer(simpleCommandBuffer) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to record command buffer!");
         }
@@ -177,7 +264,7 @@ namespace sckz
 
     void CubeMap::Update(glm::vec3 location, Camera & camera)
     {
-        VertexUniformBufferObject Vubo {};
+        ComplexVertexUniformBufferObject Vubo {};
         // Vubo.model = glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 2.0f, 2.0f));
         Vubo.view = camera.GetView();
         Vubo.proj = camera.GetProjection();
@@ -185,13 +272,28 @@ namespace sckz
         Vubo.view[3][0] = 0;
         Vubo.view[3][1] = 0;
         Vubo.view[3][2] = 0;
-        uniformBuffer.CopyDataToBuffer(&Vubo, sizeof(Vubo), 0);
+        complexUniformBuffer.CopyDataToBuffer(&Vubo, sizeof(Vubo), 0);
+
+        SimpleVertexUniformBufferObject SVubo {};
+        SVubo.proj = camera.GetProjection();
+
+        for (uint32_t i = 0; i < CUBEMAP_SIDES; i++)
+        {
+            SVubo.view[i]       = camera.GetCubeMapView(i);
+            SVubo.view[i][3][0] = 0;
+            SVubo.view[i][3][1] = 0;
+            SVubo.view[i][3][2] = 0;
+        }
+        simpleUniformBuffer.CopyDataToBuffer(&SVubo, sizeof(SVubo), 0);
     }
 
     void CubeMap::CreateUniformBuffer()
     {
-        VkDeviceSize VuboSize = sizeof(VertexUniformBufferObject);
-        uniformBuffer         = hostLocalBuffer.GetBuffer(VuboSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+        VkDeviceSize VuboSize = sizeof(ComplexVertexUniformBufferObject);
+        complexUniformBuffer  = hostLocalBuffer.GetBuffer(VuboSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+
+        VkDeviceSize SVuboSize = sizeof(SimpleVertexUniformBufferObject);
+        simpleUniformBuffer    = hostLocalBuffer.GetBuffer(SVuboSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
     }
 
     Image & CubeMap::GetImage() { return cubeMapTexture; }

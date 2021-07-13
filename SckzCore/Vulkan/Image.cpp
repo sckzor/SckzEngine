@@ -477,6 +477,7 @@ namespace sckz
             sourceStage      = VK_PIPELINE_STAGE_TRANSFER_BIT;
             destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
         }
+
         else
         {
             throw std::invalid_argument("unsupported layout transition!");
@@ -521,7 +522,7 @@ namespace sckz
         }
     }
 
-    void Image::CopyImage(Image & dst, VkImageAspectFlagBits aspectMask)
+    void Image::CopyImage(Image & dst, VkImageAspectFlagBits aspectMask, int32_t faceIndex)
     {
         BeginCommandBuffer();
 
@@ -538,16 +539,25 @@ namespace sckz
         VkOffset3D noOffset { 0, 0, 0 };
 
         VkImageSubresourceLayers subresourceLayers;
-        subresourceLayers.aspectMask     = aspectMask;
-        subresourceLayers.baseArrayLayer = 0;
-        if (isCube)
+        subresourceLayers.aspectMask = aspectMask;
+        if (faceIndex == -1)
         {
-            subresourceLayers.layerCount = 6;
+            subresourceLayers.baseArrayLayer = 0;
+            if (isCube)
+            {
+                subresourceLayers.layerCount = 6;
+            }
+            else
+            {
+                subresourceLayers.layerCount = 1;
+            }
         }
         else
         {
-            subresourceLayers.layerCount = 1;
+            subresourceLayers.baseArrayLayer = faceIndex;
+            subresourceLayers.layerCount     = 1;
         }
+
         subresourceLayers.mipLevel = mipLevels - 1;
 
         VkImageCopy copyData;

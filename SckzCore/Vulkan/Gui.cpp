@@ -40,7 +40,7 @@ namespace sckz
         texture.CreateTextureSampler();
 
         CreateUniformBuffers();
-        this->pipeline->BindShaderData(&uniformBuffer[0], &texture, nullptr, descriptorPool, &descriptorSet);
+        this->pipeline->BindComplexShaderData(&uniformBuffer[0], &texture, nullptr, descriptorPool, &descriptorSet);
 
         CreateCommandBuffer();
     }
@@ -69,7 +69,7 @@ namespace sckz
         this->renderPass      = &renderPass;
 
         CreateUniformBuffers();
-        pipeline->BindShaderData(&uniformBuffer[0], &texture, nullptr, descriptorPool, &descriptorSet);
+        pipeline->BindComplexShaderData(&uniformBuffer[0], &texture, nullptr, descriptorPool, &descriptorSet);
         CreateCommandBuffer();
 
         Update();
@@ -130,11 +130,11 @@ namespace sckz
             renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
             renderPassInfo.pClearValues    = clearValues.data();
 
-            vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetPipeline());
+            vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetComplexPipeline());
 
             vkCmdBindDescriptorSets(commandBuffers[i],
                                     VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                    pipeline->GetPieplineLayout(),
+                                    pipeline->GetComplexPieplineLayout(),
                                     0,
                                     1,
                                     &descriptorSet,
