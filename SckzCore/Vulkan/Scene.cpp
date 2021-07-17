@@ -301,7 +301,7 @@ namespace sckz
             buffers.push_back((models[j]->GetCubeMapCommandBuffer()));
         }
 
-        std::cout << cubeMapImage.GetImage().GetImage() << std::endl;
+        // std::cout << cubeMapImage.GetImage().GetImage() << std::endl;
 
         buffers.push_back(cubeMapTest.GetSimpleCommandBuffer());
 
@@ -507,7 +507,7 @@ namespace sckz
         submitInfo.pWaitDstStageMask      = waitStages;
 
         submitInfo.commandBufferCount                 = 2;
-        std::array<VkCommandBuffer, 2> commandBuffers = { primaryCmdBuffer, primaryCmdBufferCube };
+        std::array<VkCommandBuffer, 2> commandBuffers = { primaryCmdBufferCube, primaryCmdBuffer };
         submitInfo.pCommandBuffers                    = commandBuffers.data();
 
         vkResetFences(*device, 1, &inFlightFence);

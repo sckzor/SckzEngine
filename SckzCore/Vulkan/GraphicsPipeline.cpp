@@ -18,7 +18,7 @@ namespace sckz
         this->complexVertexFile   = complexVertexFile;
         this->complexFragmentFile = complexFragmentFile;
 
-        this->complexFbo         = &simpleFbo;
+        this->simpleFbo          = &simpleFbo;
         this->simpleVertexFile   = simpleVertexFile;
         this->simpleFragmentFile = simpleFragmentFile;
 
@@ -97,7 +97,7 @@ namespace sckz
                 break;
         }
 
-        CreateDescriptorSetLayout();
+        CreateComplexDescriptorSetLayout();
 
         CreateSimpleDescriptorSetLayout();
 
@@ -108,12 +108,15 @@ namespace sckz
                                complexVertexFile,
                                complexFragmentFile);
 
-        CreateGraphicsPipeline(simplePipelineLayout,
-                               simplePipeline,
-                               simpleDescriptorSetLayout,
-                               simpleFbo,
-                               simpleVertexFile,
-                               simpleFragmentFile);
+        if (hasSimple)
+        {
+            CreateGraphicsPipeline(simplePipelineLayout,
+                                   simplePipeline,
+                                   simpleDescriptorSetLayout,
+                                   simpleFbo,
+                                   simpleVertexFile,
+                                   simpleFragmentFile);
+        }
     }
 
     void GraphicsPipeline::CreatePipeline(VkDevice & device, Fbo & complexFbo, Fbo & simpleFbo)
@@ -126,7 +129,7 @@ namespace sckz
                 "failed to fragment or vertex file was not deffined, use the other overload of this method first");
         }
 
-        CreateDescriptorSetLayout();
+        CreateComplexDescriptorSetLayout();
 
         CreateSimpleDescriptorSetLayout();
 
@@ -137,12 +140,15 @@ namespace sckz
                                complexVertexFile,
                                complexFragmentFile);
 
-        CreateGraphicsPipeline(simplePipelineLayout,
-                               simplePipeline,
-                               simpleDescriptorSetLayout,
-                               simpleFbo,
-                               simpleVertexFile,
-                               simpleFragmentFile);
+        if (hasSimple)
+        {
+            CreateGraphicsPipeline(simplePipelineLayout,
+                                   simplePipeline,
+                                   simpleDescriptorSetLayout,
+                                   simpleFbo,
+                                   simpleVertexFile,
+                                   simpleFragmentFile);
+        }
     }
 
     void GraphicsPipeline::DestroyPipeline()
@@ -192,7 +198,7 @@ namespace sckz
         return shaderModule;
     }
 
-    void GraphicsPipeline::CreateDescriptorSetLayout()
+    void GraphicsPipeline::CreateComplexDescriptorSetLayout()
     {
         std::vector<VkDescriptorSetLayoutBinding> bindings;
 
@@ -670,7 +676,7 @@ namespace sckz
 
     VkDescriptorSetLayout & GraphicsPipeline::GetComplexDescriptorSetLayout() { return complexDescriptorSetLayout; }
     VkPipeline &            GraphicsPipeline::GetComplexPipeline() { return complexPipeline; }
-    VkPipelineLayout &      GraphicsPipeline::GetComplexPieplineLayout() { return complexPipelineLayout; }
+    VkPipelineLayout &      GraphicsPipeline::GetComplexPipelineLayout() { return complexPipelineLayout; }
     Fbo &                   GraphicsPipeline::GetComplexFbo() { return *complexFbo; }
 
     VkDescriptorSetLayout & GraphicsPipeline::GetSimpleDescriptorSetLayout() { return simpleDescriptorSetLayout; }

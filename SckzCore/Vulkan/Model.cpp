@@ -260,10 +260,10 @@ namespace sckz
         {
             vkCmdBindDescriptorSets(commandBuffer,
                                     VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                    pipeline->GetComplexPieplineLayout(),
+                                    pipeline->GetComplexPipelineLayout(),
                                     0,
                                     1,
-                                    &entities[j]->GetDescriptorSet(),
+                                    &entities[j]->GetComplexDescriptorSet(),
                                     0,
                                     nullptr);
 
@@ -338,7 +338,7 @@ namespace sckz
                                     pipeline->GetSimplePieplineLayout(),
                                     0,
                                     1,
-                                    &entities[j]->GetDescriptorSet(),
+                                    &entities[j]->GetSimpleDescriptorSet(),
                                     0,
                                     nullptr);
 

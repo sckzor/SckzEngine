@@ -26,9 +26,12 @@ namespace sckz
                                               textures.data(),
                                               &complexUniformBuffers[1],
                                               *this->descriptorPool,
-                                              &descriptorSet);
+                                              &complexDescriptorSet);
 
-        this->pipeline->BindSimpleShaderData(&simpleUniformBuffer, &textures[0], *this->descriptorPool, &descriptorSet);
+        this->pipeline->BindSimpleShaderData(&simpleUniformBuffer,
+                                             &textures[0],
+                                             *this->descriptorPool,
+                                             &simpleDescriptorSet);
     }
 
     void Entity::DestroyEntity() { }
@@ -41,12 +44,12 @@ namespace sckz
                                               textures->data(),
                                               &complexUniformBuffers[1],
                                               *this->descriptorPool,
-                                              &descriptorSet);
+                                              &complexDescriptorSet);
 
         this->pipeline->BindSimpleShaderData(&simpleUniformBuffer,
                                              &textures->at(0),
                                              *this->descriptorPool,
-                                             &descriptorSet);
+                                             &simpleDescriptorSet);
     }
 
     void Entity::SetShine(float reflectivity, float shineDamper)
@@ -158,5 +161,6 @@ namespace sckz
     glm::vec3 Entity::GetRotation() { return rotation; }
     glm::vec3 Entity::GetScale() { return scale; }
 
-    VkDescriptorSet & Entity::GetDescriptorSet() { return descriptorSet; }
+    VkDescriptorSet & Entity::GetSimpleDescriptorSet() { return simpleDescriptorSet; }
+    VkDescriptorSet & Entity::GetComplexDescriptorSet() { return complexDescriptorSet; }
 } // namespace sckz

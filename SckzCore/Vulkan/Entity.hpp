@@ -57,8 +57,9 @@ namespace sckz
         std::vector<Light *> * lights;
 
         std::array<Buffer::SubBlock, 2> complexUniformBuffers;
+        VkDescriptorSet                 complexDescriptorSet;
         Buffer::SubBlock                simpleUniformBuffer;
-        VkDescriptorSet                 descriptorSet;
+        VkDescriptorSet                 simpleDescriptorSet;
 
         glm::vec3 location;
         glm::vec3 rotation;
@@ -102,6 +103,7 @@ namespace sckz
         glm::vec3 GetRotation();
         glm::vec3 GetScale();
 
-        VkDescriptorSet & GetDescriptorSet();
+        VkDescriptorSet & GetSimpleDescriptorSet();
+        VkDescriptorSet & GetComplexDescriptorSet();
     };
 } // namespace sckz

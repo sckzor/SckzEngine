@@ -12,7 +12,7 @@ int main()
 
     win.SetIcon("Resources/icon.png");
 
-    vkan.SetFPS(-1);
+    // vkan.SetFPS(-1);
 
     sckz::Scene & s1 = vkan.CreateScene();
     sckz::Scene & s2 = vkan.CreateScene();
@@ -20,8 +20,11 @@ int main()
     sckz::GraphicsPipeline & f2 = vkan.CreateFBOPipeline("Resources/fbo_fragment_invert.spv");
     sckz::GraphicsPipeline & f1 = vkan.CreateFBOPipeline("Resources/fbo_fragment_normal.spv");
 
-    sckz::GraphicsPipeline & p1
-        = s1.CreatePipeline("Resources/simple_vertex.spv", "Resources/simple_fragment.spv", nullptr, nullptr);
+    sckz::GraphicsPipeline & p1 = s1.CreatePipeline("Resources/simple_vertex.spv",
+                                                    "Resources/simple_fragment.spv",
+                                                    "Resources/cubemap_render_vertex.spv",
+                                                    "Resources/cubemap_render_fragment.spv");
+
     sckz::Model & m1 = s1.CreateModel("Resources/barrel.obj",
                                       "Resources/barrelColor.png",
                                       "Resources/barrelNormal.png",
@@ -32,8 +35,11 @@ int main()
 
     sckz::ParticleSystem & pa1 = s1.CreateParticleSystem(1000, "Resources/fireParticles.png", 4, 4, 15);
 
-    sckz::GraphicsPipeline & p2
-        = s2.CreatePipeline("Resources/simple_vertex.spv", "Resources/simple_fragment.spv", nullptr, nullptr);
+    sckz::GraphicsPipeline & p2 = s2.CreatePipeline("Resources/simple_vertex.spv",
+                                                    "Resources/simple_fragment.spv",
+                                                    "Resources/cubemap_render_vertex.spv",
+                                                    "Resources/cubemap_render_fragment.spv");
+
     sckz::Model & m2 = s2.CreateModel("Resources/barrel.obj",
                                       "Resources/barrelColor.png",
                                       "Resources/barrelNormal.png",

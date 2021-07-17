@@ -62,7 +62,7 @@ namespace sckz
                                               &cubeMapTexture,
                                               nullptr,
                                               descriptorPool,
-                                              &simpleDescriptorSet);
+                                              &complexDescriptorSet);
 
         this->pipeline->BindSimpleShaderData(&simpleUniformBuffer,
                                              &cubeMapTexture,
@@ -176,7 +176,7 @@ namespace sckz
 
         vkCmdBindDescriptorSets(complexCommandBuffer,
                                 VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                pipeline->GetComplexPieplineLayout(),
+                                pipeline->GetComplexPipelineLayout(),
                                 0,
                                 1,
                                 &complexDescriptorSet,

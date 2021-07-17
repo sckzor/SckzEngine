@@ -153,7 +153,7 @@ namespace sckz
             {
                 vkCmdBindDescriptorSets(commandBuffer,
                                         VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                        pipeline->GetComplexPieplineLayout(),
+                                        pipeline->GetComplexPipelineLayout(),
                                         0,
                                         1,
                                         &particles[i].descriptorSet,

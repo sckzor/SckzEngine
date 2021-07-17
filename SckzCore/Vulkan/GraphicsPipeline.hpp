@@ -54,7 +54,7 @@ namespace sckz
         VkShaderModule           CreateShaderModule(const std::vector<char> & code);
 
     private:
-        void CreateDescriptorSetLayout();
+        void CreateComplexDescriptorSetLayout();
         void CreateSimpleDescriptorSetLayout();
         void CreateGraphicsPipeline(VkPipelineLayout &      pipelineLayout,
                                     VkPipeline &            pipeline,
@@ -79,7 +79,7 @@ namespace sckz
     public:
         VkDescriptorSetLayout & GetComplexDescriptorSetLayout();
         VkPipeline &            GetComplexPipeline();
-        VkPipelineLayout &      GetComplexPieplineLayout();
+        VkPipelineLayout &      GetComplexPipelineLayout();
         Fbo &                   GetComplexFbo();
 
         VkDescriptorSetLayout & GetSimpleDescriptorSetLayout();

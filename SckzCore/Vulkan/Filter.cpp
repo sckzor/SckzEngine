@@ -55,8 +55,6 @@ namespace sckz
         this->swapChainExtent = swapChainExtent;
         this->descriptorPool  = &descriptorPool;
 
-        std::cout << &descriptorPool << std::endl;
-
         filterPipeline.DestroyPipeline();
         filterPipeline.CreatePipeline(*this->device, tempFbo, tempFbo);
 
@@ -135,7 +133,7 @@ namespace sckz
 
             vkCmdBindDescriptorSets(commandBuffer,
                                     VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                    filterPipeline.GetComplexPieplineLayout(),
+                                    filterPipeline.GetComplexPipelineLayout(),
                                     0,
                                     1,
                                     &ds,

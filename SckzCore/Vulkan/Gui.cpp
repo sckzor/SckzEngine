@@ -134,7 +134,7 @@ namespace sckz
 
             vkCmdBindDescriptorSets(commandBuffers[i],
                                     VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                    pipeline->GetComplexPieplineLayout(),
+                                    pipeline->GetComplexPipelineLayout(),
                                     0,
                                     1,
                                     &descriptorSet,

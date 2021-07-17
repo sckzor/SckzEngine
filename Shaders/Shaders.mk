@@ -1,6 +1,8 @@
 RESOURCES_DIR = ../Resources
 
-Shaders:SimpleShaders BlueShaders FBOShaders GUIShaders ParticleShaders SkyBoxShaders
+Shaders:SimpleShaders BlueShaders FBOShaders GUIShaders ParticleShaders SkyBoxShaders CubemapRenderShaders
+
+
 
 SimpleShaders: $(RESOURCES_DIR)/simple_vertex.spv $(RESOURCES_DIR)/simple_fragment.spv
 
@@ -9,6 +11,7 @@ $(RESOURCES_DIR)/simple_fragment.spv: simple_shader.frag
 
 $(RESOURCES_DIR)/simple_vertex.spv: simple_shader.vert
 	glslc simple_shader.vert -o $(RESOURCES_DIR)/simple_vertex.spv
+
 
 
 FBOShaders:  $(RESOURCES_DIR)/fbo_fragment_gaussian_horizontal.spv $(RESOURCES_DIR)/fbo_fragment_gaussian_vertical.spv $(RESOURCES_DIR)/fbo_fragment_bright.spv $(RESOURCES_DIR)/fbo_vertex_normal.spv $(RESOURCES_DIR)/fbo_fragment_combine_additive.spv $(RESOURCES_DIR)/fbo_fragment_normal.spv $(RESOURCES_DIR)/fbo_fragment_outline.spv $(RESOURCES_DIR)/fbo_fragment_invert.spv
@@ -37,6 +40,8 @@ $(RESOURCES_DIR)/fbo_fragment_gaussian_vertical.spv: fbo_gaussian_vertical.frag
 $(RESOURCES_DIR)/fbo_fragment_gaussian_horizontal.spv: fbo_gaussian_horizontal.frag
 	glslc fbo_gaussian_horizontal.frag -o $(RESOURCES_DIR)/fbo_fragment_gaussian_horizontal.spv
 
+
+
 ParticleShaders: $(RESOURCES_DIR)/particle_fragment.spv $(RESOURCES_DIR)/particle_vertex.spv 
 
 $(RESOURCES_DIR)/particle_vertex.spv: particle_shader.vert
@@ -45,6 +50,8 @@ $(RESOURCES_DIR)/particle_vertex.spv: particle_shader.vert
 $(RESOURCES_DIR)/particle_fragment.spv: particle_shader.frag
 	glslc particle_shader.frag -o $(RESOURCES_DIR)/particle_fragment.spv
 
+
+
 GUIShaders: $(RESOURCES_DIR)/gui_fragment_normal.spv $(RESOURCES_DIR)/gui_vertex_normal.spv
 
 $(RESOURCES_DIR)/gui_vertex_normal.spv: gui_shader.vert
@@ -52,6 +59,8 @@ $(RESOURCES_DIR)/gui_vertex_normal.spv: gui_shader.vert
 
 $(RESOURCES_DIR)/gui_fragment_normal.spv: gui_shader.frag
 	glslc gui_shader.frag -o $(RESOURCES_DIR)/gui_fragment_normal.spv
+
+
 
 SkyBoxShaders: $(RESOURCES_DIR)/skybox_vertex.spv $(RESOURCES_DIR)/skybox_fragment.spv
 
@@ -62,10 +71,22 @@ $(RESOURCES_DIR)/skybox_fragment.spv: skybox.frag
 	glslc skybox.frag -o $(RESOURCES_DIR)/skybox_fragment.spv
 
 
+
+CubemapRenderShaders: $(RESOURCES_DIR)/cubemap_render_vertex.spv $(RESOURCES_DIR)/cubemap_render_fragment.spv
+
+$(RESOURCES_DIR)/cubemap_render_vertex.spv: cubemap_render.vert
+	glslc cubemap_render.vert -o $(RESOURCES_DIR)/cubemap_render_vertex.spv
+
+$(RESOURCES_DIR)/cubemap_render_fragment.spv: cubemap_render.frag
+	glslc cubemap_render.frag -o $(RESOURCES_DIR)/cubemap_render_fragment.spv
+
+
+
 BlueShaders: $(RESOURCES_DIR)/blue_fragment.spv
 
 $(RESOURCES_DIR)/blue_fragment.spv: blue_shader.frag
 	glslc blue_shader.frag -o $(RESOURCES_DIR)/blue_fragment.spv
+
 
 
 clean:
