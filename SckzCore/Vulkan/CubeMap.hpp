@@ -18,8 +18,8 @@ namespace sckz
         struct SimpleVertexUniformBufferObject
         {
             alignas(16) glm::mat4 model;
-            alignas(16) glm::mat4 view[CUBEMAP_SIDES];
             alignas(16) glm::mat4 proj;
+            alignas(16) glm::mat4 view[CUBEMAP_SIDES];
         };
 
         struct ComplexVertexUniformBufferObject
@@ -39,6 +39,7 @@ namespace sckz
         VkQueue *          queue;
         GraphicsPipeline * pipeline;
         DescriptorPool *   descriptorPool;
+        Camera             reflectionCamera;
 
         float size;
 

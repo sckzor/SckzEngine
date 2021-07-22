@@ -8,8 +8,8 @@ const int CUBEMAP_SIDES = 6;
 layout(binding = 0) uniform UniformBufferObject
 {
     mat4 model;
-    mat4 view[CUBEMAP_SIDES];
     mat4 proj;
+    mat4 view[CUBEMAP_SIDES];
 }
 ubo;
 
@@ -23,6 +23,6 @@ void main()
 {
     vec4 worldPosition = ubo.model * vec4(inPosition, 1.0);
 
-    gl_Position  = ubo.proj * ubo.view[gl_ViewIndex] * worldPosition;
+    gl_Position  = inverse(ubo.proj) * ubo.view[gl_ViewIndex] * worldPosition;
     fragTexCoord = inTexCoord;
 }

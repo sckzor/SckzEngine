@@ -114,12 +114,14 @@ namespace sckz
 
         SVubo.model = Vubo.model;
 
-        SVubo.proj = camera.GetProjection();
+        SVubo.proj = camera.GetCubeMapProjection();
 
         for (uint32_t i = 0; i < CUBEMAP_SIDES; i++)
         {
-            SVubo.view[i] = camera.GetCubeMapView(i);
+            SVubo.view[i] = camera.GetCubeMapView(1, location);
         }
+
+        simpleUniformBuffer.CopyDataToBuffer(&SVubo, sizeof(SVubo), 0);
     }
 
     void Entity::CreateUniformBuffers()

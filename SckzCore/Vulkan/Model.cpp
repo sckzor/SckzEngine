@@ -365,6 +365,7 @@ namespace sckz
         else
         {
             std::array<Image, 4> noCubeMap = { textures[0], textures[1], textures[2], blankTexture };
+            // Todo: make the blank texture 3D...
             entity
                 ->CreateEntity(*physicalDevice, *device, *queue, hostLocalBuffer, *descriptorPool, *pipeline, textures);
         }

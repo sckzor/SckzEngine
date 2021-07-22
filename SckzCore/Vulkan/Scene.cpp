@@ -59,6 +59,14 @@ namespace sckz
                                        "Resources/skybox_vertex.spv",
                                        "Resources/skybox_fragment.spv",
                                        GraphicsPipeline::PipelineType::CUBEMAP_PIPELINE);
+        /*
+        "Resources/posz.jpg",
+        "Resources/negz.jpg",
+        "Resources/posx.jpg",
+        "Resources/negx.jpg",
+        "Resources/posy.jpg",
+        "Resources/negy.jpg",
+        */
 
         cubeMapTest.CreateCubeMap("Resources/posz.jpg",
                                   "Resources/negz.jpg",

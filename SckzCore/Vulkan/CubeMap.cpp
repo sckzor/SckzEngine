@@ -58,18 +58,19 @@ namespace sckz
         CreateIndexBuffer();
         CreateUniformBuffer();
 
+        this->pipeline->BindSimpleShaderData(&simpleUniformBuffer,
+                                             &cubeMapTexture,
+                                             descriptorPool,
+                                             &simpleDescriptorSet);
+
         this->pipeline->BindComplexShaderData(&complexUniformBuffer,
                                               &cubeMapTexture,
                                               nullptr,
                                               descriptorPool,
                                               &complexDescriptorSet);
 
-        this->pipeline->BindSimpleShaderData(&simpleUniformBuffer,
-                                             &cubeMapTexture,
-                                             descriptorPool,
-                                             &simpleDescriptorSet);
-        CreateSimpleCommandBuffer();
         CreateComplexCommandBuffer();
+        CreateSimpleCommandBuffer();
     }
 
     void CubeMap::DestroyCubeMap()
@@ -275,15 +276,16 @@ namespace sckz
         complexUniformBuffer.CopyDataToBuffer(&Vubo, sizeof(Vubo), 0);
 
         SimpleVertexUniformBufferObject SVubo {};
-        SVubo.proj = camera.GetProjection();
 
+        SVubo.proj = camera.GetCubeMapProjection();
         for (uint32_t i = 0; i < CUBEMAP_SIDES; i++)
         {
-            SVubo.view[i]       = camera.GetCubeMapView(i);
+            SVubo.view[i]       = camera.GetCubeMapView(1, location);
             SVubo.view[i][3][0] = 0;
             SVubo.view[i][3][1] = 0;
             SVubo.view[i][3][2] = 0;
         }
+
         simpleUniformBuffer.CopyDataToBuffer(&SVubo, sizeof(SVubo), 0);
     }
 

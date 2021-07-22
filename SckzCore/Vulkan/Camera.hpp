@@ -31,8 +31,8 @@ namespace sckz
 
     public:
         glm::mat4 GetView();
-        glm::mat4 GetCubeMapView(uint32_t side);
-        glm::mat4 GetCubeMapProjection(uint32_t side);
+        glm::mat4 GetCubeMapView(uint32_t side, glm::vec3 location);
+        glm::mat4 GetCubeMapProjection();
         glm::mat4 GetProjection();
 
         glm::vec3 GetRotation();
