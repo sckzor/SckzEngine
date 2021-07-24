@@ -1,6 +1,6 @@
 RESOURCES_DIR = ../Resources
 
-Shaders:SimpleShaders BlueShaders FBOShaders GUIShaders ParticleShaders SkyBoxShaders CubemapRenderShaders
+Shaders:SimpleShaders BlueShaders FBOShaders GUIShaders ParticleShaders SkyBoxShaders CubemapRenderShaders CubemapRenderCubeShaders
 
 
 
@@ -79,6 +79,14 @@ $(RESOURCES_DIR)/cubemap_render_vertex.spv: cubemap_render.vert
 
 $(RESOURCES_DIR)/cubemap_render_fragment.spv: cubemap_render.frag
 	glslc cubemap_render.frag -o $(RESOURCES_DIR)/cubemap_render_fragment.spv
+
+CubemapRenderCubeShaders: $(RESOURCES_DIR)/cubemap_render_cube_vertex.spv $(RESOURCES_DIR)/cubemap_render_cube_fragment.spv
+
+$(RESOURCES_DIR)/cubemap_render_cube_vertex.spv: cubemap_render_cube.vert
+	glslc cubemap_render_cube.vert -o $(RESOURCES_DIR)/cubemap_render_cube_vertex.spv
+
+$(RESOURCES_DIR)/cubemap_render_cube_fragment.spv: cubemap_render_cube.frag
+	glslc cubemap_render_cube.frag -o $(RESOURCES_DIR)/cubemap_render_cube_fragment.spv
 
 
 

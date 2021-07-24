@@ -56,9 +56,9 @@ namespace sckz
                                        "Resources/skybox_vertex.spv",
                                        "Resources/skybox_fragment.spv",
                                        cubeMapImage,
-                                       "Resources/skybox_vertex.spv", // THIS MUST CHANGE TO MAKE IT SO THAT THERE IS
+                                       "Resources/cubemap_render_cube_vertex.spv", // THIS MUST CHANGE TO MAKE IT SO THAT THERE IS
                                                                       // ANOTHER SHADER WITH MULTIPLE VIEW MATRICEIS.
-                                       "Resources/skybox_fragment.spv",
+                                       "Resources/cubemap_render_cube_fragment.spv",
                                        GraphicsPipeline::PipelineType::CUBEMAP_PIPELINE);
         /*
         "Resources/posz.jpg",

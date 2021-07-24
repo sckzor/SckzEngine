@@ -25,7 +25,7 @@ int main()
                                                     "Resources/cubemap_render_vertex.spv",
                                                     "Resources/cubemap_render_fragment.spv");
 
-    sckz::Model & m1 = s1.CreateModel("Resources/cubemap.obj",
+    sckz::Model & m1 = s1.CreateModel("Resources/barrel.obj",
                                       "Resources/barrelColor.png",
                                       "Resources/barrelNormal.png",
                                       "Resources/barrelSpecular.png",
@@ -40,7 +40,7 @@ int main()
                                                     "Resources/cubemap_render_vertex.spv",
                                                     "Resources/cubemap_render_fragment.spv");
 
-    sckz::Model & m2 = s2.CreateModel("Resources/cubemap.obj",
+    sckz::Model & m2 = s2.CreateModel("Resources/barrel.obj",
                                       "Resources/barrelColor.png",
                                       "Resources/barrelNormal.png",
                                       "Resources/barrelSpecular.png",
@@ -70,7 +70,7 @@ int main()
     e1.SetRotation(90, 0, 0);
     e1.SetLocation(0, 0, 0);
     e1.SetScale(0.1, 0.1, 0.1);
-    e1.SetReflectRefractValues(0, 1.0);
+    e1.SetReflectRefractValues(1 / 1.33, 0.6);
 
     l1.SetColor(0, 0.5, 1);
     l1.SetLocation(0, 0, 0);

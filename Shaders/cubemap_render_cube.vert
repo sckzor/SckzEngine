@@ -1,5 +1,6 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
+#extension GL_EXT_multiview : enable
 
 const int CUBEMAP_SIDES = 6;
 
@@ -19,8 +20,6 @@ layout(location = 0) out vec3 fragTexCoord;
 
 void main()
 {
-    vec4 worldPosition = ubo.model * vec4(inPosition, 1.0);
-
-    gl_Position  = ubo.proj * ubo.view[gl_ViewIndex] * worldPosition;
-    fragTexCoord = inTexCoord;
+    fragTexCoord = inPosition;
+    gl_Position  = ubo.proj * ubo.view[gl_ViewIndex] * vec4(inPosition, 1.0);
 }

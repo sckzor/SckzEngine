@@ -51,7 +51,7 @@ namespace sckz
         }
 
         cubeMapViews[5] = glm::mat4x4(1.0f);
-        cubeMapViews[5] = glm::rotate(cubeMapViews[5], glm::radians(90.0f), glm::vec3(1, 0, 0));
+        cubeMapViews[5] = glm::rotate(cubeMapViews[5], glm::radians(270.0f), glm::vec3(1, 0, 0));
         cubeMapViews[5] = glm::translate(cubeMapViews[5], location);
         return cubeMapViews[side];
     }

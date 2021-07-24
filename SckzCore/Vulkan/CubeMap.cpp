@@ -280,7 +280,7 @@ namespace sckz
         SVubo.proj = camera.GetCubeMapProjection();
         for (uint32_t i = 0; i < CUBEMAP_SIDES; i++)
         {
-            SVubo.view[i]       = camera.GetCubeMapView(1, location);
+            SVubo.view[i]       = camera.GetCubeMapView(i, location);
             SVubo.view[i][3][0] = 0;
             SVubo.view[i][3][1] = 0;
             SVubo.view[i][3][2] = 0;

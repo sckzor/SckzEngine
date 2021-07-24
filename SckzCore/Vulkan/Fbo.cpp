@@ -58,8 +58,8 @@ namespace sckz
         uint32_t height;
         if (isCube)
         {
-            width  = swapChainExtent.width;
-            height = swapChainExtent.width;
+            width  = swapChainExtent.height;
+            height = swapChainExtent.height;
         }
         else
         {
@@ -93,8 +93,8 @@ namespace sckz
         uint32_t height;
         if (isCube)
         {
-            width  = swapChainExtent.width;
-            height = swapChainExtent.width;
+            width  = swapChainExtent.height;
+            height = swapChainExtent.height;
         }
         else
         {
@@ -140,8 +140,8 @@ namespace sckz
         uint32_t height;
         if (isCube)
         {
-            width  = swapChainExtent.width;
-            height = swapChainExtent.width;
+            width  = swapChainExtent.height;
+            height = swapChainExtent.height;
         }
         else
         {
@@ -171,8 +171,8 @@ namespace sckz
         uint32_t height;
         if (isCube)
         {
-            width  = swapChainExtent.width;
-            height = swapChainExtent.width;
+            width  = swapChainExtent.height;
+            height = swapChainExtent.height;
         }
         else
         {
@@ -338,7 +338,14 @@ namespace sckz
         renderPassInfo->renderPass        = renderPass;
         renderPassInfo->framebuffer       = renderedImageFrameBuffer;
         renderPassInfo->renderArea.offset = { 0, 0 };
-        renderPassInfo->renderArea.extent = swapChainExtent;
+        if (isCube)
+        {
+            renderPassInfo->renderArea.extent = { swapChainExtent.height, swapChainExtent.height };
+        }
+        else
+        {
+            renderPassInfo->renderArea.extent = swapChainExtent;
+        }
     }
 
     Image &        Fbo::GetImage() { return renderedImage; }

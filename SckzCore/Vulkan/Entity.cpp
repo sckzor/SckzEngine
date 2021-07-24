@@ -118,7 +118,7 @@ namespace sckz
 
         for (uint32_t i = 0; i < CUBEMAP_SIDES; i++)
         {
-            SVubo.view[i] = camera.GetCubeMapView(1, location);
+            SVubo.view[i] = camera.GetCubeMapView(i, location);
         }
 
         simpleUniformBuffer.CopyDataToBuffer(&SVubo, sizeof(SVubo), 0);
