@@ -189,19 +189,24 @@ namespace sckz
         stagingBuffer.DestroySubBlock();
     }
 
-    void Model::RebuildSwapResources(DescriptorPool & descriptorPool, VkExtent2D swapChainExtent)
+    void Model::RebuildSwapResources(DescriptorPool & descriptorPool,
+                                     VkExtent2D       swapChainExtent,
+                                     Image &          newEnvironmentMap)
     {
         DestroySwapResources();
 
+        this->environmentMap = &newEnvironmentMap;
+
         for (size_t i = 0; i < entities.size(); i++)
         {
-            entities[i]->RebuildSwapResources();
+            entities[i]->RebuildSwapResources(newEnvironmentMap);
         }
         // Create
 
         this->descriptorPool = &descriptorPool;
 
         CreateCommandBuffer();
+        CreateCubeMapCommandBuffer();
     }
 
     void Model::CreateCommandBuffer()

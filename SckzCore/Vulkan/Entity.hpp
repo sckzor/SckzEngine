@@ -82,7 +82,7 @@ namespace sckz
 
         void DestroyEntity();
 
-        void RebuildSwapResources();
+        void RebuildSwapResources(Image & newEnvironmentMap);
         void Update(Camera & camera);
 
     private:

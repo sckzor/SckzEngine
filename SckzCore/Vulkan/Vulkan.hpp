@@ -72,9 +72,11 @@ namespace sckz
         std::vector<Scene *>            scenes;
         std::vector<Gui *>              guis;
 
-        const std::vector<const char *> validationLayers = { "VK_LAYER_KHRONOS_validation" };   // Stays
-        const std::vector<const char *> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_KHR_MULTIVIEW_EXTENSION_NAME }; // Stays
-        size_t                          currentFrame     = 0;                                   // Stays
+        const std::vector<const char *> validationLayers = { "VK_LAYER_KHRONOS_validation" }; // Stays
+        const std::vector<const char *> deviceExtensions
+            = { VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_KHR_MULTIVIEW_EXTENSION_NAME }; // Stays
+
+        size_t currentFrame = 0; // Stays
 
         std::chrono::time_point<std::chrono::high_resolution_clock> lastTime;    // Stays
         std::chrono::time_point<std::chrono::high_resolution_clock> currentTime; // Stays

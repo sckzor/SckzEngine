@@ -73,6 +73,29 @@ namespace sckz
         CreateSimpleCommandBuffer();
     }
 
+    void CubeMap::RebuildSwapResources(DescriptorPool & descriptorPool)
+    {
+        CreateUniformBuffer();
+
+        this->descriptorPool = &descriptorPool;
+
+        this->pipeline->BindSimpleShaderData(&simpleUniformBuffer,
+                                             &cubeMapTexture,
+                                             descriptorPool,
+                                             &simpleDescriptorSet);
+
+        this->pipeline->BindComplexShaderData(&complexUniformBuffer,
+                                              &cubeMapTexture,
+                                              nullptr,
+                                              descriptorPool,
+                                              &complexDescriptorSet);
+
+        vkFreeCommandBuffers(*device, *pool, 1, &simpleCommandBuffer);
+        vkFreeCommandBuffers(*device, *pool, 1, &complexCommandBuffer);
+        CreateComplexCommandBuffer();
+        CreateSimpleCommandBuffer();
+    }
+
     void CubeMap::DestroyCubeMap()
     {
         vkFreeCommandBuffers(*device, *pool, 1, &simpleCommandBuffer);

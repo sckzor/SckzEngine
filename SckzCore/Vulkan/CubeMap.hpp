@@ -88,6 +88,7 @@ namespace sckz
         Image &           GetImage();
 
         void Update(glm::vec3 location, Camera & camera);
+        void RebuildSwapResources(DescriptorPool & descriptorPool);
 
     private:
         void CreateVertexBuffer();

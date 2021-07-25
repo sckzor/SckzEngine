@@ -99,8 +99,6 @@ namespace sckz
 
         CreateComplexDescriptorSetLayout();
 
-        CreateSimpleDescriptorSetLayout();
-
         CreateGraphicsPipeline(complexPipelineLayout,
                                complexPipeline,
                                complexDescriptorSetLayout,
@@ -110,6 +108,8 @@ namespace sckz
 
         if (hasSimple)
         {
+            CreateSimpleDescriptorSetLayout();
+
             CreateGraphicsPipeline(simplePipelineLayout,
                                    simplePipeline,
                                    simpleDescriptorSetLayout,
@@ -131,8 +131,6 @@ namespace sckz
 
         CreateComplexDescriptorSetLayout();
 
-        CreateSimpleDescriptorSetLayout();
-
         CreateGraphicsPipeline(complexPipelineLayout,
                                complexPipeline,
                                complexDescriptorSetLayout,
@@ -142,6 +140,8 @@ namespace sckz
 
         if (hasSimple)
         {
+            CreateSimpleDescriptorSetLayout();
+
             CreateGraphicsPipeline(simplePipelineLayout,
                                    simplePipeline,
                                    simpleDescriptorSetLayout,
@@ -157,9 +157,12 @@ namespace sckz
         vkDestroyPipeline(*this->device, this->complexPipeline, nullptr);
         vkDestroyPipelineLayout(*this->device, this->complexPipelineLayout, nullptr);
 
-        vkDestroyDescriptorSetLayout(*this->device, this->simpleDescriptorSetLayout, nullptr);
-        vkDestroyPipeline(*this->device, this->simplePipeline, nullptr);
-        vkDestroyPipelineLayout(*this->device, this->simplePipelineLayout, nullptr);
+        if (hasSimple)
+        {
+            vkDestroyDescriptorSetLayout(*this->device, this->simpleDescriptorSetLayout, nullptr);
+            vkDestroyPipeline(*this->device, this->simplePipeline, nullptr);
+            vkDestroyPipelineLayout(*this->device, this->simplePipelineLayout, nullptr);
+        }
     }
 
     std::vector<char> GraphicsPipeline::ReadFile(const std::string & filename)

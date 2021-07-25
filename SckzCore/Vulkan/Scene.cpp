@@ -51,23 +51,16 @@ namespace sckz
                                         nullptr,
                                         GraphicsPipeline::PipelineType::PARTICLE_PIPELINE);
 
-        cubeMapPipeline.CreatePipeline(*this->device,
-                                       fboImage,
-                                       "Resources/skybox_vertex.spv",
-                                       "Resources/skybox_fragment.spv",
-                                       cubeMapImage,
-                                       "Resources/cubemap_render_cube_vertex.spv", // THIS MUST CHANGE TO MAKE IT SO THAT THERE IS
-                                                                      // ANOTHER SHADER WITH MULTIPLE VIEW MATRICEIS.
-                                       "Resources/cubemap_render_cube_fragment.spv",
-                                       GraphicsPipeline::PipelineType::CUBEMAP_PIPELINE);
-        /*
-        "Resources/posz.jpg",
-        "Resources/negz.jpg",
-        "Resources/posx.jpg",
-        "Resources/negx.jpg",
-        "Resources/posy.jpg",
-        "Resources/negy.jpg",
-        */
+        cubeMapPipeline.CreatePipeline(
+            *this->device,
+            fboImage,
+            "Resources/skybox_vertex.spv",
+            "Resources/skybox_fragment.spv",
+            cubeMapImage,
+            "Resources/cubemap_render_cube_vertex.spv", // THIS MUST CHANGE TO MAKE IT SO THAT THERE IS
+                                                        // ANOTHER SHADER WITH MULTIPLE VIEW MATRICEIS.
+            "Resources/cubemap_render_cube_fragment.spv",
+            GraphicsPipeline::PipelineType::CUBEMAP_PIPELINE);
 
         cubeMapTest.CreateCubeMap("Resources/posz.jpg",
                                   "Resources/negz.jpg",
@@ -92,6 +85,7 @@ namespace sckz
         cubeMapTest.DestroyCubeMap();
         cubeMapPipeline.DestroyPipeline();
         fboImage.DestroyFBO();
+        cubeMapImage.DestroyFBO();
 
         for (uint32_t i = 0; i < models.size(); i++)
         {
@@ -151,24 +145,27 @@ namespace sckz
 
         fboImage.RebuildSwapResources(msaaSamples, swapChainExtent);
         cubeMapImage.RebuildSwapResources(msaaSamples, swapChainExtent);
+
+        particlePipeline.CreatePipeline(*device, fboImage, cubeMapImage);
+        cubeMapPipeline.CreatePipeline(*device, fboImage, cubeMapImage);
+
         for (uint32_t i = 0; i < pipelines.size(); i++)
         {
             pipelines[i]->CreatePipeline(*device, fboImage, cubeMapImage);
         }
 
         descriptorPool.CreateDescriptorPool(*device, 1);
+
+        cubeMapTest.RebuildSwapResources(descriptorPool);
         for (uint32_t i = 0; i < models.size(); i++)
         {
-            models[i]->RebuildSwapResources(descriptorPool, swapChainExtent);
+            models[i]->RebuildSwapResources(descriptorPool, swapChainExtent, cubeMapImage.GetImage());
         }
 
         for (uint32_t i = 0; i < fbos.size(); i++)
         {
             fbos[i]->RebuildSwapResources(msaaSamples, swapChainExtent);
         }
-
-        particlePipeline.CreatePipeline(*device, fboImage, cubeMapImage);
-        cubeMapPipeline.CreatePipeline(*device, fboImage, cubeMapImage);
 
         for (uint32_t i = 0; i < particleSystems.size(); i++)
         {
@@ -202,6 +199,7 @@ namespace sckz
         }
 
         particlePipeline.DestroyPipeline();
+        cubeMapPipeline.DestroyPipeline();
         descriptorPool.DestroyDescriptorPool();
     }
 

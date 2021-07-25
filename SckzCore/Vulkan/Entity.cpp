@@ -36,8 +36,9 @@ namespace sckz
 
     void Entity::DestroyEntity() { }
 
-    void Entity::RebuildSwapResources()
+    void Entity::RebuildSwapResources(Image & newEnvironmentMap)
     {
+        textures->at(3) = newEnvironmentMap;
         DestroyEntity();
         CreateUniformBuffers();
         this->pipeline->BindComplexShaderData(&complexUniformBuffers[0],
