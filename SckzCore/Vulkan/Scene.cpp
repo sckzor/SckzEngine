@@ -83,7 +83,6 @@ namespace sckz
         DestroySwapResources();
 
         cubeMapTest.DestroyCubeMap();
-        cubeMapPipeline.DestroyPipeline();
         fboImage.DestroyFBO();
         cubeMapImage.DestroyFBO();
 
@@ -159,7 +158,7 @@ namespace sckz
         cubeMapTest.RebuildSwapResources(descriptorPool);
         for (uint32_t i = 0; i < models.size(); i++)
         {
-            models[i]->RebuildSwapResources(descriptorPool, swapChainExtent, cubeMapImage.GetImage());
+            models[i]->RebuildSwapResources(descriptorPool, cubeMapImage.GetImage());
         }
 
         for (uint32_t i = 0; i < fbos.size(); i++)
@@ -523,8 +522,6 @@ namespace sckz
         {
             throw std::runtime_error("failed to submit draw command buffer! (scene)");
         }
-
-        // vkQueueWaitIdle(*graphicsQueue); // TODO: GET RID OF THIS
     }
 
     Fbo & Scene::GetRenderedImage() { return fboImage; }

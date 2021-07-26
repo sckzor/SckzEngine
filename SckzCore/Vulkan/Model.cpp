@@ -189,9 +189,7 @@ namespace sckz
         stagingBuffer.DestroySubBlock();
     }
 
-    void Model::RebuildSwapResources(DescriptorPool & descriptorPool,
-                                     VkExtent2D       swapChainExtent,
-                                     Image &          newEnvironmentMap)
+    void Model::RebuildSwapResources(DescriptorPool & descriptorPool, Image & newEnvironmentMap)
     {
         DestroySwapResources();
 

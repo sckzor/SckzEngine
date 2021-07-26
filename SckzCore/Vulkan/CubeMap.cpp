@@ -75,6 +75,9 @@ namespace sckz
 
     void CubeMap::RebuildSwapResources(DescriptorPool & descriptorPool)
     {
+        vkFreeCommandBuffers(*device, *pool, 1, &simpleCommandBuffer);
+        vkFreeCommandBuffers(*device, *pool, 1, &complexCommandBuffer);
+
         CreateUniformBuffer();
 
         this->descriptorPool = &descriptorPool;
@@ -90,8 +93,6 @@ namespace sckz
                                               descriptorPool,
                                               &complexDescriptorSet);
 
-        vkFreeCommandBuffers(*device, *pool, 1, &simpleCommandBuffer);
-        vkFreeCommandBuffers(*device, *pool, 1, &complexCommandBuffer);
         CreateComplexCommandBuffer();
         CreateSimpleCommandBuffer();
     }

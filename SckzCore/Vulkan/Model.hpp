@@ -68,9 +68,7 @@ namespace sckz
 
         void Update(Camera & camera);
 
-        void RebuildSwapResources(DescriptorPool & descriptorPool,
-                                  VkExtent2D       swapChainExtent,
-                                  Image &          newEnvironmentMap);
+        void RebuildSwapResources(DescriptorPool & descriptorPool, Image & newEnvironmentMap);
 
         Entity & CreateEntity(bool isReflectRefractive);
 

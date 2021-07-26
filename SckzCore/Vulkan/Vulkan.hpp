@@ -92,8 +92,8 @@ namespace sckz
 
         int32_t fps = 0; // Stays
 
-        Fbo *              lastRenderedFbo;
-        GraphicsPipeline * lastRenderedPipeline;
+        Fbo *              lastRenderedFbo      = nullptr;
+        GraphicsPipeline * lastRenderedPipeline = nullptr;
 
         Fbo dummyFbo;
 

@@ -29,7 +29,7 @@ namespace sckz
                           memory,
                           graphicsQueue,
                           format,
-                          msaaSamples,
+                          VK_SAMPLE_COUNT_1_BIT,
                           swapChainExtent,
                           commandPool,
                           false);
@@ -62,7 +62,7 @@ namespace sckz
 
         lastRenderedFbo = nullptr;
 
-        tempFbo.RebuildSwapResources(msaaSamples, swapChainExtent);
+        tempFbo.RebuildSwapResources(VK_SAMPLE_COUNT_1_BIT, swapChainExtent);
     }
 
     void Filter::DestroyFilter()

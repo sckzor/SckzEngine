@@ -774,11 +774,6 @@ namespace sckz
 
         CreateSwapChain();
 
-        for (uint32_t i = 0; i < scenes.size(); i++)
-        {
-            scenes[i]->RebuildSwapResources(swapChainExtent);
-        }
-
         CreateImageViews();
         CreateRenderPass();
         CreateColorResources();
@@ -796,6 +791,16 @@ namespace sckz
         for (uint32_t i = 0; i < guis.size(); i++)
         {
             guis[i]->RebuildSwapResources(descriptorPool, swapChainExtent, renderPass, swapChainFramebuffers);
+        }
+
+        for (uint32_t i = 0; i < scenes.size(); i++)
+        {
+            scenes[i]->RebuildSwapResources(swapChainExtent);
+        }
+
+        if (lastRenderedFbo != nullptr && lastRenderedPipeline != nullptr)
+        {
+            CreateCommandBuffers(lastRenderedFbo, lastRenderedPipeline);
         }
     }
 

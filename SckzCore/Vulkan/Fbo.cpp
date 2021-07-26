@@ -17,10 +17,18 @@ namespace sckz
         this->memory          = &memory;
         this->format          = format;
         this->graphicsQueue   = &graphicsQueue;
-        this->msaaSamples     = msaaSamples;
         this->swapChainExtent = swapChainExtent;
         this->pool            = &pool;
         this->isCube          = isCube;
+
+        if (isCube)
+        {
+            this->msaaSamples = VK_SAMPLE_COUNT_1_BIT; // Cube maps don't support msaa
+        }
+        else
+        {
+            this->msaaSamples = msaaSamples;
+        }
 
         CreateImage();
         CreateRenderPass();
@@ -203,7 +211,14 @@ namespace sckz
 
     void Fbo::RebuildSwapResources(VkSampleCountFlagBits msaaSamples, VkExtent2D swapChainExtent)
     {
-        this->msaaSamples     = msaaSamples;
+        if (isCube)
+        {
+            this->msaaSamples = VK_SAMPLE_COUNT_1_BIT; // Cube maps don't support msaa
+        }
+        else
+        {
+            this->msaaSamples = msaaSamples;
+        }
         this->swapChainExtent = swapChainExtent;
         DestroySwapResources();
 
