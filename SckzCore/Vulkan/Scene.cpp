@@ -246,6 +246,8 @@ namespace sckz
             throw std::runtime_error("failed to begin recording command buffer!");
         }
 
+        std::cout << "Primary Command Buffer: " << primaryCmdBuffer << std::endl;
+
         VkRenderPassBeginInfo renderPassInfo {};
         fboImage.GetRenderPassBeginInfo(&renderPassInfo);
 
@@ -289,6 +291,8 @@ namespace sckz
         {
             throw std::runtime_error("failed to begin recording command buffer!");
         }
+
+        std::cout << "Primary Cube Command Buffer: " << primaryCmdBufferCube << std::endl;
 
         VkRenderPassBeginInfo renderPassInfo {};
         cubeMapImage.GetRenderPassBeginInfo(&renderPassInfo);
@@ -501,9 +505,6 @@ namespace sckz
         {
             particleSystems[i]->Update(camera, deltaTime);
         }
-
-        RebuildCommandBuffer();
-        RebuildCubeCommandBuffer();
 
         VkSubmitInfo submitInfo {};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;

@@ -18,10 +18,11 @@ namespace sckz
         float fov;
         float near, far;
 
+        bool       isCubeMap;
         VkExtent2D extent;
 
     public:
-        void CreateCamera(float fov, float near, float far, VkExtent2D extent);
+        void CreateCamera(float fov, float near, float far, VkExtent2D extent, bool isCubeMap);
         void UpdateExtent(VkExtent2D extent);
         void DestroyCamera();
 

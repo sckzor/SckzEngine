@@ -65,6 +65,11 @@ namespace sckz
         glm::vec3 rotation;
         glm::vec3 scale;
 
+        Camera cubeMapCamera;
+        Fbo    reflectionMap;
+
+        bool isCubeMap;
+
         float refractiveIndexRatio;
         float reflectRefractFactor;
 
@@ -78,6 +83,10 @@ namespace sckz
                           Buffer &               hostLocalBuffer,
                           DescriptorPool &       pool,
                           GraphicsPipeline &     pipeline,
+                          Memory &               memory,
+                          VkFormat               format,
+                          VkCommandPool &        commandPool,
+                          bool                   isCubeMap,
                           std::array<Image, 4> & textures);
 
         void DestroyEntity();

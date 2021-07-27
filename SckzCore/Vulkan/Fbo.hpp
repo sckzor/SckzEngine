@@ -9,6 +9,8 @@ namespace sckz
     class Fbo
     {
     private:
+        const uint32_t CUBE_MAP_SIZE = 100;
+
         VkPhysicalDevice * physicalDevice;
         VkDevice *         device; // Stays
 

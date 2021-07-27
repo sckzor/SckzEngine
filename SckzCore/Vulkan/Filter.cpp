@@ -106,6 +106,8 @@ namespace sckz
             throw std::runtime_error("failed to begin recording command buffer!");
         }
 
+        std::cout << "Filter Command Buffer: " << commandBuffer << std::endl;
+
         VkRenderPassBeginInfo renderPassInfo {};
         renderPassInfo.sType             = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
         renderPassInfo.renderPass        = tempFbo.GetRenderPass();

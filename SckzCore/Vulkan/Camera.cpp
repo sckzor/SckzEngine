@@ -2,12 +2,13 @@
 
 namespace sckz
 {
-    void Camera::CreateCamera(float fov, float near, float far, VkExtent2D extent)
+    void Camera::CreateCamera(float fov, float near, float far, VkExtent2D extent, bool isCubeMap)
     {
-        this->near   = near;
-        this->far    = far;
-        this->fov    = fov;
-        this->extent = extent;
+        this->near      = near;
+        this->far       = far;
+        this->fov       = fov;
+        this->extent    = extent;
+        this->isCubeMap = isCubeMap;
     }
 
     void Camera::UpdateExtent(VkExtent2D extent)
@@ -27,7 +28,7 @@ namespace sckz
         view = glm::translate(view, location);
 
         projection        = glm::perspective(glm::radians(fov), extent.width / (float)extent.height, near, far);
-        cubeMapProjection = glm::perspective(glm::radians(90.0f), extent.width / (float)extent.height, near, far);
+        cubeMapProjection = glm::perspective(glm::radians(90.0f), 1.0f, near, far);
 
         projection[1][1] *= -1;
         cubeMapProjection[1][1] *= -1;

@@ -66,8 +66,8 @@ namespace sckz
         uint32_t height;
         if (isCube)
         {
-            width  = swapChainExtent.height;
-            height = swapChainExtent.height;
+            width  = CUBE_MAP_SIZE;
+            height = CUBE_MAP_SIZE;
         }
         else
         {
@@ -101,8 +101,8 @@ namespace sckz
         uint32_t height;
         if (isCube)
         {
-            width  = swapChainExtent.height;
-            height = swapChainExtent.height;
+            width  = CUBE_MAP_SIZE;
+            height = CUBE_MAP_SIZE;
         }
         else
         {
@@ -148,8 +148,8 @@ namespace sckz
         uint32_t height;
         if (isCube)
         {
-            width  = swapChainExtent.height;
-            height = swapChainExtent.height;
+            width  = CUBE_MAP_SIZE;
+            height = CUBE_MAP_SIZE;
         }
         else
         {
@@ -179,8 +179,8 @@ namespace sckz
         uint32_t height;
         if (isCube)
         {
-            width  = swapChainExtent.height;
-            height = swapChainExtent.height;
+            width  = CUBE_MAP_SIZE;
+            height = CUBE_MAP_SIZE;
         }
         else
         {
@@ -355,7 +355,7 @@ namespace sckz
         renderPassInfo->renderArea.offset = { 0, 0 };
         if (isCube)
         {
-            renderPassInfo->renderArea.extent = { swapChainExtent.height, swapChainExtent.height };
+            renderPassInfo->renderArea.extent = { CUBE_MAP_SIZE, CUBE_MAP_SIZE };
         }
         else
         {

@@ -360,18 +360,18 @@ namespace sckz
     Entity & Model::CreateEntity(bool isReflectRefractive)
     {
         Entity * entity = new Entity();
-        if (isReflectRefractive)
-        {
-            entity
-                ->CreateEntity(*physicalDevice, *device, *queue, hostLocalBuffer, *descriptorPool, *pipeline, textures);
-        }
-        else
-        {
-            std::array<Image, 4> noCubeMap = { textures[0], textures[1], textures[2], blankTexture };
-            // Todo: make the blank texture 3D...
-            entity
-                ->CreateEntity(*physicalDevice, *device, *queue, hostLocalBuffer, *descriptorPool, *pipeline, textures);
-        }
+
+        entity->CreateEntity(*physicalDevice,
+                             *device,
+                             *queue,
+                             hostLocalBuffer,
+                             *descriptorPool,
+                             *pipeline,
+                             *memory,
+                             VK_FORMAT_A1R5G5B5_UNORM_PACK16,
+                             *commandPool,
+                             isReflectRefractive,
+                             textures);
 
         entities.push_back(entity);
         CreateCommandBuffer();

@@ -8,6 +8,10 @@ namespace sckz
                               Buffer &               hostLocalBuffer,
                               DescriptorPool &       descriptorPool,
                               GraphicsPipeline &     pipeline,
+                              Memory &               memory,
+                              VkFormat               format,
+                              VkCommandPool &        commandPool,
+                              bool                   isCubeMap,
                               std::array<Image, 4> & textures)
     {
         this->physicalDevice  = &physicalDevice;
@@ -19,6 +23,21 @@ namespace sckz
         this->hostLocalBuffer = &hostLocalBuffer;
 
         this->scale = glm::vec3(1.0f, 1.0f, 1.0f);
+
+        if (isCubeMap)
+        {
+            reflectionMap.CreateFBO(physicalDevice,
+                                    device,
+                                    memory,
+                                    queue,
+                                    format,
+                                    VK_SAMPLE_COUNT_1_BIT,
+                                    { 0, 0 },
+                                    commandPool,
+                                    true);
+
+            cubeMapCamera.CreateCamera(90, 1, 100, { 0, 0 }, true);
+        }
 
         CreateUniformBuffers();
 

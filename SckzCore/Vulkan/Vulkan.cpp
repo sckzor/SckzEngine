@@ -797,11 +797,6 @@ namespace sckz
         {
             scenes[i]->RebuildSwapResources(swapChainExtent);
         }
-
-        if (lastRenderedFbo != nullptr && lastRenderedPipeline != nullptr)
-        {
-            CreateCommandBuffers(lastRenderedFbo, lastRenderedPipeline);
-        }
     }
 
     void Vulkan::DestroySwapResources()
@@ -942,9 +937,11 @@ namespace sckz
             std::vector<VkCommandBuffer> buffers;
 
             buffers.push_back(commandBuffers[i]);
+            std::cout << "Vulkan FBO Command Buffer: " << commandBuffers[i] << std::endl;
             for (size_t j = 0; j < guis.size(); j++)
             {
                 buffers.push_back((guis[j]->GetCommandBuffer(i)));
+                std::cout << "GUI Command Buffer " << j << ": " << guis[j]->GetCommandBuffer(i) << std::endl;
             }
 
             vkCmdExecuteCommands(primaryCommandBuffers[i], buffers.size(), buffers.data());
@@ -1037,6 +1034,7 @@ namespace sckz
         {
             framebufferResized = false;
             RebuildSwapChain();
+            CreateCommandBuffers(&fbo, &pipeline);
         }
         else if (result != VK_SUCCESS)
         {
