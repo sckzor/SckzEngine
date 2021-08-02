@@ -15,7 +15,7 @@ namespace sckz
     class Model
     {
     private:
-        std::array<Image, 4> textures;
+        std::array<Image, 3> textures;
 
         std::vector<Vertex>   vertices;
         std::vector<uint32_t> indices;
@@ -43,10 +43,8 @@ namespace sckz
         const char * normalFileName;
         const char * spacularFileName;
         const char * modelFileName;
-
-        Image * environmentMap;
-
-        Image blankTexture;
+        Image        blankTexture;
+        VkFormat     format;
 
         std::vector<Entity *> entities;
 
@@ -60,15 +58,16 @@ namespace sckz
                          VkPhysicalDevice & physicalDevice,
                          GraphicsPipeline & pipeline,
                          DescriptorPool &   descriptorPool,
+                         VkFormat           format,
                          Memory &           memory,
-                         VkQueue &          queue,
-                         Image &            environmentMap);
+                         VkQueue &          queue);
 
         void DestroyModel();
 
         void Update(Camera & camera);
+        void UpdateCubeCamera(Camera & cubeMapCamera);
 
-        void RebuildSwapResources(DescriptorPool & descriptorPool, Image & newEnvironmentMap);
+        void RebuildSwapResources(DescriptorPool & descriptorPool, VkExtent2D swapChainExtent);
 
         Entity & CreateEntity(bool isReflectRefractive);
 
@@ -87,6 +86,8 @@ namespace sckz
         Buffer::SubBlock  GetIndexBuffer();
         Buffer::SubBlock  GetVertexBuffer();
         uint32_t          GetNumIndices();
+
+        std::vector<Entity *> GetReflectiveEntities();
 
     private:
         void DestroySwapResources();

@@ -158,7 +158,7 @@ namespace sckz
         cubeMapTest.RebuildSwapResources(descriptorPool);
         for (uint32_t i = 0; i < models.size(); i++)
         {
-            models[i]->RebuildSwapResources(descriptorPool, cubeMapImage.GetImage());
+            models[i]->RebuildSwapResources(descriptorPool, swapChainExtent);
         }
 
         for (uint32_t i = 0; i < fbos.size(); i++)
@@ -202,7 +202,11 @@ namespace sckz
         descriptorPool.DestroyDescriptorPool();
     }
 
-    void Scene::DestroySyncObjects() { vkDestroyFence(*device, inFlightFence, nullptr); }
+    void Scene::DestroySyncObjects()
+    {
+        vkDestroyFence(*device, inFlightFence, nullptr);
+        vkDestroyFence(*device, inFlightFenceCube, nullptr);
+    }
 
     void Scene::DestroyCommandPool() { vkDestroyCommandPool(*device, commandPool, nullptr); }
 
@@ -231,6 +235,11 @@ namespace sckz
         fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
         if (vkCreateFence(*device, &fenceInfo, nullptr, &inFlightFence) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to create synchronization objects for a frame!");
+        }
+
+        if (vkCreateFence(*device, &fenceInfo, nullptr, &inFlightFenceCube) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to create synchronization objects for a frame!");
         }
@@ -456,9 +465,9 @@ namespace sckz
                                    *physicalDevice,
                                    pipeline,
                                    descriptorPool,
+                                   format,
                                    memory,
-                                   *graphicsQueue,
-                                   cubeMapImage.GetImage());
+                                   *graphicsQueue);
         return *models.back();
     }
 
@@ -480,7 +489,7 @@ namespace sckz
     Camera & Scene::CreateCamera(float fov, float near, float far)
     {
         cameras.push_back(new Camera());
-        cameras.back()->CreateCamera(fov, near, far, swapChainExtent);
+        cameras.back()->CreateCamera(fov, near, far, swapChainExtent, false);
         return *cameras.back();
     }
 
@@ -490,14 +499,53 @@ namespace sckz
         RebuildSwapResources(swapChainExtent);
     }
 
-    void Scene::Render(Camera & camera, float deltaTime, Fbo & fbo)
+    void Scene::RenderCubeMap(Entity & transparentEntity)
     {
+        for (uint32_t i = 0; i < models.size(); i++)
+        {
+            models[i]->UpdateCubeCamera(transparentEntity.GetCubeMapCamera());
+        }
+
+        cubeMapTest.UpdateCubeMap(transparentEntity.GetCubeMapCamera());
+
+        VkSubmitInfo submitInfo {};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+        VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+        submitInfo.waitSemaphoreCount     = 0;
+        submitInfo.pWaitDstStageMask      = waitStages;
+
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers    = &primaryCmdBufferCube;
+
+        vkResetFences(*device, 1, &inFlightFenceCube);
+
+        if (vkQueueSubmit(*graphicsQueue, 1, &submitInfo, inFlightFenceCube) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to submit draw command buffer! (scene)");
+        }
+        vkWaitForFences(*device, 1, &inFlightFenceCube, VK_TRUE, UINT64_MAX);
+
+        cubeMapImage.CopyToFbo(transparentEntity.GetEnvironmentMapFBO());
+    }
+
+    void Scene::Render(Camera & camera, float deltaTime)
+    {
+        for (uint32_t i = 0; i < models.size(); i++)
+        {
+            std::vector<Entity *> reflectiveEntities = models[i]->GetReflectiveEntities();
+            for (uint32_t j = 0; j < reflectiveEntities.size(); j++)
+            {
+                RenderCubeMap(*reflectiveEntities[j]);
+            }
+        }
+
         for (uint32_t i = 0; i < models.size(); i++)
         {
             models[i]->Update(camera);
         }
 
-        cubeMapTest.Update(glm::vec3(-50, 1, 0), camera);
+        cubeMapTest.Update(camera);
 
         vkWaitForFences(*device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
 
@@ -513,9 +561,8 @@ namespace sckz
         submitInfo.waitSemaphoreCount     = 0;
         submitInfo.pWaitDstStageMask      = waitStages;
 
-        submitInfo.commandBufferCount                 = 2;
-        std::array<VkCommandBuffer, 2> commandBuffers = { primaryCmdBufferCube, primaryCmdBuffer };
-        submitInfo.pCommandBuffers                    = commandBuffers.data();
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers    = &primaryCmdBuffer;
 
         vkResetFences(*device, 1, &inFlightFence);
 

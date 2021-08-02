@@ -20,6 +20,7 @@ namespace sckz
 
     Buffer::SubBlock & Buffer::GetBuffer(uint32_t size, VkBufferUsageFlags usage)
     {
+        // std::cout << size << " : " << blockSize << " -> " << this << std::endl;
         if (size > blockSize)
         {
             throw std::runtime_error("Buffer Size was too big!");

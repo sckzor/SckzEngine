@@ -287,7 +287,7 @@ namespace sckz
         }
     }
 
-    void CubeMap::Update(glm::vec3 location, Camera & camera)
+    void CubeMap::Update(Camera & camera)
     {
         ComplexVertexUniformBufferObject Vubo {};
         // Vubo.model = glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 2.0f, 2.0f));
@@ -298,13 +298,16 @@ namespace sckz
         Vubo.view[3][1] = 0;
         Vubo.view[3][2] = 0;
         complexUniformBuffer.CopyDataToBuffer(&Vubo, sizeof(Vubo), 0);
+    }
 
+    void CubeMap::UpdateCubeMap(Camera & cubeMapCamera)
+    {
         SimpleVertexUniformBufferObject SVubo {};
 
-        SVubo.proj = camera.GetCubeMapProjection();
+        SVubo.proj = cubeMapCamera.GetProjection();
         for (uint32_t i = 0; i < CUBEMAP_SIDES; i++)
         {
-            SVubo.view[i]       = camera.GetCubeMapView(i, location);
+            SVubo.view[i]       = cubeMapCamera.GetCubeMapView(i);
             SVubo.view[i][3][0] = 0;
             SVubo.view[i][3][1] = 0;
             SVubo.view[i][3][2] = 0;

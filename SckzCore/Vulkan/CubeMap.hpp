@@ -87,7 +87,8 @@ namespace sckz
         VkCommandBuffer & GetComplexCommandBuffer();
         Image &           GetImage();
 
-        void Update(glm::vec3 location, Camera & camera);
+        void Update(Camera & camera);
+        void UpdateCubeMap(Camera & cubeMapCamera);
         void RebuildSwapResources(DescriptorPool & descriptorPool);
 
     private:

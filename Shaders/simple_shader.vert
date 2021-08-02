@@ -46,6 +46,6 @@ void main()
 
     toCameraVector = camLocation - worldPosition.xyz;
     // reflect(normalize(toCameraVector), normalize(inNormal))
-    reflectedVector = reflect(normalize(toCameraVector), normalize(inNormal));
+    reflectedVector = normalize(toCameraVector);
     refractedVector = refract(normalize(toCameraVector), normalize(inNormal), ubo.refractiveIndexRatio);
 }

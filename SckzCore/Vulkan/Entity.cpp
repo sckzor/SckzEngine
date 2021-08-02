@@ -12,20 +12,25 @@ namespace sckz
                               VkFormat               format,
                               VkCommandPool &        commandPool,
                               bool                   isCubeMap,
-                              std::array<Image, 4> & textures)
+                              std::array<Image, 3> & textures,
+                              Image &                blankImage)
     {
         this->physicalDevice  = &physicalDevice;
         this->queue           = &queue;
         this->device          = &device;
         this->descriptorPool  = &descriptorPool;
         this->pipeline        = &pipeline;
-        this->textures        = &textures;
         this->hostLocalBuffer = &hostLocalBuffer;
+        this->isCubeMap       = true;
+        this->blankImage      = &blankImage;
+
+        this->textures = &textures;
 
         this->scale = glm::vec3(1.0f, 1.0f, 1.0f);
 
-        if (isCubeMap)
+        if (this->isCubeMap)
         {
+
             reflectionMap.CreateFBO(physicalDevice,
                                     device,
                                     memory,
@@ -41,33 +46,64 @@ namespace sckz
 
         CreateUniformBuffers();
 
+        std::array<Image, 4> allTextures;
+        if (this->isCubeMap)
+        {
+            allTextures = { textures.at(0), textures.at(1), textures.at(2), reflectionMap.GetImage() };
+        }
+        else
+        {
+            allTextures = { textures.at(0), textures.at(1), textures.at(2), blankImage };
+        }
+
         this->pipeline->BindComplexShaderData(&complexUniformBuffers[0],
-                                              textures.data(),
+                                              allTextures.data(),
                                               &complexUniformBuffers[1],
                                               *this->descriptorPool,
                                               &complexDescriptorSet);
 
         this->pipeline->BindSimpleShaderData(&simpleUniformBuffer,
-                                             &textures[0],
+                                             &allTextures[0],
                                              *this->descriptorPool,
                                              &simpleDescriptorSet);
     }
 
-    void Entity::DestroyEntity() { }
-
-    void Entity::RebuildSwapResources(Image & newEnvironmentMap)
+    void Entity::DestroyEntity()
     {
-        textures->at(3) = newEnvironmentMap;
+        if (this->isCubeMap)
+        {
+            reflectionMap.DestroyFBO();
+        }
+    }
+
+    bool Entity::IsReflective() { return this->isCubeMap; }
+
+    Fbo & Entity::GetEnvironmentMapFBO() { return reflectionMap; }
+
+    void Entity::RebuildSwapResources(VkExtent2D swapChainExtent)
+    {
+        reflectionMap.RebuildSwapResources(VK_SAMPLE_COUNT_1_BIT, swapChainExtent);
+
+        std::array<Image, 4> allTextures;
+        if (this->isCubeMap)
+        {
+            allTextures = { textures->at(0), textures->at(1), textures->at(2), reflectionMap.GetImage() };
+        }
+        else
+        {
+            allTextures = { textures->at(0), textures->at(1), textures->at(2), *blankImage };
+        }
+
         DestroyEntity();
         CreateUniformBuffers();
         this->pipeline->BindComplexShaderData(&complexUniformBuffers[0],
-                                              textures->data(),
+                                              allTextures.data(),
                                               &complexUniformBuffers[1],
                                               *this->descriptorPool,
                                               &complexDescriptorSet);
 
         this->pipeline->BindSimpleShaderData(&simpleUniformBuffer,
-                                             &textures->at(0),
+                                             &allTextures[0],
                                              *this->descriptorPool,
                                              &simpleDescriptorSet);
     }
@@ -88,11 +124,13 @@ namespace sckz
     {
         ComplexVertexUniformBufferObject   Vubo {};
         ComplexFragmentUniformBufferObject Fubo {};
-        Vubo.model = glm::scale(glm::mat4(1.0f), scale);
-        Vubo.model = glm::rotate(Vubo.model, glm::radians(rotation.x), glm::vec3(1.0, 0.0, 0.0));
-        Vubo.model = glm::rotate(Vubo.model, glm::radians(rotation.y), glm::vec3(0.0, 1.0, 0.0));
-        Vubo.model = glm::rotate(Vubo.model, glm::radians(rotation.z), glm::vec3(0.0, 0.0, 1.0));
-        Vubo.model = glm::translate(Vubo.model, location);
+        currentModel = glm::scale(glm::mat4(1.0f), scale);
+        currentModel = glm::rotate(currentModel, glm::radians(rotation.x), glm::vec3(1.0, 0.0, 0.0));
+        currentModel = glm::rotate(currentModel, glm::radians(rotation.y), glm::vec3(0.0, 1.0, 0.0));
+        currentModel = glm::rotate(currentModel, glm::radians(rotation.z), glm::vec3(0.0, 0.0, 1.0));
+        currentModel = glm::translate(currentModel, location);
+
+        Vubo.model = currentModel;
 
         Vubo.view = camera.GetView();
         Vubo.proj = camera.GetProjection();
@@ -129,16 +167,19 @@ namespace sckz
 
         complexUniformBuffers[0].CopyDataToBuffer(&Vubo, sizeof(Vubo), 0);
         complexUniformBuffers[1].CopyDataToBuffer(&Fubo, sizeof(Fubo), 0);
+    }
 
+    void Entity::UpdateCubeMap(Camera & cubeMapCamera)
+    {
         SimpleVertexUniformBufferObject SVubo {};
 
-        SVubo.model = Vubo.model;
+        SVubo.model = currentModel;
 
-        SVubo.proj = camera.GetCubeMapProjection();
+        SVubo.proj = cubeMapCamera.GetProjection();
 
         for (uint32_t i = 0; i < CUBEMAP_SIDES; i++)
         {
-            SVubo.view[i] = camera.GetCubeMapView(i, location);
+            SVubo.view[i] = cubeMapCamera.GetCubeMapView(i);
         }
 
         simpleUniformBuffer.CopyDataToBuffer(&SVubo, sizeof(SVubo), 0);
@@ -161,6 +202,8 @@ namespace sckz
         location.x = x;
         location.y = y;
         location.z = z;
+
+        cubeMapCamera.SetLocation(x, y, z);
     }
 
     void Entity::SetRotation(float x, float y, float z)
@@ -168,6 +211,8 @@ namespace sckz
         rotation.x = x;
         rotation.y = y;
         rotation.z = z;
+
+        cubeMapCamera.SetRotation(x, y, z);
     }
 
     void Entity::SetScale(float x, float y, float z)
@@ -185,4 +230,6 @@ namespace sckz
 
     VkDescriptorSet & Entity::GetSimpleDescriptorSet() { return simpleDescriptorSet; }
     VkDescriptorSet & Entity::GetComplexDescriptorSet() { return complexDescriptorSet; }
+
+    Camera & Entity::GetCubeMapCamera() { return cubeMapCamera; }
 } // namespace sckz

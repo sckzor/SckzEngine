@@ -25,7 +25,7 @@ int main()
                                                     "Resources/cubemap_render_vertex.spv",
                                                     "Resources/cubemap_render_fragment.spv");
 
-    sckz::Model & m1 = s1.CreateModel("Resources/barrel.obj",
+    sckz::Model & m1 = s1.CreateModel("Resources/cubemap.obj",
                                       "Resources/barrelColor.png",
                                       "Resources/barrelNormal.png",
                                       "Resources/barrelSpecular.png",
@@ -70,7 +70,7 @@ int main()
     e1.SetRotation(90, 0, 0);
     e1.SetLocation(0, 0, 0);
     e1.SetScale(0.1, 0.1, 0.1);
-    e1.SetReflectRefractValues(1 / 1.33, 0.6);
+    e1.SetReflectRefractValues(1 / 1, 1);
 
     l1.SetColor(0, 0.5, 1);
     l1.SetLocation(0, 0, 0);
@@ -174,7 +174,7 @@ int main()
 
         if (win.QueryKey('u'))
         {
-            s2.Render(c2, vkan.GetDeltaT(), fbo);
+            s2.Render(c2, vkan.GetDeltaT());
 
             // sckz::Fbo & filteredImage = fil.FilterFbo(s2.GetRenderedImage());
 
@@ -189,7 +189,7 @@ int main()
         }
         else
         {
-            s1.Render(c1, vkan.GetDeltaT(), fbo);
+            s1.Render(c1, vkan.GetDeltaT());
 
             sckz::Fbo & bloomFbo = bloom.ApplyBloom();
 
@@ -223,12 +223,12 @@ int main()
 
         if (win.QueryKey('6'))
         {
-            e3.SetRotation(e3.GetRotation().x, e3.GetRotation().y - (10 * vkan.GetDeltaT()), e3.GetRotation().z);
+            e1.SetLocation(e1.GetLocation().x, e1.GetLocation().y - (10 * vkan.GetDeltaT()), e1.GetLocation().z);
         }
 
         if (win.QueryKey('7'))
         {
-            e3.SetRotation(e3.GetRotation().x, e3.GetRotation().y + (10 * vkan.GetDeltaT()), e3.GetRotation().z);
+            e1.SetLocation(e1.GetLocation().x, e1.GetLocation().y + (10 * vkan.GetDeltaT()), e1.GetLocation().z);
         }
 
         win.Update();

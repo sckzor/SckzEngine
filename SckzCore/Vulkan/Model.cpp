@@ -14,9 +14,9 @@ namespace sckz
                             VkPhysicalDevice & physicalDevice,
                             GraphicsPipeline & pipeline,
                             DescriptorPool &   descriptorPool,
+                            VkFormat           format,
                             Memory &           memory,
-                            VkQueue &          queue,
-                            Image &            environmentMap)
+                            VkQueue &          queue)
     {
         this->colorFileName    = colorFileName;
         this->normalFileName   = normalFileName;
@@ -29,7 +29,7 @@ namespace sckz
         this->pipeline         = &pipeline;
         this->queue            = &queue;
         this->memory           = &memory;
-        this->environmentMap   = &environmentMap;
+        this->format           = format;
 
         this->hostLocalBuffer.CreateBuffer(*this->physicalDevice,
                                            *this->device,
@@ -54,7 +54,6 @@ namespace sckz
         CreateTexture(textures[0], colorFileName);
         CreateTexture(textures[1], normalFileName);
         CreateTexture(textures[2], spacularFileName);
-        textures[3] = environmentMap;
 
         LoadModel();
         CreateVertexBuffer();
@@ -109,6 +108,29 @@ namespace sckz
         for (uint32_t i = 0; i < entities.size(); i++)
         {
             entities[i]->Update(camera);
+        }
+    }
+
+    std::vector<Entity *> Model::GetReflectiveEntities()
+    {
+        std::vector<Entity *> reflectiveEntities;
+        for (uint32_t i = 0; i < entities.size(); i++)
+        {
+            if (entities[i]->IsReflective())
+            {
+                reflectiveEntities.push_back(entities[i]);
+            }
+        }
+
+        return reflectiveEntities;
+    }
+
+    void Model::UpdateCubeCamera(Camera & camera)
+    {
+
+        for (uint32_t i = 0; i < entities.size(); i++)
+        {
+            entities[i]->UpdateCubeMap(camera);
         }
     }
 
@@ -189,15 +211,12 @@ namespace sckz
         stagingBuffer.DestroySubBlock();
     }
 
-    void Model::RebuildSwapResources(DescriptorPool & descriptorPool, Image & newEnvironmentMap)
+    void Model::RebuildSwapResources(DescriptorPool & descriptorPool, VkExtent2D swapChainExtent)
     {
         DestroySwapResources();
-
-        this->environmentMap = &newEnvironmentMap;
-
         for (size_t i = 0; i < entities.size(); i++)
         {
-            entities[i]->RebuildSwapResources(newEnvironmentMap);
+            entities[i]->RebuildSwapResources(swapChainExtent);
         }
         // Create
 
@@ -368,10 +387,11 @@ namespace sckz
                              *descriptorPool,
                              *pipeline,
                              *memory,
-                             VK_FORMAT_A1R5G5B5_UNORM_PACK16,
+                             format,
                              *commandPool,
                              isReflectRefractive,
-                             textures);
+                             textures,
+                             blankTexture);
 
         entities.push_back(entity);
         CreateCommandBuffer();

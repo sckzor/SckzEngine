@@ -53,7 +53,8 @@ namespace sckz
         VkDevice *             device;
         DescriptorPool *       descriptorPool;
         GraphicsPipeline *     pipeline;
-        std::array<Image, 4> * textures;
+        std::array<Image, 3> * textures;
+        Image *                blankImage;
         std::vector<Light *> * lights;
 
         std::array<Buffer::SubBlock, 2> complexUniformBuffers;
@@ -64,6 +65,8 @@ namespace sckz
         glm::vec3 location;
         glm::vec3 rotation;
         glm::vec3 scale;
+
+        glm::mat4x4 currentModel;
 
         Camera cubeMapCamera;
         Fbo    reflectionMap;
@@ -87,12 +90,14 @@ namespace sckz
                           VkFormat               format,
                           VkCommandPool &        commandPool,
                           bool                   isCubeMap,
-                          std::array<Image, 4> & textures);
+                          std::array<Image, 3> & textures,
+                          Image &                blankImage);
 
         void DestroyEntity();
 
-        void RebuildSwapResources(Image & newEnvironmentMap);
+        void RebuildSwapResources(VkExtent2D swapChainExtent);
         void Update(Camera & camera);
+        void UpdateCubeMap(Camera & cubeMapCamera);
 
     private:
         void CreateUniformBuffers();
@@ -108,11 +113,17 @@ namespace sckz
 
         void SetReflectRefractValues(float refractiveIndexRatio, float reflectRefractFactor);
 
+        Fbo & GetEnvironmentMapFBO();
+
+        bool IsReflective();
+
         glm::vec3 GetLocation();
         glm::vec3 GetRotation();
         glm::vec3 GetScale();
 
         VkDescriptorSet & GetSimpleDescriptorSet();
         VkDescriptorSet & GetComplexDescriptorSet();
+
+        Camera & GetCubeMapCamera();
     };
 } // namespace sckz

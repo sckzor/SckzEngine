@@ -46,6 +46,7 @@ namespace sckz
         std::vector<ParticleSystem *>   particleSystems;
 
         VkFence inFlightFence;
+        VkFence inFlightFenceCube;
 
         CubeMap cubeMapTest;
 
@@ -81,10 +82,13 @@ namespace sckz
         void DestroySwapResources();
 
     private:
+        void RenderCubeMap(Entity & transparentEntity);
+
+    private:
         VkSampleCountFlagBits GetTargetSampleCount(int32_t targetSampleCount);
 
     public:
-        void Render(Camera & camera, float deltaTime, Fbo & fbo);
+        void Render(Camera & camera, float deltaTime);
         void SetMSAA(int32_t targetMsaaSamples);
 
         Fbo & GetRenderedImage();
