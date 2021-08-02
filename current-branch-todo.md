@@ -8,8 +8,8 @@ All code in this repository is copyright Charles Sands 2021. All rights reserved
 
 #### Things to do in the current branch before it is merged to master
 
-Animated textures for the partices
+Get rid of validation errors
 
-Each particle with it's own secondary command buffer so that extra draw calls don't need to be triggered
+Add a blank cubemap texture
 
-~~Get rid of the darn "hasCommandBuffer" boolean from a bunch of functions!!!!!!!!!!!!!!!!!!!!!!!!~~
+Rename variables
