@@ -54,7 +54,7 @@ namespace sckz
         DescriptorPool *       descriptorPool;
         GraphicsPipeline *     pipeline;
         std::array<Image, 3> * textures;
-        Image *                blankImage;
+        Image *                blankCubeImage;
         std::vector<Light *> * lights;
 
         std::array<Buffer::SubBlock, 2> complexUniformBuffers;
@@ -91,7 +91,7 @@ namespace sckz
                           VkCommandPool &        commandPool,
                           bool                   isCubeMap,
                           std::array<Image, 3> & textures,
-                          Image &                blankImage);
+                          Image &                blankCubeImage);
 
         void DestroyEntity();
 

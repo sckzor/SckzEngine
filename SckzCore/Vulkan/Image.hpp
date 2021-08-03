@@ -82,6 +82,12 @@ namespace sckz
                                      VkCommandPool &    pool,
                                      VkQueue &          queue);
 
+        void CreateBlankCubeTextureImage(VkDevice &         device,
+                                         VkPhysicalDevice & physicalDevice,
+                                         Memory &           memory,
+                                         VkCommandPool &    pool,
+                                         VkQueue &          queue);
+
         void CopyImage(Image & dst, VkImageAspectFlagBits aspectMask, int32_t faceIndex);
         void GenerateMipmaps(VkFormat imageFormat, int32_t texWidth, int32_t texHeight);
 

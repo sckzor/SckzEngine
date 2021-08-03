@@ -70,6 +70,7 @@ namespace sckz
 
         block = &memory.AllocateMemory(memRequirements, properties);
         vkBindImageMemory(*this->device, image, *block->memory, block->offset);
+        std::cout << "Created Image" << std::endl;
     }
 
     void Image::CreateCommandBuffer()
@@ -315,6 +316,84 @@ namespace sckz
         GenerateMipmaps(VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight);
     }
 
+    void Image::CreateBlankCubeTextureImage(VkDevice &         device,
+                                            VkPhysicalDevice & physicalDevice,
+                                            Memory &           memory,
+                                            VkCommandPool &    pool,
+                                            VkQueue &          queue)
+    {
+        this->device         = &device;
+        this->physicalDevice = &physicalDevice;
+        this->memory         = &memory;
+
+        hostLocalBuffer.CreateBuffer(*this->physicalDevice,
+                                     *this->device,
+                                     *this->memory,
+                                     0x7FFFFFF,
+                                     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                                     queue,
+                                     pool);
+
+        deviceLocalBuffer.CreateBuffer(*this->physicalDevice,
+                                       *this->device,
+                                       *this->memory,
+                                       0x7FFFFFF,
+                                       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                                       queue,
+                                       pool);
+
+        int          texWidth = 1, texHeight = 1;
+        char *       dummyData = new char;
+        VkDeviceSize imageSize = 24;
+        VkDeviceSize layerSize = 4;
+        mipLevels              = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
+
+        if (!dummyData)
+        {
+            throw std::runtime_error("failed to load texture image!");
+        }
+
+        Buffer::SubBlock stagingBuffer = hostLocalBuffer.GetBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+
+        for (uint32_t i = 0; i < 6; i++)
+        {
+            stagingBuffer.CopyDataToBuffer(dummyData, static_cast<size_t>(layerSize), layerSize * i);
+        }
+
+        CreateImage(texWidth,
+                    texHeight,
+                    mipLevels,
+                    VK_SAMPLE_COUNT_1_BIT,
+                    VK_FORMAT_R8G8B8A8_SRGB,
+                    VK_IMAGE_TILING_OPTIMAL,
+                    VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+                    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                    *this->device,
+                    *this->physicalDevice,
+                    memory,
+                    queue,
+                    pool,
+                    true); // queue is the PRIVATE queue
+
+        CommandBuffer cmdBuffer;
+        cmdBuffer.BeginSingleUseCommandBuffer(device, pool, queue);
+        TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED,
+                              VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                              VK_IMAGE_ASPECT_COLOR_BIT,
+                              cmdBuffer.GetCommandBuffer());
+        cmdBuffer.EndSingleUseCommandBuffer();
+
+        stagingBuffer.CopyBufferToImage(image,
+                                        static_cast<uint32_t>(texWidth),
+                                        static_cast<uint32_t>(texHeight),
+                                        isCube);
+        // transitioned to VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL while generating mipmaps
+
+        stagingBuffer.DestroySubBlock();
+
+        GenerateMipmaps(VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight);
+    }
+
     void Image::CreateBlankTextureImage(VkDevice &         device,
                                         VkPhysicalDevice & physicalDevice,
                                         Memory &           memory,
@@ -394,6 +473,7 @@ namespace sckz
 
     void Image::DestroyImage()
     {
+        std::cout << "Destroyed Image" << std::endl;
         vkDestroyImageView(*device, imageView, nullptr);
         vkDestroySampler(*device, sampler, nullptr);
         if (holdsRealImage)

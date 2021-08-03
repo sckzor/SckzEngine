@@ -44,6 +44,7 @@ namespace sckz
         const char * spacularFileName;
         const char * modelFileName;
         Image        blankTexture;
+        Image        blankTextureCube;
         VkFormat     format;
 
         std::vector<Entity *> entities;

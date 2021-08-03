@@ -13,7 +13,7 @@ namespace sckz
                               VkCommandPool &        commandPool,
                               bool                   isCubeMap,
                               std::array<Image, 3> & textures,
-                              Image &                blankImage)
+                              Image &                blankCubeImage)
     {
         this->physicalDevice  = &physicalDevice;
         this->queue           = &queue;
@@ -21,8 +21,8 @@ namespace sckz
         this->descriptorPool  = &descriptorPool;
         this->pipeline        = &pipeline;
         this->hostLocalBuffer = &hostLocalBuffer;
-        this->isCubeMap       = true;
-        this->blankImage      = &blankImage;
+        this->isCubeMap       = isCubeMap;
+        this->blankCubeImage  = &blankCubeImage;
 
         this->textures = &textures;
 
@@ -53,7 +53,7 @@ namespace sckz
         }
         else
         {
-            allTextures = { textures.at(0), textures.at(1), textures.at(2), blankImage };
+            allTextures = { textures.at(0), textures.at(1), textures.at(2), blankCubeImage };
         }
 
         this->pipeline->BindComplexShaderData(&complexUniformBuffers[0],
@@ -66,6 +66,8 @@ namespace sckz
                                              &allTextures[0],
                                              *this->descriptorPool,
                                              &simpleDescriptorSet);
+
+        // std::cout << reflectionMap.GetImage().GetImage() << std::endl;
     }
 
     void Entity::DestroyEntity()
@@ -91,7 +93,7 @@ namespace sckz
         }
         else
         {
-            allTextures = { textures->at(0), textures->at(1), textures->at(2), *blankImage };
+            allTextures = { textures->at(0), textures->at(1), textures->at(2), *blankCubeImage };
         }
 
         DestroyEntity();
@@ -203,7 +205,10 @@ namespace sckz
         location.y = y;
         location.z = z;
 
-        cubeMapCamera.SetLocation(x, y, z);
+        if (isCubeMap)
+        {
+            cubeMapCamera.SetLocation(x, y, z);
+        }
     }
 
     void Entity::SetRotation(float x, float y, float z)
@@ -212,7 +217,10 @@ namespace sckz
         rotation.y = y;
         rotation.z = z;
 
-        cubeMapCamera.SetRotation(x, y, z);
+        if (isCubeMap)
+        {
+            cubeMapCamera.SetRotation(x, y, z);
+        }
     }
 
     void Entity::SetScale(float x, float y, float z)

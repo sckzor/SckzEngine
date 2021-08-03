@@ -28,8 +28,8 @@ namespace sckz
         DescriptorPool descriptorPool; // Duplicated
         VkCommandPool  commandPool;    // Duplicated
 
-        Fbo      fboImage;
-        Fbo      cubeMapImage;
+        Fbo      renderedImageFbo;
+        Fbo      temporaryCubeMapFbo;
         VkFormat format;
         Memory   memory;
 
@@ -48,7 +48,7 @@ namespace sckz
         VkFence inFlightFence;
         VkFence inFlightFenceCube;
 
-        CubeMap cubeMapTest;
+        CubeMap skyboxCubemap;
 
         VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT; // Goes
         VkSampleCountFlagBits maxMsaaSamples;

@@ -51,6 +51,10 @@ namespace sckz
         blankTexture.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
         blankTexture.CreateTextureSampler();
 
+        blankTextureCube.CreateBlankCubeTextureImage(*this->device, *this->physicalDevice, memory, commandPool, queue);
+        blankTextureCube.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
+        blankTextureCube.CreateTextureSampler();
+
         CreateTexture(textures[0], colorFileName);
         CreateTexture(textures[1], normalFileName);
         CreateTexture(textures[2], spacularFileName);
@@ -100,6 +104,7 @@ namespace sckz
             }
         }
         blankTexture.DestroyImage();
+        blankTextureCube.DestroyImage();
     }
 
     void Model::Update(Camera & camera)
@@ -214,6 +219,21 @@ namespace sckz
     void Model::RebuildSwapResources(DescriptorPool & descriptorPool, VkExtent2D swapChainExtent)
     {
         DestroySwapResources();
+
+        blankTexture.DestroyImage();
+        blankTexture.CreateBlankTextureImage(*this->device, *this->physicalDevice, *memory, *commandPool, *queue);
+        blankTexture.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
+        blankTexture.CreateTextureSampler();
+
+        blankTextureCube.DestroyImage();
+        blankTextureCube.CreateBlankCubeTextureImage(*this->device,
+                                                     *this->physicalDevice,
+                                                     *memory,
+                                                     *commandPool,
+                                                     *queue);
+        blankTextureCube.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
+        blankTextureCube.CreateTextureSampler();
+
         for (size_t i = 0; i < entities.size(); i++)
         {
             entities[i]->RebuildSwapResources(swapChainExtent);
@@ -391,7 +411,7 @@ namespace sckz
                              *commandPool,
                              isReflectRefractive,
                              textures,
-                             blankTexture);
+                             blankTextureCube);
 
         entities.push_back(entity);
         CreateCommandBuffer();
