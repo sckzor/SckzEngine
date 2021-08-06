@@ -38,16 +38,14 @@ namespace sckz
         cubeMapTexture.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
         cubeMapTexture.CreateTextureSampler();
 
-        this->hostLocalBuffer.CreateBuffer(*this->physicalDevice,
-                                           *this->device,
+        this->hostLocalBuffer.CreateBuffer(*this->device,
                                            *this->memory,
                                            0x7FFFFFF,
                                            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                                            *this->queue,
                                            pool);
 
-        this->deviceLocalBuffer.CreateBuffer(*this->physicalDevice,
-                                             *this->device,
+        this->deviceLocalBuffer.CreateBuffer(*this->device,
                                              *this->memory,
                                              0x7FFFFFF,
                                              VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,

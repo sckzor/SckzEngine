@@ -70,7 +70,6 @@ namespace sckz
 
         block = &memory.AllocateMemory(memRequirements, properties);
         vkBindImageMemory(*this->device, image, *block->memory, block->offset);
-        std::cout << "Created Image" << std::endl;
     }
 
     void Image::CreateCommandBuffer()
@@ -152,21 +151,15 @@ namespace sckz
         this->physicalDevice = &physicalDevice;
         this->memory         = &memory;
 
-        hostLocalBuffer.CreateBuffer(*this->physicalDevice,
-                                     *this->device,
+        hostLocalBuffer.CreateBuffer(*this->device,
                                      *this->memory,
                                      0x7FFFFFF,
                                      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                                      queue,
                                      pool);
 
-        deviceLocalBuffer.CreateBuffer(*this->physicalDevice,
-                                       *this->device,
-                                       *this->memory,
-                                       0x7FFFFFF,
-                                       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                                       queue,
-                                       pool);
+        deviceLocalBuffer
+            .CreateBuffer(*this->device, *this->memory, 0x7FFFFFF, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, queue, pool);
 
         int          texWidth, texHeight, texChannels;
         stbi_uc *    pixels    = stbi_load(fileName, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
@@ -236,21 +229,15 @@ namespace sckz
         this->physicalDevice = &physicalDevice;
         this->memory         = &memory;
 
-        hostLocalBuffer.CreateBuffer(*this->physicalDevice,
-                                     *this->device,
+        hostLocalBuffer.CreateBuffer(*this->device,
                                      *this->memory,
                                      0x7FFFFFF,
                                      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                                      queue,
                                      pool);
 
-        deviceLocalBuffer.CreateBuffer(*this->physicalDevice,
-                                       *this->device,
-                                       *this->memory,
-                                       0x7FFFFFF,
-                                       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                                       queue,
-                                       pool);
+        deviceLocalBuffer
+            .CreateBuffer(*this->device, *this->memory, 0x7FFFFFF, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, queue, pool);
         stbi_uc * pixels[6];
 
         int texWidth, texHeight, texChannels;
@@ -326,21 +313,15 @@ namespace sckz
         this->physicalDevice = &physicalDevice;
         this->memory         = &memory;
 
-        hostLocalBuffer.CreateBuffer(*this->physicalDevice,
-                                     *this->device,
+        hostLocalBuffer.CreateBuffer(*this->device,
                                      *this->memory,
                                      0x7FFFFFF,
                                      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                                      queue,
                                      pool);
 
-        deviceLocalBuffer.CreateBuffer(*this->physicalDevice,
-                                       *this->device,
-                                       *this->memory,
-                                       0x7FFFFFF,
-                                       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                                       queue,
-                                       pool);
+        deviceLocalBuffer
+            .CreateBuffer(*this->device, *this->memory, 0x7FFFFFF, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, queue, pool);
 
         int          texWidth = 1, texHeight = 1;
         char *       dummyData = new char;
@@ -403,24 +384,20 @@ namespace sckz
         this->device         = &device;
         this->physicalDevice = &physicalDevice;
         this->memory         = &memory;
+        this->pool           = &pool;
+        this->queue          = &queue;
         size.width           = 0;
         size.height          = 0;
 
-        hostLocalBuffer.CreateBuffer(*this->physicalDevice,
-                                     *this->device,
+        hostLocalBuffer.CreateBuffer(*this->device,
                                      *this->memory,
                                      0x7FFFFFF,
                                      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                                      queue,
                                      pool);
 
-        deviceLocalBuffer.CreateBuffer(*this->physicalDevice,
-                                       *this->device,
-                                       *this->memory,
-                                       0x7FFFFFF,
-                                       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                                       queue,
-                                       pool);
+        deviceLocalBuffer
+            .CreateBuffer(*this->device, *this->memory, 0x7FFFFFF, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, queue, pool);
 
         int          texWidth = 1, texHeight = 1;
         char *       dummyData = new char;
@@ -473,7 +450,6 @@ namespace sckz
 
     void Image::DestroyImage()
     {
-        std::cout << "Destroyed Image" << std::endl;
         vkDestroyImageView(*device, imageView, nullptr);
         vkDestroySampler(*device, sampler, nullptr);
         if (holdsRealImage)

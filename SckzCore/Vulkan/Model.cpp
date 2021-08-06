@@ -31,21 +31,15 @@ namespace sckz
         this->memory           = &memory;
         this->format           = format;
 
-        this->hostLocalBuffer.CreateBuffer(*this->physicalDevice,
-                                           *this->device,
-                                           *this->memory,
+        this->hostLocalBuffer.CreateBuffer(device,
+                                           memory,
                                            0x7FFFFFF,
                                            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                                           *this->queue,
+                                           queue,
                                            commandPool);
 
-        this->deviceLocalBuffer.CreateBuffer(*this->physicalDevice,
-                                             *this->device,
-                                             *this->memory,
-                                             0x7FFFFFF,
-                                             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                                             *this->queue,
-                                             commandPool);
+        this->deviceLocalBuffer
+            .CreateBuffer(device, memory, 0x7FFFFFF, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, queue, commandPool);
 
         blankTexture.CreateBlankTextureImage(*this->device, *this->physicalDevice, memory, commandPool, queue);
         blankTexture.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
@@ -93,18 +87,19 @@ namespace sckz
         vertexBuffer->DestroySubBlock();
         indexBuffer->DestroySubBlock();
 
+        blankTexture.DestroyImage();
+        blankTextureCube.DestroyImage();
+
         hostLocalBuffer.DestroyBuffer();
         deviceLocalBuffer.DestroyBuffer();
-        for (uint32_t i = 0; i < textures.size() - 1; i++)
+        for (uint32_t i = 0; i < textures.size(); i++)
         {
-            if (textures[i] != blankTexture)
+            if (textures[i].GetImage() != blankTexture.GetImage())
             {
 
                 textures[i].DestroyImage();
             }
         }
-        blankTexture.DestroyImage();
-        blankTextureCube.DestroyImage();
     }
 
     void Model::Update(Camera & camera)
@@ -219,28 +214,13 @@ namespace sckz
     void Model::RebuildSwapResources(DescriptorPool & descriptorPool, VkExtent2D swapChainExtent)
     {
         DestroySwapResources();
-
-        blankTexture.DestroyImage();
-        blankTexture.CreateBlankTextureImage(*this->device, *this->physicalDevice, *memory, *commandPool, *queue);
-        blankTexture.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
-        blankTexture.CreateTextureSampler();
-
-        blankTextureCube.DestroyImage();
-        blankTextureCube.CreateBlankCubeTextureImage(*this->device,
-                                                     *this->physicalDevice,
-                                                     *memory,
-                                                     *commandPool,
-                                                     *queue);
-        blankTextureCube.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
-        blankTextureCube.CreateTextureSampler();
+        this->descriptorPool = &descriptorPool;
 
         for (size_t i = 0; i < entities.size(); i++)
         {
             entities[i]->RebuildSwapResources(swapChainExtent);
         }
         // Create
-
-        this->descriptorPool = &descriptorPool;
 
         CreateCommandBuffer();
         CreateCubeMapCommandBuffer();

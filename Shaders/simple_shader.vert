@@ -44,8 +44,7 @@ void main()
     // TODO: change this so that the camera position is uploaded in the UBO
     camLocation = (inverse(ubo.view) * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 
-    toCameraVector = camLocation - worldPosition.xyz;
-    // reflect(normalize(toCameraVector), normalize(inNormal))
-    reflectedVector = normalize(toCameraVector);
+    toCameraVector  = camLocation - worldPosition.xyz;
+    reflectedVector = reflect(normalize(toCameraVector), normalize(inNormal));
     refractedVector = refract(normalize(toCameraVector), normalize(inNormal), ubo.refractiveIndexRatio);
 }

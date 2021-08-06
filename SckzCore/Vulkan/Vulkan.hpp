@@ -92,8 +92,9 @@ namespace sckz
 
         int32_t fps = 0; // Stays
 
-        Fbo *              lastRenderedFbo      = nullptr;
-        GraphicsPipeline * lastRenderedPipeline = nullptr;
+        Fbo *                 lastRenderedFbo      = nullptr;
+        GraphicsPipeline *    lastRenderedPipeline = nullptr;
+        VkSampleCountFlagBits lastRenderedMsaaSamples;
 
         Fbo dummyFbo;
 
@@ -145,8 +146,6 @@ namespace sckz
         void CreateFramebuffers();
         void CreateSyncObjects();
 
-        void RebuildCommandBuffers(Scene * scene, GraphicsPipeline * pipeline);
-
     private: // Swapchain recreation functions
         void RebuildSwapChain();
         void DestroySwapResources();
@@ -177,7 +176,7 @@ namespace sckz
         uint32_t GetMaximumSampleCount();
         float    GetDeltaT();
 
-        void Present(Fbo & fbo, GraphicsPipeline & pipeline);
+        void Present(Fbo & fbo, GraphicsPipeline & pipeline, VkSampleCountFlagBits msaaSamples);
 
     public:
         Scene & CreateScene();

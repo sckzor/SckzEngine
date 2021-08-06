@@ -25,7 +25,7 @@ int main()
                                                     "Resources/cubemap_render_vertex.spv",
                                                     "Resources/cubemap_render_fragment.spv");
 
-    sckz::Model & m1 = s1.CreateModel("Resources/cubemap.obj",
+    sckz::Model & m1 = s1.CreateModel("Resources/barrel.obj",
                                       "Resources/barrelColor.png",
                                       "Resources/barrelNormal.png",
                                       "Resources/barrelSpecular.png",
@@ -40,12 +40,13 @@ int main()
                                                     "Resources/cubemap_render_vertex.spv",
                                                     "Resources/cubemap_render_fragment.spv");
 
-    sckz::Model & m2 = s2.CreateModel("Resources/barrel.obj",
-                                      "Resources/barrelColor.png",
-                                      "Resources/barrelNormal.png",
-                                      "Resources/barrelSpecular.png",
-                                      p2);
-
+    /*
+        sckz::Model & m2 = s2.CreateModel("Resources/barrel.obj",
+                                          "Resources/barrelColor.png",
+                                          "Resources/barrelNormal.png",
+                                          "Resources/barrelSpecular.png",
+                                          p2);
+    */
     sckz::Light & l2 = s1.CreateLight(true);
 
     sckz::Entity & e1 = s1.CreateEntity(m1, true);
@@ -70,7 +71,7 @@ int main()
     e1.SetRotation(90, 0, 0);
     e1.SetLocation(0, 0, 0);
     e1.SetScale(0.1, 0.1, 0.1);
-    e1.SetReflectRefractValues(1 / 1, 1);
+    e1.SetReflectRefractValues(1 / 1.33, 0.6);
 
     l1.SetColor(0, 0.5, 1);
     l1.SetLocation(0, 0, 0);
@@ -180,11 +181,11 @@ int main()
 
             if (win.QueryKey('y'))
             {
-                vkan.Present(s2.GetRenderedImage(), f2);
+                vkan.Present(s2.GetRenderedImage(), f2, s2.GetMsaaSamples());
             }
             else
             {
-                vkan.Present(s2.GetRenderedImage(), f1);
+                vkan.Present(s2.GetRenderedImage(), f1, s2.GetMsaaSamples());
             }
         }
         else
@@ -196,11 +197,11 @@ int main()
             if (win.QueryKey('y'))
             {
 
-                vkan.Present(s1.GetRenderedImage(), f1);
+                vkan.Present(s1.GetRenderedImage(), f1, s1.GetMsaaSamples());
             }
             else
             {
-                vkan.Present(bloomFbo, f1);
+                vkan.Present(bloomFbo, f1, s1.GetMsaaSamples());
             }
         }
 

@@ -116,5 +116,7 @@ namespace sckz
                                               uint32_t     hStages,
                                               uint32_t     vStages,
                                               uint32_t     totalStages);
+
+        VkSampleCountFlagBits GetMsaaSamples();
     };
 } // namespace sckz

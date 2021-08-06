@@ -10,6 +10,8 @@ All code in this repository is copyright Charles Sands 2021. All rights reserved
 
 Get rid of validation errors
 
+Make msaa work
+
 ~~Add a blank cubemap texture~~
 
 ~~Rename variables~~

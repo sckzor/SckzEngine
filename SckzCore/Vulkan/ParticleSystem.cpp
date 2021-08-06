@@ -29,12 +29,11 @@ namespace sckz
 
         particles.resize(maxParticles);
 
-        this->hostLocalBuffer.CreateBuffer(*this->physicalDevice,
-                                           *this->device,
-                                           *this->memory,
+        this->hostLocalBuffer.CreateBuffer(device,
+                                           memory,
                                            0x7FFFFFF,
                                            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                                           *this->queue,
+                                           queue,
                                            commandPool);
 
         texture.CreateTextureImage(textureFileName, *this->device, *this->physicalDevice, memory, commandPool, queue);

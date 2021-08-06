@@ -26,8 +26,7 @@ namespace sckz
         this->queue           = &queue;
         this->memory          = &memory;
 
-        this->hostLocalBuffer.CreateBuffer(*this->physicalDevice,
-                                           *this->device,
+        this->hostLocalBuffer.CreateBuffer(*this->device,
                                            *this->memory,
                                            0x7FFFFFF,
                                            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,

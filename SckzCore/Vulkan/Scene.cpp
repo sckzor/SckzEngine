@@ -499,6 +499,8 @@ namespace sckz
         RebuildSwapResources(swapChainExtent);
     }
 
+    VkSampleCountFlagBits Scene::GetMsaaSamples() { return msaaSamples; }
+
     void Scene::RenderCubeMap(Entity & transparentEntity)
     {
         for (uint32_t i = 0; i < models.size(); i++)

@@ -12,7 +12,7 @@ namespace sckz
         VkCommandBufferAllocateInfo allocInfo {};
         allocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandPool        = *this->pool;
+        allocInfo.commandPool        = pool;
         allocInfo.commandBufferCount = 1;
 
         vkAllocateCommandBuffers(*this->device, &allocInfo, &this->commandBuffer);

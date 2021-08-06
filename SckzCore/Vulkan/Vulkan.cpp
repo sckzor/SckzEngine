@@ -937,11 +937,11 @@ namespace sckz
             std::vector<VkCommandBuffer> buffers;
 
             buffers.push_back(commandBuffers[i]);
-            std::cout << "Vulkan FBO Command Buffer: " << commandBuffers[i] << std::endl;
+            // std::cout << "Vulkan FBO Command Buffer: " << commandBuffers[i] << std::endl;
             for (size_t j = 0; j < guis.size(); j++)
             {
                 buffers.push_back((guis[j]->GetCommandBuffer(i)));
-                std::cout << "GUI Command Buffer " << j << ": " << guis[j]->GetCommandBuffer(i) << std::endl;
+                // std::cout << "GUI Command Buffer " << j << ": " << guis[j]->GetCommandBuffer(i) << std::endl;
             }
 
             vkCmdExecuteCommands(primaryCommandBuffers[i], buffers.size(), buffers.data());
@@ -955,17 +955,18 @@ namespace sckz
         }
     }
 
-    void Vulkan::RebuildCommandBuffers(Scene * scene, GraphicsPipeline * pipeline) { }
-
-    void Vulkan::Present(Fbo & fbo, GraphicsPipeline & pipeline)
+    void Vulkan::Present(Fbo & fbo, GraphicsPipeline & pipeline, VkSampleCountFlagBits msaaSamples)
     {
         vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
-        if (lastRenderedFbo != &fbo || lastRenderedPipeline != &pipeline)
+        std::cout << msaaSamples << " " << lastRenderedMsaaSamples << std::endl;
+
+        if (lastRenderedFbo != &fbo || lastRenderedPipeline != &pipeline || lastRenderedMsaaSamples != msaaSamples)
         {
             CreateCommandBuffers(&fbo, &pipeline);
-            lastRenderedPipeline = &pipeline;
-            lastRenderedFbo      = &fbo;
+            lastRenderedPipeline    = &pipeline;
+            lastRenderedFbo         = &fbo;
+            lastRenderedMsaaSamples = msaaSamples;
         }
 
         uint32_t imageIndex;
@@ -979,6 +980,7 @@ namespace sckz
         if (result == VK_ERROR_OUT_OF_DATE_KHR)
         {
             RebuildSwapChain();
+            CreateCommandBuffers(&fbo, &pipeline);
             return;
         }
         else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
@@ -1063,7 +1065,6 @@ namespace sckz
         lastTime    = currentTime;
         currentTime = std::chrono::high_resolution_clock::now();
         deltaTime   = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
-        // FrameMark("frame");
     }
 
     float Vulkan::GetDeltaT()

@@ -84,11 +84,10 @@ namespace sckz
 
     void Entity::RebuildSwapResources(VkExtent2D swapChainExtent)
     {
-        reflectionMap.RebuildSwapResources(VK_SAMPLE_COUNT_1_BIT, swapChainExtent);
-
         std::array<Image, 4> allTextures;
         if (this->isCubeMap)
         {
+            reflectionMap.RebuildSwapResources(VK_SAMPLE_COUNT_1_BIT, swapChainExtent);
             allTextures = { textures->at(0), textures->at(1), textures->at(2), reflectionMap.GetImage() };
         }
         else
@@ -96,8 +95,8 @@ namespace sckz
             allTextures = { textures->at(0), textures->at(1), textures->at(2), *blankCubeImage };
         }
 
-        DestroyEntity();
         CreateUniformBuffers();
+
         this->pipeline->BindComplexShaderData(&complexUniformBuffers[0],
                                               allTextures.data(),
                                               &complexUniformBuffers[1],

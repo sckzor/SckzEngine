@@ -114,7 +114,6 @@ void main()
         vec4 reflectedColor = texture(cubeMap, reflectedVector);
         vec4 refractedColor = texture(cubeMap, refractedVector);
         vec4 cubeMapColor   = mix(reflectedColor, refractedColor, 0.5);
-        // mix(outColor, cubeMapColor, ubo.reflectRefractFactor)
-        outColor = reflectedColor;
+        outColor            = mix(outColor, cubeMapColor, ubo.reflectRefractFactor);
     }
 }

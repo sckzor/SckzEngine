@@ -65,7 +65,6 @@ namespace sckz
         VkExtent2D            GetSwapChainExtent();
         VkRenderPass &        GetRenderPass();
         void                  CopyToFbo(Fbo & dst);
-        // void                  FilterImage(Filter & pipeline);
-        void GetRenderPassBeginInfo(VkRenderPassBeginInfo * renderPassInfo);
+        void                  GetRenderPassBeginInfo(VkRenderPassBeginInfo * renderPassInfo);
     };
 } // namespace sckz

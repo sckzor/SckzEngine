@@ -53,8 +53,7 @@ namespace sckz
         CommandBuffer         cmdBuffer;
 
     public:
-        void CreateBuffer(VkPhysicalDevice &    physicalDevice,
-                          VkDevice &            device,
+        void CreateBuffer(VkDevice &            device,
                           Memory &              memory,
                           uint32_t              blockSize,
                           VkMemoryPropertyFlags memoryProperty,

@@ -2,8 +2,7 @@
 
 namespace sckz
 {
-    void Buffer::CreateBuffer(VkPhysicalDevice &    physicalDevice,
-                              VkDevice &            device,
+    void Buffer::CreateBuffer(VkDevice &            device,
                               Memory &              memory,
                               uint32_t              blockSize,
                               VkMemoryPropertyFlags memoryProperty,

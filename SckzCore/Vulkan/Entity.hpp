@@ -57,6 +57,10 @@ namespace sckz
         Image *                blankCubeImage;
         std::vector<Light *> * lights;
 
+        Memory *        memory;
+        VkFormat        format;
+        VkCommandPool * commandPool;
+
         std::array<Buffer::SubBlock, 2> complexUniformBuffers;
         VkDescriptorSet                 complexDescriptorSet;
         Buffer::SubBlock                simpleUniformBuffer;
