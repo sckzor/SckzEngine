@@ -122,4 +122,4 @@ those were caused by me and I need to fix them at some point.
 
 ## Image of the Engine in action
 
-![Screenshot](Screenshot.gif)
+![Screenshot](Screenshot.png)

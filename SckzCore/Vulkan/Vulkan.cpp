@@ -959,8 +959,6 @@ namespace sckz
     {
         vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
-        std::cout << msaaSamples << " " << lastRenderedMsaaSamples << std::endl;
-
         if (lastRenderedFbo != &fbo || lastRenderedPipeline != &pipeline || lastRenderedMsaaSamples != msaaSamples)
         {
             CreateCommandBuffers(&fbo, &pipeline);
