@@ -3,11 +3,16 @@
 namespace sckz
 {
     // public member functions
-    void Window::CreateWindow(const char * name, uint32_t width, uint32_t height)
+    void Window::CreateWindow(const char * name, uint32_t width, uint32_t height, bool decorated)
     {
         glfwInit();
 
+        initialWindowedWidth  = width;
+        initialWindowedHieght = height;
+        isFullScreen          = false;
+
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+        glfwWindowHint(GLFW_DECORATED, decorated ? GLFW_TRUE : GLFW_FALSE);
 
         window = glfwCreateWindow(width, height, name, nullptr, nullptr);
         glfwSetWindowUserPointer(window, this);
@@ -30,6 +35,19 @@ namespace sckz
         glfwSetWindowIcon(window, 1, images);
         stbi_image_free(images[0].pixels);
     }
+
+    void Window::GoFullScreen()
+    {
+        isFullScreen = true;
+        glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), 0, 0, 1920, 1080, GLFW_DONT_CARE);
+    }
+    void Window::GoWindowed()
+    {
+        isFullScreen = false;
+        glfwSetWindowMonitor(window, nullptr, 0, 0, initialWindowedWidth, initialWindowedHieght, GLFW_DONT_CARE);
+    }
+
+    bool Window::IsFullScreen() { return isFullScreen; }
 
     bool Window::QueryClose() { return glfwWindowShouldClose(window); }
 

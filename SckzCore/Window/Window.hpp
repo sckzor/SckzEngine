@@ -14,8 +14,13 @@ namespace sckz
         bool         resized          = false;
         bool         keys[total_keys] = { false };
 
+        bool isFullScreen;
+
+        uint32_t initialWindowedWidth;
+        uint32_t initialWindowedHieght;
+
     public: // Pulbic member functions
-        void         CreateWindow(const char * name, uint32_t length, uint32_t width);
+        void         CreateWindow(const char * name, uint32_t length, uint32_t width, bool decorated);
         void         DestroyWindow();
         void         Update();
         void         SetIcon(const char * fileName);
@@ -25,6 +30,10 @@ namespace sckz
         bool *       QueryKeys();
         GLFWwindow * GetWindow();
         VkExtent2D   GetSize();
+        void         GoFullScreen();
+        void         GoWindowed();
+
+        bool IsFullScreen();
 
     public: // Public static functions
         static void FramebufferResizeCallback(GLFWwindow * window, int width, int height);

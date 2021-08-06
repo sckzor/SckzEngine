@@ -5,7 +5,7 @@ int main()
     sckz::InitRand();
 
     sckz::Window win;
-    win.CreateWindow("SckzEngine", 700, 500);
+    win.CreateWindow("SckzEngine", 700, 500, true);
 
     sckz::Vulkan vkan;
     vkan.CreateVulkan(win);
@@ -230,6 +230,17 @@ int main()
         if (win.QueryKey('7'))
         {
             e1.SetLocation(e1.GetLocation().x, e1.GetLocation().y + (10 * vkan.GetDeltaT()), e1.GetLocation().z);
+        }
+        if (win.QueryKey('\\'))
+        {
+            if (win.IsFullScreen())
+            {
+                win.GoWindowed();
+            }
+            else
+            {
+                win.GoFullScreen();
+            }
         }
 
         win.Update();
