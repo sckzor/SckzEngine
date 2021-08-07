@@ -17,6 +17,8 @@ namespace sckz
         window = glfwCreateWindow(width, height, name, nullptr, nullptr);
         glfwSetWindowUserPointer(window, this);
         glfwSetFramebufferSizeCallback(window, FramebufferResizeCallback);
+        glfwSetCursorPosCallback(window, MouseMoveCallback);
+        glfwSetMouseButtonCallback(window, MousePressCallback);
         glfwSetKeyCallback(window, KeyPressCallback);
     }
 
@@ -89,4 +91,35 @@ namespace sckz
     }
 
     bool Window::QueryKey(uint32_t key) { return keys[toupper(key)]; }
+
+    void Window::MouseMoveCallback(GLFWwindow * window, double xpos, double ypos)
+    {
+        auto app    = reinterpret_cast<Window *>(glfwGetWindowUserPointer(window));
+        app->mouseX = xpos;
+        app->mouseY = ypos;
+    }
+
+    void Window::MousePressCallback(GLFWwindow * window, int button, int action, int mods)
+    {
+        auto app = reinterpret_cast<Window *>(glfwGetWindowUserPointer(window));
+
+        if (action == GLFW_PRESS)
+        {
+            app->mouseButtons[button] = true;
+        }
+        else if (action == GLFW_RELEASE)
+        {
+            app->mouseButtons[button] = false;
+        }
+    }
+
+    glm::vec2 Window::GetMousePosition()
+    {
+        glm::vec2 location;
+        location.x = mouseX;
+        location.y = mouseY;
+        return location;
+    }
+
+    bool Window::QueryMouseButton(uint32_t button) { return mouseButtons[button]; }
 } // namespace sckz
