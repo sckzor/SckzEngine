@@ -116,8 +116,8 @@ namespace sckz
     glm::vec2 Window::GetMousePosition()
     {
         glm::vec2 location;
-        location.x = mouseX;
-        location.y = mouseY;
+        location.x = (mouseX * 2) - GetSize().width;
+        location.y = (mouseY * 2) - GetSize().height;
         return location;
     }
 

@@ -11,6 +11,7 @@
 #include "Image.hpp"
 #include "Model.hpp"
 #include "Scene.hpp"
+#include "Timer.hpp"
 
 namespace sckz
 {
@@ -71,6 +72,7 @@ namespace sckz
         GraphicsPipeline                guiPipeline;
         std::vector<Scene *>            scenes;
         std::vector<Gui *>              guis;
+        std::vector<Timer *>            timers;
 
         const std::vector<const char *> validationLayers = { "VK_LAYER_KHRONOS_validation" }; // Stays
         const std::vector<const char *> deviceExtensions
@@ -173,6 +175,8 @@ namespace sckz
 
         void SetFPS(int32_t fps);
 
+        Window & GetWindow();
+
         uint32_t GetMaximumSampleCount();
         float    GetDeltaT();
 
@@ -181,7 +185,9 @@ namespace sckz
     public:
         Scene & CreateScene();
 
-        Gui & CreateGUI(const char * texture);
+        Gui & CreateGUI(const char * texture, uint32_t stages);
+
+        Timer & CreateTimer();
 
         GraphicsPipeline & CreateFBOPipeline(const char * fragShader);
     };

@@ -14,10 +14,9 @@ int main()
 
     vkan.SetFPS(-1);
 
-    sckz::Scene & s1 = vkan.CreateScene();
-    sckz::Scene & s2 = vkan.CreateScene();
+    bool isMenuOpen = false;
 
-    sckz::GraphicsPipeline & f2 = vkan.CreateFBOPipeline("Resources/fbo_fragment_invert.spv");
+    sckz::Scene &            s1 = vkan.CreateScene();
     sckz::GraphicsPipeline & f1 = vkan.CreateFBOPipeline("Resources/fbo_fragment_normal.spv");
 
     sckz::GraphicsPipeline & p1 = s1.CreatePipeline("Resources/simple_vertex.spv",
@@ -35,36 +34,45 @@ int main()
 
     sckz::ParticleSystem & pa1 = s1.CreateParticleSystem(1000, "Resources/fireParticles.png", 4, 4, 15);
 
-    sckz::GraphicsPipeline & p2 = s2.CreatePipeline("Resources/simple_vertex.spv",
-                                                    "Resources/simple_fragment.spv",
-                                                    "Resources/cubemap_render_vertex.spv",
-                                                    "Resources/cubemap_render_fragment.spv");
-
-    /*
-        sckz::Model & m2 = s2.CreateModel("Resources/barrel.obj",
-                                          "Resources/barrelColor.png",
-                                          "Resources/barrelNormal.png",
-                                          "Resources/barrelSpecular.png",
-                                          p2);
-    */
     sckz::Light & l2 = s1.CreateLight(true);
 
     sckz::Entity & e1 = s1.CreateEntity(m1, true);
     sckz::Entity & e3 = s1.CreateEntity(m3, false);
     sckz::Camera & c1 = s1.CreateCamera(45, 0.1, 100);
 
-    // sckz::Entity & e2 = s2.CreateEntity(m2);
-    sckz::Camera & c2 = s2.CreateCamera(45, 0.1, 100);
+    sckz::Timer & fullScreenTimer = vkan.CreateTimer();
+    fullScreenTimer.ResetTimer();
 
-    sckz::Gui & gui = vkan.CreateGUI("Resources/icon.png");
+    sckz::Timer & menuTimer = vkan.CreateTimer();
+    menuTimer.ResetTimer();
+
+    sckz::Button button;
+    button.CreateButton(vkan, "Resources/icon.png");
+
+    sckz::Button quitButton;
+    quitButton.CreateButton(vkan, "Resources/Quit.png");
+    quitButton.SetLocation(0, -120);
+
+    sckz::Button backButton;
+    backButton.CreateButton(vkan, "Resources/BackToApp.png");
+    backButton.SetLocation(0, 120);
+
+    sckz::Button fullScreenButton;
+    fullScreenButton.CreateButton(vkan, "Resources/ToggleFullScreen.png");
+    fullScreenButton.SetLocation(0, 0);
+
+    // sckz::Gui & gui = vkan.CreateGUI("Resources/icon.png");
 
     sckz::Fbo & fbo = s1.CreateFbo();
 
     sckz::Bloom bloom;
     bloom.CreateBloom(s1);
 
-    gui.SetScale(200, 200);
-    gui.SetLocation(500, 300);
+    sckz::Blur blur;
+    blur.CreateBlur(s1);
+
+    button.SetScale(200, 200);
+    // gui.SetLocation(500, 300);
     // gui.SetRotationPoint(100, 100);
 
     e1.SetShine(1, 10);
@@ -97,110 +105,95 @@ int main()
 
     c1.SetLocation(0, 0, 0);
     c1.SetRotation(-90, 0, 0);
-    c2.SetLocation(0, 5, 0);
-    c2.SetRotation(-90, 0, 0);
 
     while (!win.QueryClose())
     {
-        if (win.QueryKey('w'))
+        if (win.QueryKey('w') && !isMenuOpen)
         {
             c1.SetLocation(c1.GetLocation().x, c1.GetLocation().y - (1 * vkan.GetDeltaT()), c1.GetLocation().z);
         }
 
-        if (win.QueryKey('S'))
+        if (win.QueryKey('S') && !isMenuOpen)
         {
             c1.SetLocation(c1.GetLocation().x, c1.GetLocation().y + (1 * vkan.GetDeltaT()), c1.GetLocation().z);
         }
 
-        if (win.QueryKey('a'))
+        if (win.QueryKey('a') && !isMenuOpen)
         {
             c1.SetLocation(c1.GetLocation().x + (1 * vkan.GetDeltaT()), c1.GetLocation().y, c1.GetLocation().z);
         }
 
-        if (win.QueryKey('d'))
+        if (win.QueryKey('d') && !isMenuOpen)
         {
             c1.SetLocation(c1.GetLocation().x - (1 * vkan.GetDeltaT()), c1.GetLocation().y, c1.GetLocation().z);
         }
 
-        if (win.QueryKey('z'))
+        if (win.QueryKey('z') && !isMenuOpen)
         {
             c1.SetRotation(c1.GetRotation().x, c1.GetRotation().y, c1.GetRotation().z - (30 * vkan.GetDeltaT()));
         }
 
-        if (win.QueryKey('c'))
+        if (win.QueryKey('c') && !isMenuOpen)
         {
             c1.SetRotation(c1.GetRotation().x, c1.GetRotation().y, c1.GetRotation().z + (30 * vkan.GetDeltaT()));
         }
 
-        if (win.QueryKey('q'))
+        if (win.QueryKey('q') && !isMenuOpen)
         {
             c1.SetRotation(c1.GetRotation().x - (30 * vkan.GetDeltaT()), c1.GetRotation().y, c1.GetRotation().z);
         }
 
-        if (win.QueryKey('e'))
+        if (win.QueryKey('e') && !isMenuOpen)
         {
             c1.SetRotation(c1.GetRotation().x + (30 * vkan.GetDeltaT()), c1.GetRotation().y, c1.GetRotation().z);
         }
 
-        if (win.QueryKey(GLFW_KEY_LEFT_SHIFT))
+        if (win.QueryKey(GLFW_KEY_LEFT_SHIFT) && !isMenuOpen)
         {
             c1.SetLocation(c1.GetLocation().x, c1.GetLocation().y, c1.GetLocation().z + (1 * vkan.GetDeltaT()));
         }
 
-        if (win.QueryKey(GLFW_KEY_SPACE))
+        if (win.QueryKey(GLFW_KEY_SPACE) && !isMenuOpen)
         {
             c1.SetLocation(c1.GetLocation().x, c1.GetLocation().y, c1.GetLocation().z - (1 * vkan.GetDeltaT()));
         }
 
-        if (win.QueryKey(GLFW_KEY_TAB))
+        if (win.QueryKey(GLFW_KEY_TAB) && !isMenuOpen)
         {
             pa1.AddParticle(0, 0, 0, sckz::GetRandomFloat(1, -1), sckz::GetRandomFloat(1, -1), 3);
         }
 
-        if (win.QueryKey('p'))
+        if (win.QueryKey('p') && !isMenuOpen)
         {
             vkan.SetFPS(30);
         }
 
-        if (win.QueryKey('l'))
+        if (win.QueryKey('l') && !isMenuOpen)
         {
             vkan.SetFPS(-1);
         }
 
-        if (win.QueryKey('g'))
+        if (win.QueryKey('g') && !isMenuOpen)
         {
             s1.SetMSAA(8);
-            s2.SetMSAA(8);
         }
 
-        if (win.QueryKey('u'))
+        s1.Render(c1, vkan.GetDeltaT());
+
+        if (win.QueryKey('y'))
         {
-            s2.Render(c2, vkan.GetDeltaT());
-
-            // sckz::Fbo & filteredImage = fil.FilterFbo(s2.GetRenderedImage());
-
-            if (win.QueryKey('y'))
-            {
-                vkan.Present(s2.GetRenderedImage(), f2, s2.GetMsaaSamples());
-            }
-            else
-            {
-                vkan.Present(s2.GetRenderedImage(), f1, s2.GetMsaaSamples());
-            }
+            vkan.Present(s1.GetRenderedImage(), f1, s1.GetMsaaSamples());
         }
         else
         {
-            s1.Render(c1, vkan.GetDeltaT());
-
-            sckz::Fbo & bloomFbo = bloom.ApplyBloom();
-
-            if (win.QueryKey('y'))
+            if (isMenuOpen)
             {
-
-                vkan.Present(s1.GetRenderedImage(), f1, s1.GetMsaaSamples());
+                sckz::Fbo & blurFbo = blur.ApplyBlur();
+                vkan.Present(blurFbo, f1, s1.GetMsaaSamples());
             }
             else
             {
+                sckz::Fbo & bloomFbo = bloom.ApplyBloom();
                 vkan.Present(bloomFbo, f1, s1.GetMsaaSamples());
             }
         }
@@ -231,7 +224,8 @@ int main()
         {
             e1.SetLocation(e1.GetLocation().x, e1.GetLocation().y + (10 * vkan.GetDeltaT()), e1.GetLocation().z);
         }
-        if (win.QueryKey('\\'))
+
+        if (fullScreenButton.IsPressed(0) && fullScreenTimer.GetCurrentTime() > 1)
         {
             if (win.IsFullScreen())
             {
@@ -241,13 +235,43 @@ int main()
             {
                 win.GoFullScreen();
             }
+
+            fullScreenTimer.ResetTimer();
+        }
+
+        if ((win.QueryKey(GLFW_KEY_ESCAPE) || backButton.IsPressed(0)) && menuTimer.GetCurrentTime() > 0.25)
+        {
+            if (isMenuOpen)
+            {
+                quitButton.SetScale(-1, -1);
+                backButton.SetScale(-1, -1);
+                fullScreenButton.SetScale(-1, -1);
+            }
+            else
+            {
+                quitButton.SetScale(600, 100);
+                backButton.SetScale(600, 100);
+                fullScreenButton.SetScale(600, 100);
+            }
+
+            menuTimer.ResetTimer();
+            isMenuOpen = !isMenuOpen;
+        }
+
+        if (isMenuOpen && quitButton.IsPressed(0))
+        {
+            break;
+        }
+
+        if (button.IsPressed(0))
+        {
+            button.SetLocation(win.GetMousePosition().x, win.GetMousePosition().y);
         }
 
         win.Update();
     }
 
     s1.DestroyScene();
-    s2.DestroyScene();
     vkan.DestroyVulkan();
     win.DestroyWindow();
 

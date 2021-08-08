@@ -12,7 +12,8 @@ namespace sckz
                         DescriptorPool &             descriptorPool,
                         VkExtent2D                   swapChainExtent,
                         Memory &                     memory,
-                        VkQueue &                    queue)
+                        VkQueue &                    queue,
+                        uint32_t                     stages)
     {
         this->textureFileName = textureFileName;
         this->renderPass      = &renderPass;
@@ -25,6 +26,7 @@ namespace sckz
         this->swapChainExtent = swapChainExtent;
         this->queue           = &queue;
         this->memory          = &memory;
+        this->stages          = stages;
 
         this->hostLocalBuffer.CreateBuffer(*this->device,
                                            *this->memory,
@@ -34,7 +36,6 @@ namespace sckz
                                            commandPool);
 
         texture.CreateTextureImage(textureFileName, *this->device, *this->physicalDevice, memory, commandPool, queue);
-
         texture.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
         texture.CreateTextureSampler();
 
@@ -159,8 +160,8 @@ namespace sckz
         Vubo.location.w = 0.0;
         Vubo.scale.x    = scale.x / swapChainExtent.width;
         Vubo.scale.y    = scale.y / swapChainExtent.height;
-        Vubo.scale.z    = 0.0;
-        Vubo.scale.w    = 0.0;
+        Vubo.scale.z    = stages;
+        Vubo.scale.w    = currentStage;
         Vubo.rotation.x = rotationPoint.x / swapChainExtent.width;
         Vubo.rotation.y = rotationPoint.y / swapChainExtent.height;
         Vubo.rotation.z = glm::radians(rotation);
@@ -194,6 +195,8 @@ namespace sckz
         this->scale.y = y;
         Update();
     }
+
+    void Gui::SetCurrentStage(uint32_t stage) { this->currentStage = stage; }
 
     glm::vec2 Gui::GetLocation() { return location; }
 

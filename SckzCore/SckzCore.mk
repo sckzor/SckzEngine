@@ -4,8 +4,8 @@ all: SckzCore.a
 
 # C++ based make information
 
-SckzCore.a:build/Scene.o build/CubeMap.o build/Gui.o build/ParticleSystem.o build/Buffer.o build/Combine.o build/CommandBuffer.o build/Filter.o build/HelperMethods.o build/Image.o build/Memory.o build/Model.o build/Entity.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o build/Light.o  build/Camera.o build/Fbo.o $(INCLUDE)
-	ar rvs SckzCore.a build/CubeMap.o build/Buffer.o build/ParticleSystem.o build/Gui.o build/Combine.o build/Scene.o build/Filter.o build/HelperMethods.o build/CommandBuffer.o build/Image.o build/Memory.o build/Model.o build/Entity.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o build/Camera.o build/Light.o build/Fbo.o
+SckzCore.a:build/Scene.o build/CubeMap.o build/Gui.o build/Timer.o build/ParticleSystem.o build/Buffer.o build/Combine.o build/CommandBuffer.o build/Filter.o build/HelperMethods.o build/Image.o build/Memory.o build/Model.o build/Entity.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o build/Light.o  build/Camera.o build/Fbo.o $(INCLUDE)
+	ar rvs SckzCore.a build/CubeMap.o build/Buffer.o build/Timer.o build/ParticleSystem.o build/Gui.o build/Combine.o build/Scene.o build/Filter.o build/HelperMethods.o build/CommandBuffer.o build/Image.o build/Memory.o build/Model.o build/Entity.o build/GraphicsPipeline.o build/Vulkan.o build/DescriptorPool.o build/Window.o build/Camera.o build/Light.o build/Fbo.o
 
 build/Buffer.o: $(VK_PATH)/Buffer.cpp $(VK_PATH)/Buffer.hpp $(VK_PATH)/Memory.hpp $(VK_PATH)/CommandBuffer.hpp $(INCLUDE)
 	g++ $(CFLAGS) -c $(VK_PATH)/Buffer.cpp -o build/Buffer.o $(LDFLAGS)
@@ -66,6 +66,9 @@ build/Combine.o: $(VK_PATH)/Combine.cpp $(VK_PATH)/Combine.hpp $(VK_PATH)/Comman
 
 build/CubeMap.o: $(VK_PATH)/CubeMap.cpp $(VK_PATH)/CubeMap.hpp $(VK_PATH)/GraphicsPipeline.hpp $(VK_PATH)/Image.hpp $(VK_PATH)/Scene.hpp $(VK_PATH)/Vertex.hpp $(INCLUDE)
 	g++ $(CFLAGS) -c $(VK_PATH)/CubeMap.cpp -o build/CubeMap.o $(LDFLAGS)
+
+build/Timer.o: $(VK_PATH)/Timer.cpp $(VK_PATH)/Timer.hpp $(VK_PATH)/Vulkan.hpp $(INCLUDE)
+	g++ $(CFLAGS) -c $(VK_PATH)/Timer.cpp -o build/Timer.o $(LDFLAGS)
 
 clean:
 	rm -f build/*.o

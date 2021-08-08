@@ -1,3 +1,4 @@
+#pragma once
 #include "../../Include.hpp"
 #include "GraphicsPipeline.hpp"
 #include "Image.hpp"
@@ -39,6 +40,9 @@ namespace sckz
         glm::vec2    rotationPoint;
         glm::float32 rotation;
 
+        uint32_t stages;
+        uint32_t currentStage = 0;
+
     public:
         void CreateGUI(const char *                 textureFileName,
                        VkCommandPool &              commandPool,
@@ -50,7 +54,8 @@ namespace sckz
                        DescriptorPool &             descriptorPool,
                        VkExtent2D                   swapChainExtent,
                        Memory &                     memory,
-                       VkQueue &                    queue);
+                       VkQueue &                    queue,
+                       uint32_t                     stages);
 
         void Update();
 
@@ -67,6 +72,7 @@ namespace sckz
         void SetScale(float x, float y);
         void SetRotationPoint(float x, float y);
         void SetRotation(float x);
+        void SetCurrentStage(uint32_t stage);
 
         glm::vec2 GetLocation();
         glm::vec2 GetScale();

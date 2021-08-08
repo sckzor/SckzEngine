@@ -1063,6 +1063,11 @@ namespace sckz
         lastTime    = currentTime;
         currentTime = std::chrono::high_resolution_clock::now();
         deltaTime   = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
+
+        for (uint32_t i = 0; i < timers.size(); i++)
+        {
+            timers[i]->Update(deltaTime);
+        }
     }
 
     float Vulkan::GetDeltaT()
@@ -1112,7 +1117,7 @@ namespace sckz
         return *fboPipelines.back();
     }
 
-    Gui & Vulkan::CreateGUI(const char * texture)
+    Gui & Vulkan::CreateGUI(const char * texture, uint32_t stages)
     {
         guis.push_back(new Gui());
         guis.back()->CreateGUI(texture,
@@ -1125,7 +1130,17 @@ namespace sckz
                                descriptorPool,
                                swapChainExtent,
                                memory,
-                               graphicsQueue);
+                               graphicsQueue,
+                               stages);
         return *guis.back();
+    }
+
+    Window & Vulkan::GetWindow() { return *window; }
+
+    Timer & Vulkan::CreateTimer()
+    {
+        Timer * timer = new Timer();
+        timers.push_back(timer);
+        return *timer;
     }
 } // namespace sckz
