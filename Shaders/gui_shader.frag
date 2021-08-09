@@ -12,7 +12,7 @@ layout(location = 0) out vec4 outColor;
 void main()
 {
     outColor = texture(texSampler, fragTexCoord);
-    if (fragTexCoord.x > 1.0 || fragTexCoord.y > 1.5 - (0.5 * currentStage))
+    if (fragTexCoord.x > 1.0 || fragTexCoord.y > (1 + (1 / stages)) - ((1 / stages) * currentStage))
     {
         discard;
     }
