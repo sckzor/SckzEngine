@@ -556,6 +556,8 @@ namespace sckz
             particleSystems[i]->Update(camera, deltaTime);
         }
 
+        RebuildCommandBuffer();
+
         VkSubmitInfo submitInfo {};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 

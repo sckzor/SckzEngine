@@ -59,8 +59,6 @@ namespace sckz
         uint32_t hStages;
         uint32_t totalStages;
 
-        bool rendering;
-
         float lifeLength;
 
     public:

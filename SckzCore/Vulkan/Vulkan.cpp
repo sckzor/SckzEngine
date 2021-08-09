@@ -957,14 +957,18 @@ namespace sckz
 
     void Vulkan::Present(Fbo & fbo, GraphicsPipeline & pipeline, VkSampleCountFlagBits msaaSamples)
     {
-        vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+        // vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
-        if (lastRenderedFbo != &fbo || lastRenderedPipeline != &pipeline || lastRenderedMsaaSamples != msaaSamples)
+        if (lastRenderedFbo != &fbo.GetImage().GetImage() || lastRenderedPipeline != &pipeline
+            || lastRenderedMsaaSamples != msaaSamples)
         {
             CreateCommandBuffers(&fbo, &pipeline);
+            std::cout << "Recreated Command Buffers" << std::endl;
             lastRenderedPipeline    = &pipeline;
-            lastRenderedFbo         = &fbo;
+            lastRenderedFbo         = &fbo.GetImage().GetImage();
             lastRenderedMsaaSamples = msaaSamples;
+
+            usleep(100000); // WHAT THE F*CK FIX THIS, WHY DOES THIS MAKE MSAA WORK
         }
 
         uint32_t imageIndex;

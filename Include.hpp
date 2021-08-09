@@ -24,6 +24,7 @@
 #include <set>
 #include <stdexcept>
 #include <thread>
+#include <unistd.h>
 #include <unordered_map>
 #include <vector>
 

@@ -94,7 +94,7 @@ namespace sckz
 
         int32_t fps = 0; // Stays
 
-        Fbo *                 lastRenderedFbo      = nullptr;
+        VkImage *             lastRenderedFbo      = nullptr;
         GraphicsPipeline *    lastRenderedPipeline = nullptr;
         VkSampleCountFlagBits lastRenderedMsaaSamples;
 
@@ -148,7 +148,7 @@ namespace sckz
         void CreateFramebuffers();
         void CreateSyncObjects();
 
-    private: // Swapchain recreation functions
+    public: // Swapchain recreation functions
         void RebuildSwapChain();
         void DestroySwapResources();
 
