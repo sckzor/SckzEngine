@@ -6,8 +6,11 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #define GLM_ENABLE_EXPERIMENTAL
 
+#include <AL/al.h>
+#include <AL/alc.h>
 #include <algorithm>
 #include <array>
+#include <bits/stdc++.h>
 #include <chrono>
 #include <cstdint>
 #include <cstdlib>

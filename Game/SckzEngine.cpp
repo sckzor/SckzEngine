@@ -65,6 +65,29 @@ int main()
 
     sckz::Fbo & fbo = s1.CreateFbo();
 
+    SoundDevice soundDevice;
+    soundDevice.CreateSoundDevice(nullptr);
+
+    SoundBuffer & snowman  = soundDevice.CreateSoundBuffer("Resources/Snowman.wav");
+    SoundBuffer & polaroid = soundDevice.CreateSoundBuffer("Resources/Polaroid.wav");
+    SoundBuffer & bounce   = soundDevice.CreateSoundBuffer("Resources/bounce.wav");
+
+    SoundSource musicSource;
+    musicSource.CreateSource();
+
+    SoundSource barrelSource;
+    barrelSource.CreateSource();
+
+    SoundSource sfxSource;
+    sfxSource.CreateSource();
+
+    c1.SetListener(&soundDevice);
+    c1.SetMusicSource(&musicSource);
+    c1.SetSfxSource(&sfxSource);
+    musicSource.Play(snowman);
+
+    e1.SetSoundSource(&barrelSource);
+
     sckz::Bloom bloom;
     bloom.CreateBloom(s1);
 
@@ -105,6 +128,9 @@ int main()
 
     c1.SetLocation(0, 0, 0);
     c1.SetRotation(-90, 0, 0);
+
+    e1.GetSoundSource()->Play(polaroid);
+    e1.GetSoundSource()->SetShouldLoop(true);
 
     while (!win.QueryClose())
     {
@@ -236,6 +262,8 @@ int main()
                 win.GoFullScreen();
             }
 
+            sfxSource.Play(bounce);
+
             fullScreenTimer.ResetTimer();
         }
 
@@ -254,12 +282,15 @@ int main()
                 fullScreenButton.SetScale(600, 100);
             }
 
+            sfxSource.Play(bounce);
+
             menuTimer.ResetTimer();
             isMenuOpen = !isMenuOpen;
         }
 
         if (isMenuOpen && quitButton.IsPressed(0))
         {
+            sfxSource.Play(bounce);
             break;
         }
 
@@ -270,6 +301,11 @@ int main()
 
         win.Update();
     }
+
+    musicSource.DestroySource();
+    sfxSource.DestroySource();
+    barrelSource.DestroySource();
+    soundDevice.DestroySoundDevice();
 
     s1.DestroyScene();
     vkan.DestroyVulkan();

@@ -17,6 +17,10 @@ namespace sckz
         UpdateMatrix();
     }
 
+    void Camera::SetListener(SoundDevice * soundDevice) { this->soundDevice = soundDevice; }
+    void Camera::SetMusicSource(SoundSource * musicSource) { this->musicSource = musicSource; }
+    void Camera::SetSfxSource(SoundSource * sfxSource) { this->sfxSource = sfxSource; }
+
     void Camera::DestroyCamera() { }
 
     void Camera::UpdateMatrix()
@@ -84,14 +88,38 @@ namespace sckz
         location.x = x;
         location.y = y;
         location.z = z;
+
+        if (soundDevice != nullptr)
+        {
+            soundDevice->SetListenerPosition(x, y, z);
+        }
+
+        if (musicSource != nullptr)
+        {
+            musicSource->SetPosition(x, y, z);
+        }
+
+        if (sfxSource != nullptr)
+        {
+            sfxSource->SetPosition(x, y, z);
+        }
+
         UpdateMatrix();
     }
+
+    SoundDevice * Camera::GetSoundDevice() { return soundDevice; }
 
     void Camera::SetRotation(float x, float y, float z)
     {
         rotation.x = x;
         rotation.y = y;
         rotation.z = z;
+
+        if (soundDevice != nullptr)
+        {
+            soundDevice->SetListenerRotation(x, y, z);
+        }
+
         UpdateMatrix();
     }
 } // namespace sckz

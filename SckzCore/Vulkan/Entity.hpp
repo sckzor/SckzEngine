@@ -1,6 +1,7 @@
 #pragma once
 #include "../../Include.hpp"
 #include "../../SckzExtras/LightSort.hpp"
+#include "../../SckzSound/SoundSource.hpp"
 #include "Buffer.hpp"
 #include "Camera.hpp"
 #include "DescriptorPool.hpp"
@@ -75,6 +76,8 @@ namespace sckz
         Camera cubeMapCamera;
         Fbo    reflectionMap;
 
+        SoundSource * soundSource = nullptr;
+
         bool isCubeMap;
 
         float refractiveIndexRatio;
@@ -103,6 +106,8 @@ namespace sckz
         void Update(Camera & camera);
         void UpdateCubeMap(Camera & cubeMapCamera);
 
+        void SetSoundSource(SoundSource * soundSource);
+
     private:
         void CreateUniformBuffers();
 
@@ -127,6 +132,8 @@ namespace sckz
 
         VkDescriptorSet & GetSimpleDescriptorSet();
         VkDescriptorSet & GetComplexDescriptorSet();
+
+        SoundSource * GetSoundSource();
 
         Camera & GetCubeMapCamera();
     };

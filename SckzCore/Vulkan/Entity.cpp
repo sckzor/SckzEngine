@@ -70,6 +70,8 @@ namespace sckz
         // std::cout << reflectionMap.GetImage().GetImage() << std::endl;
     }
 
+    void Entity::SetSoundSource(SoundSource * soundSource) { this->soundSource = soundSource; }
+
     void Entity::DestroyEntity()
     {
         if (this->isCubeMap)
@@ -204,6 +206,11 @@ namespace sckz
         location.y = y;
         location.z = z;
 
+        if (soundSource != nullptr)
+        {
+            soundSource->SetPosition(x, y, z);
+        }
+
         if (isCubeMap)
         {
             cubeMapCamera.SetLocation(x, y, z);
@@ -221,6 +228,8 @@ namespace sckz
             cubeMapCamera.SetRotation(x, y, z);
         }
     }
+
+    SoundSource * Entity::GetSoundSource() { return soundSource; }
 
     void Entity::SetScale(float x, float y, float z)
     {

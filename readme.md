@@ -55,7 +55,9 @@ Time behind schedule: 2 weeks
 - [x] Reflections.
 - [x] Skybox.
 - [x] FBO Class / Extensible pipelines for unique UBOs
+- [ ] Audio and SFX in game
 - [ ] Animation.
+- [ ] Basic music and sfx support
 - [ ] Error handling (out the wazoo!)
 - [ ] Add custom _system_ memory managment
 - [ ] Add custom dynamic _system_ memory structures
