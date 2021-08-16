@@ -8,4 +8,5 @@ SckzCore/SckzCore.a
 SckzCore/build/
 SckzEngine.vktracer
 Resources/*.spv
+Resources/UntilForever.wav
 valgrind-out.txt
