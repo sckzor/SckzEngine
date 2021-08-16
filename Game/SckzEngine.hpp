@@ -13,6 +13,7 @@
 #include "../SckzExtras/Bloom.hpp"
 #include "../SckzExtras/Blur.hpp"
 #include "../SckzExtras/Button.hpp"
+#include "../SckzSound/MusicBuffer.hpp"
 #include "../SckzSound/SoundBuffer.hpp"
 #include "../SckzSound/SoundDevice.hpp"
 #include "../SckzSound/SoundSource.hpp"

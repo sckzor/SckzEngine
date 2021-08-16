@@ -29,6 +29,7 @@ int main()
                                       "Resources/barrelNormal.png",
                                       "Resources/barrelSpecular.png",
                                       p1);
+
     sckz::Model & m3 = s1.CreateModel("Resources/room.obj", "Resources/RoomTextureAtlas.png", nullptr, nullptr, p1);
     sckz::Light & l1 = s1.CreateLight(true);
 
@@ -38,7 +39,7 @@ int main()
 
     sckz::Entity & e1 = s1.CreateEntity(m1, true);
     sckz::Entity & e3 = s1.CreateEntity(m3, false);
-    sckz::Camera & c1 = s1.CreateCamera(45, 0.1, 100);
+    sckz::Camera & c1 = s1.CreateCamera(70, 0.1, 100);
 
     sckz::Timer & fullScreenTimer = vkan.CreateTimer();
     fullScreenTimer.ResetTimer();
@@ -68,7 +69,9 @@ int main()
     SoundDevice soundDevice;
     soundDevice.CreateSoundDevice(nullptr);
 
-    SoundBuffer & snowman  = soundDevice.CreateSoundBuffer("Resources/Snowman.wav");
+    MusicBuffer musicBuffer;
+    musicBuffer.CreateMusicBuffer("Resources/UntilForever.wav");
+
     SoundBuffer & polaroid = soundDevice.CreateSoundBuffer("Resources/Polaroid.wav");
     SoundBuffer & bounce   = soundDevice.CreateSoundBuffer("Resources/bounce.wav");
 
@@ -84,7 +87,7 @@ int main()
     c1.SetListener(&soundDevice);
     c1.SetMusicSource(&musicSource);
     c1.SetSfxSource(&sfxSource);
-    musicSource.Play(snowman);
+    musicBuffer.Play();
 
     e1.SetSoundSource(&barrelSource);
 
@@ -134,6 +137,7 @@ int main()
 
     while (!win.QueryClose())
     {
+        musicBuffer.UpdateBufferStream();
         if (win.QueryKey('w') && !isMenuOpen)
         {
             c1.SetLocation(c1.GetLocation().x, c1.GetLocation().y - (1 * vkan.GetDeltaT()), c1.GetLocation().z);
@@ -197,6 +201,16 @@ int main()
         if (win.QueryKey('l') && !isMenuOpen)
         {
             vkan.SetFPS(-1);
+        }
+
+        if (win.QueryKey('i') && !isMenuOpen)
+        {
+            musicBuffer.SetGain(musicBuffer.GetGain() - 0.0001);
+        }
+
+        if (win.QueryKey('o') && !isMenuOpen)
+        {
+            musicBuffer.SetGain(musicBuffer.GetGain() + 0.0001);
         }
 
         if (win.QueryKey('g') && !isMenuOpen)
@@ -302,9 +316,13 @@ int main()
         win.Update();
     }
 
+    musicBuffer.DestroyMusicBuffer();
     musicSource.DestroySource();
+    musicSource.Stop();
     sfxSource.DestroySource();
+    sfxSource.Stop();
     barrelSource.DestroySource();
+    barrelSource.Stop();
     soundDevice.DestroySoundDevice();
 
     s1.DestroyScene();

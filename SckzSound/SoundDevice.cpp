@@ -52,10 +52,7 @@ void SoundDevice::SetListenerRotation(float x, float y, float z)
     rotation.y   = y;
     rotation.z   = z;
 
-    std::cout << x << " " << y << " " << z << std::endl;
-
     at = glm::rotate(at, glm::radians(rotation.z), glm::vec3(0, 0, -1));
-    std::cout << at.x << " " << at.y << " " << at.z << std::endl;
 
     ALfloat dir[6] = { 0.0f, 0.0f, 1.0f, at.x, at.y, at.z };
     alListenerfv(AL_ORIENTATION, dir);

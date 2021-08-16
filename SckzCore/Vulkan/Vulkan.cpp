@@ -963,7 +963,6 @@ namespace sckz
             || lastRenderedMsaaSamples != msaaSamples)
         {
             CreateCommandBuffers(&fbo, &pipeline);
-            std::cout << "Recreated Command Buffers" << std::endl;
             lastRenderedPipeline    = &pipeline;
             lastRenderedFbo         = &fbo.GetImage().GetImage();
             lastRenderedMsaaSamples = msaaSamples;

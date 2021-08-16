@@ -4,10 +4,11 @@
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#define GLM_ENABLE_EXPERIMENTAL
+#define GLM_ENABLE_EXPERIMENTALS
 
 #include <AL/al.h>
 #include <AL/alc.h>
+#include <AL/alext.h>
 #include <algorithm>
 #include <array>
 #include <bits/stdc++.h>
