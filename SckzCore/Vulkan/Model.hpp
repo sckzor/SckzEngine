@@ -15,6 +15,9 @@ namespace sckz
     class Model
     {
     private:
+        static const uint32_t SIZE_OF_VERTEX          = 16;
+        static const uint32_t SIZE_OF_VERTEX_UNRIGGED = 8;
+
         std::array<Image, 3> textures;
 
         std::vector<Vertex>   vertices;

@@ -14,12 +14,14 @@ ubo;
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inNormal;
 layout(location = 2) in vec2 inTexCoord;
+layout(location = 3) in vec4 boneDataA;
+layout(location = 4) in vec4 boneDataB;
 
 layout(location = 0) out vec3 fragTexCoord;
 
 void main()
 {
     fragTexCoord = inPosition;
-    gl_Position = ubo.proj * ubo.view * vec4(inPosition, 1.0);
+    gl_Position  = ubo.proj * ubo.view * vec4(inPosition, 1.0);
     // gl_Position = vec4(fragTexCoord.xy * 2.0f + -1.0f, 0.0f, 1.0f);
 }

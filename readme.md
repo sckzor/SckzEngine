@@ -57,10 +57,9 @@ Time behind schedule: 2 weeks
 - [x] FBO Class / Extensible pipelines for unique UBOs
 - [x] Audio and SFX in game
 - [ ] Animation.
-- [ ] Basic music and sfx support
+- [x] Basic music and sfx support
 - [ ] Error handling (out the wazoo!)
-- [ ] Add custom _system_ memory managment
-- [ ] Add custom dynamic _system_ memory structures
+
 
 ### 2nd Priority
 
@@ -73,6 +72,8 @@ Time behind schedule: 2 weeks
 ### 3rd Priority
 
 - [ ] DLSS support, if I can convince NVidia to give me the development materials.
+- [ ] Add custom _system_ memory managment
+- [ ] Add custom dynamic _system_ memory structures
 - [ ] Support for other platorms.
 
 ## Known issues and bugs

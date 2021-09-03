@@ -56,9 +56,11 @@ namespace sckz
             allTextures = { textures.at(0), textures.at(1), textures.at(2), blankCubeImage };
         }
 
-        this->pipeline->BindComplexShaderData(&complexUniformBuffers[0],
+        std::array<Buffer::SubBlock, 2> ubos = { complexUniformBuffers[0], complexUniformBuffers[1] };
+
+        this->pipeline->BindComplexShaderData(ubos.data(),
                                               allTextures.data(),
-                                              &complexUniformBuffers[1],
+                                              &complexUniformBuffers[2],
                                               *this->descriptorPool,
                                               &complexDescriptorSet);
 
@@ -99,9 +101,11 @@ namespace sckz
 
         CreateUniformBuffers();
 
-        this->pipeline->BindComplexShaderData(&complexUniformBuffers[0],
+        std::array<Buffer::SubBlock, 2> ubos = { complexUniformBuffers[0], complexUniformBuffers[1] };
+
+        this->pipeline->BindComplexShaderData(ubos.data(),
                                               allTextures.data(),
-                                              &complexUniformBuffers[1],
+                                              &complexUniformBuffers[2],
                                               *this->descriptorPool,
                                               &complexDescriptorSet);
 
@@ -168,8 +172,20 @@ namespace sckz
             }
         }
 
+        BoneVertexUniforBufferObject BVubo {};
+
+        for (uint32_t i = 0; i < MAX_BONES; i++)
+        {
+            BVubo.bones[i][0][0] = 1;
+            BVubo.bones[i][0][1] = 0;
+            BVubo.bones[i][0][2] = 1;
+            BVubo.bones[i][0][3] = 1;
+        }
+
+        complexUniformBuffers[1].CopyDataToBuffer(&BVubo, sizeof(BVubo), 0);
+
         complexUniformBuffers[0].CopyDataToBuffer(&Vubo, sizeof(Vubo), 0);
-        complexUniformBuffers[1].CopyDataToBuffer(&Fubo, sizeof(Fubo), 0);
+        complexUniformBuffers[2].CopyDataToBuffer(&Fubo, sizeof(Fubo), 0);
     }
 
     void Entity::UpdateCubeMap(Camera & cubeMapCamera)
@@ -191,9 +207,11 @@ namespace sckz
     void Entity::CreateUniformBuffers()
     {
         VkDeviceSize ComplexVUboSize = sizeof(ComplexVertexUniformBufferObject);
+        VkDeviceSize BoneVUboSize    = sizeof(BoneVertexUniforBufferObject);
         VkDeviceSize ComplexFUboSize = sizeof(ComplexFragmentUniformBufferObject);
         complexUniformBuffers[0]     = hostLocalBuffer->GetBuffer(ComplexVUboSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
-        complexUniformBuffers[1]     = hostLocalBuffer->GetBuffer(ComplexFUboSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+        complexUniformBuffers[1]     = hostLocalBuffer->GetBuffer(BoneVUboSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+        complexUniformBuffers[2]     = hostLocalBuffer->GetBuffer(ComplexFUboSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
 
         VkDeviceSize SimpleVUboSize = sizeof(SimpleVertexUniformBufferObject);
 

@@ -1,5 +1,10 @@
 #include "Model.hpp"
 
+#include <assimp/cimport.h>
+#include <assimp/material.h>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
+
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "../Loaders/tiny_obj_loader.h"
 
@@ -136,43 +141,118 @@ namespace sckz
 
     void Model::LoadModel()
     {
-        tinyobj::attrib_t                attrib;
-        std::vector<tinyobj::shape_t>    shapes;
-        std::vector<tinyobj::material_t> materials;
-        std::string                      warn, err;
+        const aiScene * scene = aiImportFile(modelFileName, aiProcessPreset_TargetRealtime_MaxQuality);
 
-        if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, modelFileName))
+        if (!scene)
         {
-            throw std::runtime_error(warn + err);
+            std::cerr << "Could not load file " << modelFileName << std::endl;
+            return;
         }
 
-        std::unordered_map<Vertex, uint32_t> uniqueVertices {};
+        // Load all meshes and whatnot
 
-        for (const auto & shape : shapes)
+        aiMesh * mesh = scene->mMeshes[0];
+
+        aiMaterial * material = scene->mMaterials[mesh->mMaterialIndex];
+        aiColor4D    specularColor;
+        aiColor4D    diffuseColor;
+        aiColor4D    ambientColor;
+        float        shininess;
+
+        aiGetMaterialColor(material, AI_MATKEY_COLOR_SPECULAR, &specularColor);
+        aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &diffuseColor);
+        aiGetMaterialColor(material, AI_MATKEY_COLOR_AMBIENT, &ambientColor);
+        aiGetMaterialFloat(material, AI_MATKEY_SHININESS, &shininess);
+
+        for (std::uint32_t vertIdx = 0u; vertIdx < mesh->mNumVertices; vertIdx++)
         {
-            for (const auto & index : shape.mesh.indices)
+            aiVector3D vert = mesh->mVertices[vertIdx];
+            aiVector3D norm = mesh->mNormals[vertIdx];
+            aiVector3D uv;
+            if (mesh->mTextureCoords[0] != nullptr)
             {
-                Vertex vertex {};
-
-                vertex.pos = { attrib.vertices[3 * index.vertex_index + 0],
-                               attrib.vertices[3 * index.vertex_index + 1],
-                               attrib.vertices[3 * index.vertex_index + 2] };
-
-                vertex.texCoord = { attrib.texcoords[2 * index.texcoord_index + 0],
-                                    1.0f - attrib.texcoords[2 * index.texcoord_index + 1] };
-
-                vertex.normal = { attrib.normals[3 * index.normal_index + 0],
-                                  attrib.normals[3 * index.normal_index + 1],
-                                  attrib.normals[3 * index.normal_index + 2] };
-
-                if (uniqueVertices.count(vertex) == 0)
-                {
-                    uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
-                    vertices.push_back(vertex);
-                }
-
-                indices.push_back(uniqueVertices[vertex]);
+                uv = mesh->mTextureCoords[0][vertIdx];
             }
+            else
+            {
+                uv.x = 0;
+                uv.y = 0;
+            }
+
+            vertices.push_back(Vertex { glm::vec3(vert.x, vert.y, vert.z),
+                                        glm::vec3(norm.x, norm.y, norm.z),
+                                        glm::vec2(uv.x, 1.0f - uv.y),
+                                        glm::vec4(0, 0, 0, 0),
+                                        glm::vec4(0, 0, 0, 0) });
+        }
+
+        for (std::uint32_t faceIdx = 0u; faceIdx < mesh->mNumFaces; faceIdx++)
+        {
+            indices.push_back(mesh->mFaces[faceIdx].mIndices[0u]);
+            indices.push_back(mesh->mFaces[faceIdx].mIndices[1u]);
+            indices.push_back(mesh->mFaces[faceIdx].mIndices[2u]);
+        }
+
+        std::unordered_map<const char *, uint32_t> boneMap;
+        std::unordered_map<uint32_t, uint32_t>     bone_index_map0;
+        std::unordered_map<uint32_t, uint32_t>     bone_index_map1;
+
+        for (int b = 0; b < mesh->mNumBones; b++)
+        {
+            aiBone * bone = mesh->mBones[b];
+            boneMap.insert(std::pair<const char *, uint32_t>(bone->mName.C_Str(), b));
+            boneMap["test"];
+
+            for (int w = 0; w < bone->mNumWeights; w++)
+            {
+                aiVertexWeight weight      = bone->mWeights[w];
+                int            vertexIndex = weight.mVertexId;
+                int            findex      = vertexIndex;
+
+                if (bone_index_map0.find(vertexIndex) == bone_index_map0.end())
+                {
+                    vertices[findex].boneDataA.x = b;
+                    vertices[findex].boneDataA.z = weight.mWeight;
+                    bone_index_map0.insert(vertexIndex, 0);
+                }
+                else if (bone_index_map0[vertexIndex] == 0)
+                {
+                    vertices[findex].boneDataA.y = b;
+                    vertices[findex].boneDataA.w = weight.mWeight;
+                    bone_index_map0.insert(vertexIndex, 1);
+                }
+                else if (bone_index_map1.find(vertexIndex) == bone_index_map1.end())
+                {
+                    vertices[findex].boneDataB.x = b;
+                    vertices[findex].boneDataB.z = weight.mWeight;
+                    bone_index_map1.insert(vertexIndex, 0);
+                }
+                else if (bone_index_map1[vertexIndex] == 0)
+                {
+                    vertices[findex].boneDataB.y = b;
+                    vertices[findex].boneDataB.w = weight.mWeight;
+                    bone_index_map1.insert(vertexIndex, 1);
+                }
+                else
+                {
+                    std::cerr << "max 4 bones per vertex." << std::endl;
+                    throw std::runtime_error("BONE ERROR");
+                }
+            }
+        }
+
+        aiMatrix4x4 inverseRootTransform      = scene->mRootNode->mTransformation;
+        glm::mat4   inverseRootTransformation = new Matrix4f().fromAssimp(inverseRootTransform);
+
+        Bone bones[] = new Bone[boneMap.size()];
+
+        for (int b = 0; b < mesh.mNumBones(); b++)
+        {
+            AIBone bone = AIBone.create(mesh.mBones().get(b));
+            bones[b]    = new Bone();
+
+            bones[b].name         = bone.mName().dataString();
+            bones[b].offsetMatrix = new Matrix4f().fromAssimp(bone.mOffsetMatrix());
         }
     }
 

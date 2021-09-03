@@ -1,5 +1,5 @@
 CFLAGS  = -std=c++17 -O0 -g -DSCKZ_DEBUG
-LDFLAGS = -lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi -lopenal -lsndfile
+LDFLAGS = -lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi -lopenal -lsndfile -lassimp
 INCLUDE = ../Include.hpp
 MFLAGS = -j16
 

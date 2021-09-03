@@ -24,7 +24,7 @@ int main()
                                                     "Resources/cubemap_render_vertex.spv",
                                                     "Resources/cubemap_render_fragment.spv");
 
-    sckz::Model & m1 = s1.CreateModel("Resources/barrel.obj",
+    sckz::Model & m1 = s1.CreateModel("Resources/teapot.fbx",
                                       "Resources/barrelColor.png",
                                       "Resources/barrelNormal.png",
                                       "Resources/barrelSpecular.png",
@@ -70,7 +70,7 @@ int main()
     soundDevice.CreateSoundDevice(nullptr);
 
     MusicBuffer musicBuffer;
-    musicBuffer.CreateMusicBuffer("Resources/UntilForever.wav");
+    musicBuffer.CreateMusicBuffer("Resources/Polaroid.wav");
 
     SoundBuffer & polaroid = soundDevice.CreateSoundBuffer("Resources/Polaroid.wav");
     SoundBuffer & bounce   = soundDevice.CreateSoundBuffer("Resources/bounce.wav");

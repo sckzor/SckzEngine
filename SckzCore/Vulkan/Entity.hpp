@@ -15,7 +15,8 @@ namespace sckz
     class Entity
     {
     private:
-        static const int MAX_LIGHTS = 4;
+        static const uint32_t MAX_LIGHTS = 4;
+        static const uint32_t MAX_BONES  = 20;
 
         struct SimpleVertexUniformBufferObject
         {
@@ -33,6 +34,11 @@ namespace sckz
             alignas(16) glm::vec3 lightPosition[MAX_LIGHTS];
 
             alignas(16) float refractiveIndexRatio;
+        };
+
+        struct BoneVertexUniforBufferObject
+        {
+            alignas(16) glm::mat4 bones[MAX_BONES];
         };
 
         struct ComplexFragmentUniformBufferObject
@@ -62,7 +68,7 @@ namespace sckz
         VkFormat        format;
         VkCommandPool * commandPool;
 
-        std::array<Buffer::SubBlock, 2> complexUniformBuffers;
+        std::array<Buffer::SubBlock, 3> complexUniformBuffers;
         VkDescriptorSet                 complexDescriptorSet;
         Buffer::SubBlock                simpleUniformBuffer;
         VkDescriptorSet                 simpleDescriptorSet;

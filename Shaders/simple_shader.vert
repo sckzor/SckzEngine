@@ -2,6 +2,7 @@
 #extension GL_ARB_separate_shader_objects : enable
 
 const int MAX_LIGHTS = 4;
+const int MAX_BONES  = 20;
 
 layout(binding = 0) uniform UniformBufferObject
 {
@@ -15,9 +16,14 @@ layout(binding = 0) uniform UniformBufferObject
 }
 ubo;
 
+layout(binding = 1) uniform BoneUniformBuffer { mat4 bones[MAX_BONES]; }
+bubo;
+
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inNormal;
 layout(location = 2) in vec2 inTexCoord;
+layout(location = 3) in vec4 boneDataA;
+layout(location = 4) in vec4 boneDataB;
 
 layout(location = 0) out vec2 fragTexCoord;
 layout(location = 1) out vec3 surfaceNormal;
@@ -29,7 +35,10 @@ layout(location = 9) out vec3 refractedVector;
 
 void main()
 {
-    vec4 worldPosition = ubo.model * vec4(inPosition, 1.0);
+    mat4 boneTransform = bubo.bones[uint(boneDataA.x)] * boneDataA.z + bubo.bones[uint(boneDataA.y)] * boneDataA.w
+                       + bubo.bones[uint(boneDataB.x)] * boneDataB.z + bubo.bones[uint(boneDataB.y)] * boneDataB.w;
+
+    vec4 worldPosition = ubo.model * /*boneTransform **/ vec4(inPosition, 1.0);
 
     gl_Position  = ubo.proj * ubo.view * worldPosition;
     fragTexCoord = inTexCoord;

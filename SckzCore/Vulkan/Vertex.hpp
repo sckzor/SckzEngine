@@ -8,6 +8,8 @@ namespace sckz
         glm::vec3 pos;
         glm::vec3 normal;
         glm::vec2 texCoord;
+        glm::vec4 boneDataA;
+        glm::vec4 boneDataB;
 
         static VkVertexInputBindingDescription GetBindingDescription()
         {
@@ -20,9 +22,9 @@ namespace sckz
             return bindingDescription;
         }
 
-        static std::array<VkVertexInputAttributeDescription, 3> GetAttributeDescriptions()
+        static std::array<VkVertexInputAttributeDescription, 5> GetAttributeDescriptions()
         {
-            std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions {};
+            std::array<VkVertexInputAttributeDescription, 5> attributeDescriptions {};
 
             attributeDescriptions[0].binding  = 0;
             attributeDescriptions[0].location = 0;
@@ -38,6 +40,16 @@ namespace sckz
             attributeDescriptions[2].location = 2;
             attributeDescriptions[2].format   = VK_FORMAT_R32G32_SFLOAT;
             attributeDescriptions[2].offset   = offsetof(Vertex, texCoord);
+
+            attributeDescriptions[3].binding  = 0;
+            attributeDescriptions[3].location = 3;
+            attributeDescriptions[3].format   = VK_FORMAT_R32G32B32A32_SFLOAT;
+            attributeDescriptions[3].offset   = offsetof(Vertex, boneDataA);
+
+            attributeDescriptions[4].binding  = 0;
+            attributeDescriptions[4].location = 4;
+            attributeDescriptions[4].format   = VK_FORMAT_R32G32B32A32_SFLOAT;
+            attributeDescriptions[4].offset   = offsetof(Vertex, boneDataB);
 
             return attributeDescriptions;
         }
