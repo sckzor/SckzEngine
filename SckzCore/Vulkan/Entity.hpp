@@ -2,6 +2,7 @@
 #include "../../Include.hpp"
 #include "../../SckzExtras/LightSort.hpp"
 #include "../../SckzSound/SoundSource.hpp"
+#include "Bone.hpp"
 #include "Buffer.hpp"
 #include "Camera.hpp"
 #include "DescriptorPool.hpp"
@@ -31,14 +32,11 @@ namespace sckz
             alignas(16) glm::mat4 view;
             alignas(16) glm::mat4 proj;
 
+            alignas(16) glm::mat4 bones[MAX_BONES];
+
             alignas(16) glm::vec3 lightPosition[MAX_LIGHTS];
 
             alignas(16) float refractiveIndexRatio;
-        };
-
-        struct BoneVertexUniforBufferObject
-        {
-            alignas(16) glm::mat4 bones[MAX_BONES];
         };
 
         struct ComplexFragmentUniformBufferObject
@@ -63,12 +61,13 @@ namespace sckz
         std::array<Image, 3> * textures;
         Image *                blankCubeImage;
         std::vector<Light *> * lights;
+        std::vector<Bone> *    bones;
 
         Memory *        memory;
         VkFormat        format;
         VkCommandPool * commandPool;
 
-        std::array<Buffer::SubBlock, 3> complexUniformBuffers;
+        std::array<Buffer::SubBlock, 2> complexUniformBuffers;
         VkDescriptorSet                 complexDescriptorSet;
         Buffer::SubBlock                simpleUniformBuffer;
         VkDescriptorSet                 simpleDescriptorSet;
@@ -104,6 +103,7 @@ namespace sckz
                           VkCommandPool &        commandPool,
                           bool                   isCubeMap,
                           std::array<Image, 3> & textures,
+                          std::vector<Bone> &    bones,
                           Image &                blankCubeImage);
 
         void DestroyEntity();

@@ -213,46 +213,40 @@ namespace sckz
                 {
                     vertices[findex].boneDataA.x = b;
                     vertices[findex].boneDataA.z = weight.mWeight;
-                    bone_index_map0.insert(vertexIndex, 0);
+                    bone_index_map0.insert(std::pair<uint32_t, uint32_t>(vertexIndex, 0));
                 }
                 else if (bone_index_map0[vertexIndex] == 0)
                 {
                     vertices[findex].boneDataA.y = b;
                     vertices[findex].boneDataA.w = weight.mWeight;
-                    bone_index_map0.insert(vertexIndex, 1);
+                    bone_index_map0.insert(std::pair<uint32_t, uint32_t>(vertexIndex, 1));
                 }
                 else if (bone_index_map1.find(vertexIndex) == bone_index_map1.end())
                 {
                     vertices[findex].boneDataB.x = b;
                     vertices[findex].boneDataB.z = weight.mWeight;
-                    bone_index_map1.insert(vertexIndex, 0);
+                    bone_index_map1.insert(std::pair<uint32_t, uint32_t>(vertexIndex, 0));
                 }
                 else if (bone_index_map1[vertexIndex] == 0)
                 {
                     vertices[findex].boneDataB.y = b;
                     vertices[findex].boneDataB.w = weight.mWeight;
-                    bone_index_map1.insert(vertexIndex, 1);
+                    bone_index_map1.insert(std::pair<uint32_t, uint32_t>(vertexIndex, 1));
                 }
                 else
                 {
-                    std::cerr << "max 4 bones per vertex." << std::endl;
-                    throw std::runtime_error("BONE ERROR");
+                    throw std::runtime_error("max 4 bones per vertex.");
                 }
             }
         }
 
         aiMatrix4x4 inverseRootTransform      = scene->mRootNode->mTransformation;
-        glm::mat4   inverseRootTransformation = new Matrix4f().fromAssimp(inverseRootTransform);
+        glm::mat4   inverseRootTransformation = Bone::Mat4x4FromAssimp(inverseRootTransform);
 
-        Bone bones[] = new Bone[boneMap.size()];
-
-        for (int b = 0; b < mesh.mNumBones(); b++)
+        for (int b = 0; b < mesh->mNumBones; b++)
         {
-            AIBone bone = AIBone.create(mesh.mBones().get(b));
-            bones[b]    = new Bone();
-
-            bones[b].name         = bone.mName().dataString();
-            bones[b].offsetMatrix = new Matrix4f().fromAssimp(bone.mOffsetMatrix());
+            aiBone * bone = mesh->mBones[b];
+            bones.push_back(Bone { bone->mName.C_Str(), Bone::Mat4x4FromAssimp(bone->mOffsetMatrix) });
         }
     }
 
@@ -471,6 +465,7 @@ namespace sckz
                              *commandPool,
                              isReflectRefractive,
                              textures,
+                             bones,
                              blankTextureCube);
 
         entities.push_back(entity);

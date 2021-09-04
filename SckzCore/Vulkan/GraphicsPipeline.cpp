@@ -57,7 +57,7 @@ namespace sckz
                 break;
 
             case PipelineType::MODEL_PIPELINE:
-                complexVertexUboCount   = 2;
+                complexVertexUboCount   = 1;
                 complexSamplerCount     = 4;
                 complexFragmentUboCount = 1;
 

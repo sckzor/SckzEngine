@@ -46,7 +46,7 @@ build/Scene.o: $(VK_PATH)/Scene.cpp $(VK_PATH)/CubeMap.hpp $(VK_PATH)/Camera.hpp
 build/HelperMethods.o: $(VK_PATH)/HelperMethods.cpp $(VK_PATH)/HelperMethods.hpp  $(INCLUDE)
 	g++ $(CFLAGS) -c $(VK_PATH)/HelperMethods.cpp -o build/HelperMethods.o $(LDFLAGS)
 
-build/Model.o: $(VK_PATH)/Model.cpp $(VK_PATH)/Model.hpp $(VK_PATH)/Fbo.hpp $(VK_PATH)/Entity.hpp $(VK_PATH)/Buffer.hpp $(VK_PATH)/Image.hpp $(VK_PATH)/Camera.hpp $(VK_PATH)/Vertex.hpp $(VK_PATH)/GraphicsPipeline.hpp $(INCLUDE)
+build/Model.o: $(VK_PATH)/Model.cpp $(VK_PATH)/Model.hpp $(VK_PATH)/Fbo.hpp $(VK_PATH)/Entity.hpp $(VK_PATH)/Buffer.hpp $(VK_PATH)/Image.hpp $(VK_PATH)/Camera.hpp $(VK_PATH)/Vertex.hpp $(VK_PATH)/Bone.hpp $(VK_PATH)/GraphicsPipeline.hpp $(INCLUDE)
 	g++ $(CFLAGS) -c $(VK_PATH)/Model.cpp -o build/Model.o $(LDFLAGS)
 
 build/Gui.o: $(VK_PATH)/Gui.cpp $(VK_PATH)/Gui.hpp $(VK_PATH)/Buffer.hpp $(VK_PATH)/Image.hpp $(VK_PATH)/GraphicsPipeline.hpp $(INCLUDE)

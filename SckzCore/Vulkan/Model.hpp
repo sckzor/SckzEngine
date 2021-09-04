@@ -1,5 +1,6 @@
 #pragma once
 #include "../../Include.hpp"
+#include "Bone.hpp"
 #include "Buffer.hpp"
 #include "Camera.hpp"
 #include "CubeMap.hpp"
@@ -21,6 +22,7 @@ namespace sckz
         std::array<Image, 3> textures;
 
         std::vector<Vertex>   vertices;
+        std::vector<Bone>     bones;
         std::vector<uint32_t> indices;
 
         Buffer hostLocalBuffer;

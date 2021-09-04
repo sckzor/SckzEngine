@@ -10,14 +10,13 @@ layout(binding = 0) uniform UniformBufferObject
     mat4 view;
     mat4 proj;
 
+    mat4 bones[MAX_BONES];
+
     vec3 lightPosition[MAX_LIGHTS];
 
     float refractiveIndexRatio;
 }
 ubo;
-
-layout(binding = 1) uniform BoneUniformBuffer { mat4 bones[MAX_BONES]; }
-bubo;
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inNormal;
@@ -35,8 +34,8 @@ layout(location = 9) out vec3 refractedVector;
 
 void main()
 {
-    mat4 boneTransform = bubo.bones[uint(boneDataA.x)] * boneDataA.z + bubo.bones[uint(boneDataA.y)] * boneDataA.w
-                       + bubo.bones[uint(boneDataB.x)] * boneDataB.z + bubo.bones[uint(boneDataB.y)] * boneDataB.w;
+    mat4 boneTransform = ubo.bones[uint(boneDataA.x)] * boneDataA.z + ubo.bones[uint(boneDataA.y)] * boneDataA.w
+                       + ubo.bones[uint(boneDataB.x)] * boneDataB.z + ubo.bones[uint(boneDataB.y)] * boneDataB.w;
 
     vec4 worldPosition = ubo.model * /*boneTransform **/ vec4(inPosition, 1.0);
 
