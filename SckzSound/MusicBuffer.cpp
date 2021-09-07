@@ -45,7 +45,6 @@ void MusicBuffer::SetGain(float gain)
 {
     this->gain = gain;
     alSourcef(p_Source, AL_GAIN, gain);
-    std::cout << gain << std::endl;
 }
 
 void MusicBuffer::UpdateBufferStream()

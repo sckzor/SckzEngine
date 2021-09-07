@@ -5,11 +5,11 @@ namespace sckz
 {
     struct Vertex
     {
-        glm::vec3 pos;
-        glm::vec3 normal;
-        glm::vec2 texCoord;
-        glm::vec4 boneDataA;
-        glm::vec4 boneDataB;
+        glm::vec3  pos;
+        glm::vec3  normal;
+        glm::vec2  texCoord;
+        glm::ivec4 boneIds;
+        glm::vec4  weights;
 
         static VkVertexInputBindingDescription GetBindingDescription()
         {
@@ -43,13 +43,13 @@ namespace sckz
 
             attributeDescriptions[3].binding  = 0;
             attributeDescriptions[3].location = 3;
-            attributeDescriptions[3].format   = VK_FORMAT_R32G32B32A32_SFLOAT;
-            attributeDescriptions[3].offset   = offsetof(Vertex, boneDataA);
+            attributeDescriptions[3].format   = VK_FORMAT_R32G32B32A32_SINT;
+            attributeDescriptions[3].offset   = offsetof(Vertex, boneIds);
 
             attributeDescriptions[4].binding  = 0;
             attributeDescriptions[4].location = 4;
             attributeDescriptions[4].format   = VK_FORMAT_R32G32B32A32_SFLOAT;
-            attributeDescriptions[4].offset   = offsetof(Vertex, boneDataB);
+            attributeDescriptions[4].offset   = offsetof(Vertex, weights);
 
             return attributeDescriptions;
         }

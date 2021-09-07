@@ -1,6 +1,8 @@
 #pragma once
 #include "../Include.hpp"
 #include "../SckzCore/Extra/Random.hpp"
+#include "../SckzCore/Vulkan/Animation.hpp"
+#include "../SckzCore/Vulkan/Animator.hpp"
 #include "../SckzCore/Vulkan/Combine.hpp"
 #include "../SckzCore/Vulkan/Entity.hpp"
 #include "../SckzCore/Vulkan/Fbo.hpp"

@@ -13,7 +13,6 @@ namespace sckz
                               VkCommandPool &        commandPool,
                               bool                   isCubeMap,
                               std::array<Image, 3> & textures,
-                              std::vector<Bone> &    bones,
                               Image &                blankCubeImage)
     {
         this->physicalDevice  = &physicalDevice;
@@ -24,7 +23,6 @@ namespace sckz
         this->hostLocalBuffer = &hostLocalBuffer;
         this->isCubeMap       = isCubeMap;
         this->blankCubeImage  = &blankCubeImage;
-        this->bones           = &bones;
 
         this->textures = &textures;
 
@@ -172,15 +170,14 @@ namespace sckz
 
         for (uint32_t i = 0; i < MAX_BONES; i++)
         {
-            Vubo.bones[i][0][0] = 1;
-            Vubo.bones[i][0][1] = 0;
-            Vubo.bones[i][0][2] = 1;
-            Vubo.bones[i][0][3] = 1;
+            Vubo.bones[i] = boneTransforms[i];
         }
 
         complexUniformBuffers[0].CopyDataToBuffer(&Vubo, sizeof(Vubo), 0);
         complexUniformBuffers[1].CopyDataToBuffer(&Fubo, sizeof(Fubo), 0);
     }
+
+    void Entity::UpdateAnimation(std::vector<glm::mat4> boneTransforms) { this->boneTransforms = boneTransforms; }
 
     void Entity::UpdateCubeMap(Camera & cubeMapCamera)
     {

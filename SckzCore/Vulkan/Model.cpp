@@ -182,9 +182,10 @@ namespace sckz
             vertices.push_back(Vertex { glm::vec3(vert.x, vert.y, vert.z),
                                         glm::vec3(norm.x, norm.y, norm.z),
                                         glm::vec2(uv.x, 1.0f - uv.y),
-                                        glm::vec4(0, 0, 0, 0),
+                                        glm::ivec4(-1, -1, -1, -1),
                                         glm::vec4(0, 0, 0, 0) });
         }
+        ExtractBoneWeightForVertices(mesh, scene);
 
         for (std::uint32_t faceIdx = 0u; faceIdx < mesh->mNumFaces; faceIdx++)
         {
@@ -192,61 +193,47 @@ namespace sckz
             indices.push_back(mesh->mFaces[faceIdx].mIndices[1u]);
             indices.push_back(mesh->mFaces[faceIdx].mIndices[2u]);
         }
+    }
 
-        std::unordered_map<const char *, uint32_t> boneMap;
-        std::unordered_map<uint32_t, uint32_t>     bone_index_map0;
-        std::unordered_map<uint32_t, uint32_t>     bone_index_map1;
-
-        for (int b = 0; b < mesh->mNumBones; b++)
+    void Model::ExtractBoneWeightForVertices(aiMesh * mesh, const aiScene * scene)
+    {
+        for (int boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex)
         {
-            aiBone * bone = mesh->mBones[b];
-            boneMap.insert(std::pair<const char *, uint32_t>(bone->mName.C_Str(), b));
-            boneMap["test"];
-
-            for (int w = 0; w < bone->mNumWeights; w++)
+            int         boneID   = -1;
+            std::string boneName = mesh->mBones[boneIndex]->mName.C_Str();
+            if (boneMap.find(boneName) == boneMap.end())
             {
-                aiVertexWeight weight      = bone->mWeights[w];
-                int            vertexIndex = weight.mVertexId;
-                int            findex      = vertexIndex;
+                BoneInfo newBoneInfo;
+                newBoneInfo.id     = boneCount;
+                newBoneInfo.offset = BoneInfo::Mat4x4FromAssimp(mesh->mBones[boneIndex]->mOffsetMatrix);
+                boneMap[boneName]  = newBoneInfo;
+                boneID             = boneCount;
+                boneCount++;
+            }
+            else
+            {
+                boneID = boneMap[boneName].id;
+            }
+            assert(boneID != -1);
+            auto weights    = mesh->mBones[boneIndex]->mWeights;
+            int  numWeights = mesh->mBones[boneIndex]->mNumWeights;
 
-                if (bone_index_map0.find(vertexIndex) == bone_index_map0.end())
+            for (int weightIndex = 0; weightIndex < numWeights; ++weightIndex)
+            {
+                int   vertexId = weights[weightIndex].mVertexId;
+                float weight   = weights[weightIndex].mWeight;
+                assert(vertexId <= vertices.size());
+
+                for (int i = 0; i < BoneInfo::MAX_BONES_PER_VERTEX; ++i)
                 {
-                    vertices[findex].boneDataA.x = b;
-                    vertices[findex].boneDataA.z = weight.mWeight;
-                    bone_index_map0.insert(std::pair<uint32_t, uint32_t>(vertexIndex, 0));
-                }
-                else if (bone_index_map0[vertexIndex] == 0)
-                {
-                    vertices[findex].boneDataA.y = b;
-                    vertices[findex].boneDataA.w = weight.mWeight;
-                    bone_index_map0.insert(std::pair<uint32_t, uint32_t>(vertexIndex, 1));
-                }
-                else if (bone_index_map1.find(vertexIndex) == bone_index_map1.end())
-                {
-                    vertices[findex].boneDataB.x = b;
-                    vertices[findex].boneDataB.z = weight.mWeight;
-                    bone_index_map1.insert(std::pair<uint32_t, uint32_t>(vertexIndex, 0));
-                }
-                else if (bone_index_map1[vertexIndex] == 0)
-                {
-                    vertices[findex].boneDataB.y = b;
-                    vertices[findex].boneDataB.w = weight.mWeight;
-                    bone_index_map1.insert(std::pair<uint32_t, uint32_t>(vertexIndex, 1));
-                }
-                else
-                {
-                    throw std::runtime_error("max 4 bones per vertex.");
+                    if (vertices[vertexId].boneIds[i] < 0)
+                    {
+                        vertices[vertexId].weights[i] = weight;
+                        vertices[vertexId].boneIds[i] = boneID;
+                        break;
+                    }
                 }
             }
-        }
-
-        aiMatrix4x4 inverseRootTransform      = scene->mRootNode->mTransformation;
-        glm::mat4   inverseRootTransformation = Bone::Mat4x4FromAssimp(inverseRootTransform);
-
-        for (int b = 0; b < mesh->mNumBones; b++)
-        {
-            aiBone * bone = mesh->mBones[b];
-            bones.push_back(Bone { bone->mName.C_Str(), Bone::Mat4x4FromAssimp(bone->mOffsetMatrix) });
         }
     }
 
@@ -465,7 +452,6 @@ namespace sckz
                              *commandPool,
                              isReflectRefractive,
                              textures,
-                             bones,
                              blankTextureCube);
 
         entities.push_back(entity);
@@ -480,6 +466,9 @@ namespace sckz
     Buffer::SubBlock Model::GetVertexBuffer() { return *vertexBuffer; }
 
     uint32_t Model::GetNumIndices() { return static_cast<uint32_t>(indices.size()); }
+
+    std::map<std::string, BoneInfo> & Model::GetBoneMap() { return boneMap; }
+    uint32_t                          Model::GetBoneCount() { return boneCount; }
 
     void Model::DestroySwapResources()
     {

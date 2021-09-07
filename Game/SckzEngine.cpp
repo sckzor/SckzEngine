@@ -24,21 +24,18 @@ int main()
                                                     "Resources/cubemap_render_vertex.spv",
                                                     "Resources/cubemap_render_fragment.spv");
 
-    sckz::Model & m1 = s1.CreateModel("Resources/teapot.fbx",
-                                      "Resources/barrelColor.png",
-                                      "Resources/barrelNormal.png",
-                                      "Resources/barrelSpecular.png",
-                                      p1);
+    sckz::Model & m1
+        = s1.CreateModel("Resources/dancing_vampire.dae", "Resources/Vampire_diffuse.png", nullptr, nullptr, p1);
 
-    sckz::Model & m3 = s1.CreateModel("Resources/room.obj", "Resources/RoomTextureAtlas.png", nullptr, nullptr, p1);
+    // sckz::Model & m3 = s1.CreateModel("Resources/room.obj", "Resources/RoomTextureAtlas.png", nullptr, nullptr, p1);
     sckz::Light & l1 = s1.CreateLight(true);
 
     sckz::ParticleSystem & pa1 = s1.CreateParticleSystem(1000, "Resources/fireParticles.png", 4, 4, 15);
 
     sckz::Light & l2 = s1.CreateLight(true);
 
-    sckz::Entity & e1 = s1.CreateEntity(m1, true);
-    sckz::Entity & e3 = s1.CreateEntity(m3, false);
+    sckz::Entity & e1 = s1.CreateEntity(m1, false);
+    // sckz::Entity & e3 = s1.CreateEntity(m3, false);
     sckz::Camera & c1 = s1.CreateCamera(70, 0.1, 100);
 
     sckz::Timer & fullScreenTimer = vkan.CreateTimer();
@@ -104,7 +101,7 @@ int main()
     e1.SetShine(1, 10);
     e1.SetRotation(90, 0, 0);
     e1.SetLocation(0, 0, 0);
-    e1.SetScale(0.1, 0.1, 0.1);
+    e1.SetScale(0.01, 0.01, 0.01);
     e1.SetReflectRefractValues(1 / 1.33, 0.6);
 
     l1.SetColor(0, 0.5, 1);
@@ -124,10 +121,10 @@ int main()
     // e2.SetLocation(0, 0, 0);
     // e2.SetScale(0.1, 0.1, 0.1);
 
-    e3.SetShine(1, 30);
-    e3.SetRotation(90, 0, 0);
-    e3.SetLocation(0, 0, 0);
-    e3.SetReflectRefractValues(1, 0);
+    // e3.SetShine(1, 30);
+    // e3.SetRotation(90, 0, 0);
+    // e3.SetLocation(0, 0, 0);
+    // e3.SetReflectRefractValues(1, 0);
 
     c1.SetLocation(0, 0, 0);
     c1.SetRotation(-90, 0, 0);
@@ -135,8 +132,17 @@ int main()
     e1.GetSoundSource()->Play(polaroid);
     e1.GetSoundSource()->SetShouldLoop(true);
 
+    sckz::Animation a1;
+    a1.CreateAnimation("Resources/dancing_vampire.dae", &m1);
+
+    sckz::Animator am1;
+    am1.CreateAnimator(&a1);
+    // am1.PlayAnimation(&a1);
+
     while (!win.QueryClose())
     {
+        am1.UpdateAnimation(vkan.GetDeltaT());
+        e1.UpdateAnimation(am1.GetFinalBoneMatrices());
         musicBuffer.UpdateBufferStream();
         if (win.QueryKey('w') && !isMenuOpen)
         {

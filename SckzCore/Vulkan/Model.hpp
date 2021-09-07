@@ -1,6 +1,6 @@
 #pragma once
 #include "../../Include.hpp"
-#include "Bone.hpp"
+#include "BoneInfo.hpp"
 #include "Buffer.hpp"
 #include "Camera.hpp"
 #include "CubeMap.hpp"
@@ -16,14 +16,12 @@ namespace sckz
     class Model
     {
     private:
-        static const uint32_t SIZE_OF_VERTEX          = 16;
-        static const uint32_t SIZE_OF_VERTEX_UNRIGGED = 8;
-
         std::array<Image, 3> textures;
 
-        std::vector<Vertex>   vertices;
-        std::vector<Bone>     bones;
-        std::vector<uint32_t> indices;
+        std::vector<Vertex>             vertices;
+        std::vector<uint32_t>           indices;
+        std::map<std::string, BoneInfo> boneMap; //
+        uint32_t                        boneCount = 0;
 
         Buffer hostLocalBuffer;
         Buffer deviceLocalBuffer;
@@ -83,6 +81,8 @@ namespace sckz
     public:
         void CreateTexture(Image & image, const char * fileName);
         void LoadModel();
+        void ExtractBoneWeightForVertices(aiMesh * mesh, const aiScene * scene);
+
         void CreateVertexBuffer();
         void CreateIndexBuffer();
 
@@ -92,6 +92,9 @@ namespace sckz
         Buffer::SubBlock  GetIndexBuffer();
         Buffer::SubBlock  GetVertexBuffer();
         uint32_t          GetNumIndices();
+
+        std::map<std::string, BoneInfo> & GetBoneMap();
+        uint32_t                          GetBoneCount();
 
         std::vector<Entity *> GetReflectiveEntities();
 

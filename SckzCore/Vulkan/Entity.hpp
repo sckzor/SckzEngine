@@ -17,7 +17,7 @@ namespace sckz
     {
     private:
         static const uint32_t MAX_LIGHTS = 4;
-        static const uint32_t MAX_BONES  = 20;
+        static const uint32_t MAX_BONES  = 100;
 
         struct SimpleVertexUniformBufferObject
         {
@@ -63,6 +63,8 @@ namespace sckz
         std::vector<Light *> * lights;
         std::vector<Bone> *    bones;
 
+        std::vector<glm::mat4> boneTransforms;
+
         Memory *        memory;
         VkFormat        format;
         VkCommandPool * commandPool;
@@ -103,7 +105,6 @@ namespace sckz
                           VkCommandPool &        commandPool,
                           bool                   isCubeMap,
                           std::array<Image, 3> & textures,
-                          std::vector<Bone> &    bones,
                           Image &                blankCubeImage);
 
         void DestroyEntity();
@@ -127,6 +128,8 @@ namespace sckz
         void SetShine(float reflectivity, float shineDamper);
 
         void SetReflectRefractValues(float refractiveIndexRatio, float reflectRefractFactor);
+
+        void UpdateAnimation(std::vector<glm::mat4> boneTransforms);
 
         Fbo & GetEnvironmentMapFBO();
 
