@@ -4,7 +4,7 @@ namespace sckz
 {
     void Bone::CreateBone(std::string name, uint32_t ID, const aiNodeAnim * channel)
     {
-        name           = name;
+        this->name     = name;
         id             = ID;
         localTransform = glm::mat4(1.0f);
 
@@ -108,11 +108,8 @@ namespace sckz
     {
         if (1 == numPositions)
         {
-            std::cout << "1 Position" << std::endl;
             return glm::translate(glm::mat4(1.0f), positions[0].position);
         }
-
-        std::cout << "Many Positions" << std::endl;
 
         int   p0Index     = GetPositionIndex(animationTime);
         int   p1Index     = p0Index + 1;

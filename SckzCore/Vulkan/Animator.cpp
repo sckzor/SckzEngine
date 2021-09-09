@@ -19,7 +19,6 @@ namespace sckz
         if (currentAnimation)
         {
             currentTime += currentAnimation->GetTicksPerSecond() * dt;
-            std::cout << currentTime << std::endl;
             currentTime = fmod(currentTime, currentAnimation->GetDuration());
             CalculateBoneTransform(&currentAnimation->GetRootNode(), glm::mat4(1.0f));
         }
@@ -37,8 +36,6 @@ namespace sckz
         glm::mat4   nodeTransform = node->transformation;
 
         Bone * bone = currentAnimation->FindBone(nodeName);
-
-        std::cout << bone << std::endl;
 
         if (bone)
         {

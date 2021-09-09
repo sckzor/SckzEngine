@@ -101,7 +101,7 @@ int main()
     e1.SetShine(1, 10);
     e1.SetRotation(90, 0, 0);
     e1.SetLocation(0, 0, 0);
-    e1.SetScale(0.01, 0.01, 0.01);
+    e1.SetScale(1, 1, 1);
     e1.SetReflectRefractValues(1 / 1.33, 0.6);
 
     l1.SetColor(0, 0.5, 1);
@@ -146,22 +146,22 @@ int main()
         musicBuffer.UpdateBufferStream();
         if (win.QueryKey('w') && !isMenuOpen)
         {
-            c1.SetLocation(c1.GetLocation().x, c1.GetLocation().y - (1 * vkan.GetDeltaT()), c1.GetLocation().z);
+            c1.SetLocation(c1.GetLocation().x, c1.GetLocation().y - (10 * vkan.GetDeltaT()), c1.GetLocation().z);
         }
 
         if (win.QueryKey('S') && !isMenuOpen)
         {
-            c1.SetLocation(c1.GetLocation().x, c1.GetLocation().y + (1 * vkan.GetDeltaT()), c1.GetLocation().z);
+            c1.SetLocation(c1.GetLocation().x, c1.GetLocation().y + (10 * vkan.GetDeltaT()), c1.GetLocation().z);
         }
 
         if (win.QueryKey('a') && !isMenuOpen)
         {
-            c1.SetLocation(c1.GetLocation().x + (1 * vkan.GetDeltaT()), c1.GetLocation().y, c1.GetLocation().z);
+            c1.SetLocation(c1.GetLocation().x + (10 * vkan.GetDeltaT()), c1.GetLocation().y, c1.GetLocation().z);
         }
 
         if (win.QueryKey('d') && !isMenuOpen)
         {
-            c1.SetLocation(c1.GetLocation().x - (1 * vkan.GetDeltaT()), c1.GetLocation().y, c1.GetLocation().z);
+            c1.SetLocation(c1.GetLocation().x - (10 * vkan.GetDeltaT()), c1.GetLocation().y, c1.GetLocation().z);
         }
 
         if (win.QueryKey('z') && !isMenuOpen)
@@ -186,12 +186,12 @@ int main()
 
         if (win.QueryKey(GLFW_KEY_LEFT_SHIFT) && !isMenuOpen)
         {
-            c1.SetLocation(c1.GetLocation().x, c1.GetLocation().y, c1.GetLocation().z + (1 * vkan.GetDeltaT()));
+            c1.SetLocation(c1.GetLocation().x, c1.GetLocation().y, c1.GetLocation().z + (10 * vkan.GetDeltaT()));
         }
 
         if (win.QueryKey(GLFW_KEY_SPACE) && !isMenuOpen)
         {
-            c1.SetLocation(c1.GetLocation().x, c1.GetLocation().y, c1.GetLocation().z - (1 * vkan.GetDeltaT()));
+            c1.SetLocation(c1.GetLocation().x, c1.GetLocation().y, c1.GetLocation().z - (10 * vkan.GetDeltaT()));
         }
 
         if (win.QueryKey(GLFW_KEY_TAB) && !isMenuOpen)

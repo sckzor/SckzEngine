@@ -56,7 +56,7 @@ void main()
     gl_Position  = ubo.proj * ubo.view * worldPosition;
     fragTexCoord = inTexCoord;
 
-    surfaceNormal = (ubo.model * vec4(localNormal, 0.0)).xyz;
+    surfaceNormal = (ubo.model * vec4(localNormal, 1.0)).xyz;
 
     for (int i = 0; i < MAX_LIGHTS; i++)
     {

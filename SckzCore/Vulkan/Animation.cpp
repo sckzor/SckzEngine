@@ -24,10 +24,13 @@ namespace sckz
 
     Bone * Animation::FindBone(const std::string & name)
     {
+
         auto iter
             = std::find_if(bones.begin(), bones.end(), [&](const Bone & bone) { return bone.GetBoneName() == name; });
         if (iter == bones.end())
+
             return nullptr;
+
         else
             return &(*iter);
     }
