@@ -20,7 +20,7 @@ namespace sckz
             {
                 for (uint32_t j = 0; j < 4; j++)
                 {
-                    matrix[i][j] = assimpMat[i][j];
+                    matrix[i][j] = assimpMat[j][i];
                 }
             }
 

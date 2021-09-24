@@ -35,28 +35,17 @@ layout(location = 9) out vec3 refractedVector;
 
 void main()
 {
-    vec4 totalPosition = vec4(0.0f);
-    vec3 localNormal;
-    for (int i = 0; i < MAX_BONE_INFLUENCE; i++)
-    {
-        if (boneIds[i] == -1)
-            continue;
-        if (boneIds[i] >= MAX_BONES)
-        {
-            totalPosition = vec4(inPosition, 1.0f);
-            break;
-        }
-        vec4 localPosition = ubo.bones[boneIds[i]] * vec4(inPosition, 1.0f);
-        totalPosition += localPosition * weights[i];
-        localNormal = mat3(ubo.bones[boneIds[i]]) * inNormal;
-    }
+    mat4 boneTransform = ubo.bones[boneIds[0]] * weights[0];
+    boneTransform += ubo.bones[boneIds[1]] * weights[1];
+    boneTransform += ubo.bones[boneIds[2]] * weights[2];
+    boneTransform += ubo.bones[boneIds[3]] * weights[3];
 
-    vec4 worldPosition = ubo.model * totalPosition;
+    vec4 worldPosition = ubo.model * (boneTransform * vec4(inPosition, 1.0));
 
     gl_Position  = ubo.proj * ubo.view * worldPosition;
     fragTexCoord = inTexCoord;
 
-    surfaceNormal = (ubo.model * vec4(localNormal, 1.0)).xyz;
+    surfaceNormal = (ubo.model * vec4(inNormal, 1.0)).xyz;
 
     for (int i = 0; i < MAX_LIGHTS; i++)
     {
@@ -70,5 +59,5 @@ void main()
     // reflectedVector = reflect(normalize(toCameraVector), normalize(inNormal));
     refractedVector = refract(normalize(toCameraVector), normalize(inNormal), ubo.refractiveIndexRatio);
 
-    reflectedVector = totalPosition;
+    reflectedVector = ubo.proj * ubo.view * worldPosition;
 }

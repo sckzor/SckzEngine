@@ -24,8 +24,7 @@ int main()
                                                     "Resources/cubemap_render_vertex.spv",
                                                     "Resources/cubemap_render_fragment.spv");
 
-    sckz::Model & m1
-        = s1.CreateModel("Resources/dancing_vampire.dae", "Resources/Vampire_diffuse.png", nullptr, nullptr, p1);
+    sckz::Model & m1 = s1.CreateModel("Resources/model.dae", "Resources/modeltex.png", nullptr, nullptr, p1);
 
     // sckz::Model & m3 = s1.CreateModel("Resources/room.obj", "Resources/RoomTextureAtlas.png", nullptr, nullptr, p1);
     sckz::Light & l1 = s1.CreateLight(true);
@@ -99,7 +98,7 @@ int main()
     // gui.SetRotationPoint(100, 100);
 
     e1.SetShine(1, 10);
-    e1.SetRotation(90, 0, 0);
+    e1.SetRotation(0, 0, 0);
     e1.SetLocation(0, 0, 0);
     e1.SetScale(1, 1, 1);
     e1.SetReflectRefractValues(1 / 1.33, 0.6);
@@ -133,11 +132,11 @@ int main()
     e1.GetSoundSource()->SetShouldLoop(true);
 
     sckz::Animation a1;
-    a1.CreateAnimation("Resources/dancing_vampire.dae", &m1);
+    a1.CreateAnimation("Resources/model.dae", &m1);
 
     sckz::Animator am1;
     am1.CreateAnimator(&a1);
-    // am1.PlayAnimation(&a1);
+    am1.PlayAnimation(&a1);
 
     while (!win.QueryClose())
     {
