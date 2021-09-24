@@ -56,7 +56,7 @@ Time behind schedule: 2 weeks
 - [x] Skybox.
 - [x] FBO Class / Extensible pipelines for unique UBOs
 - [x] Audio and SFX in game
-- [ ] Animation.
+- [x] Animation.
 - [x] Basic music and sfx support
 - [ ] Error handling (out the wazoo!)
 

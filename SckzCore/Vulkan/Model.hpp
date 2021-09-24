@@ -73,7 +73,7 @@ namespace sckz
 
         void RebuildSwapResources(DescriptorPool & descriptorPool, VkExtent2D swapChainExtent);
 
-        Entity & CreateEntity(bool isReflectRefractive);
+        Entity & CreateEntity(bool isReflectRefractive, bool isAnimated);
 
         void CreateCommandBuffer();
         void CreateCubeMapCommandBuffer();

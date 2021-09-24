@@ -86,6 +86,7 @@ namespace sckz
         SoundSource * soundSource = nullptr;
 
         bool isCubeMap;
+        bool isAnimated;
 
         float refractiveIndexRatio;
         float reflectRefractFactor;
@@ -104,6 +105,7 @@ namespace sckz
                           VkFormat               format,
                           VkCommandPool &        commandPool,
                           bool                   isCubeMap,
+                          bool                   isAnimated,
                           std::array<Image, 3> & textures,
                           Image &                blankCubeImage);
 

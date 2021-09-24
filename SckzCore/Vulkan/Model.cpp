@@ -437,7 +437,7 @@ namespace sckz
     VkCommandBuffer & Model::GetCommandBuffer() { return commandBuffer; }
     VkCommandBuffer & Model::GetCubeMapCommandBuffer() { return cubeMapCommandBuffer; }
 
-    Entity & Model::CreateEntity(bool isReflectRefractive)
+    Entity & Model::CreateEntity(bool isReflectRefractive, bool isAnimated)
     {
         Entity * entity = new Entity();
 
@@ -451,6 +451,7 @@ namespace sckz
                              format,
                              *commandPool,
                              isReflectRefractive,
+                             isAnimated,
                              textures,
                              blankTextureCube);
 

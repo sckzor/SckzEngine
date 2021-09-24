@@ -12,6 +12,7 @@ namespace sckz
                               VkFormat               format,
                               VkCommandPool &        commandPool,
                               bool                   isCubeMap,
+                              bool                   isAnimated,
                               std::array<Image, 3> & textures,
                               Image &                blankCubeImage)
     {
@@ -22,6 +23,7 @@ namespace sckz
         this->pipeline        = &pipeline;
         this->hostLocalBuffer = &hostLocalBuffer;
         this->isCubeMap       = isCubeMap;
+        this->isAnimated      = isAnimated;
         this->blankCubeImage  = &blankCubeImage;
 
         this->textures = &textures;
@@ -168,16 +170,29 @@ namespace sckz
             }
         }
 
-        for (uint32_t i = 0; i < MAX_BONES; i++)
+        if (isAnimated)
         {
-            Vubo.bones[i] = boneTransforms[i];
+            for (uint32_t i = 0; i < MAX_BONES; i++)
+            {
+                Vubo.bones[i] = boneTransforms[i];
+            }
         }
 
         complexUniformBuffers[0].CopyDataToBuffer(&Vubo, sizeof(Vubo), 0);
         complexUniformBuffers[1].CopyDataToBuffer(&Fubo, sizeof(Fubo), 0);
     }
 
-    void Entity::UpdateAnimation(std::vector<glm::mat4> boneTransforms) { this->boneTransforms = boneTransforms; }
+    void Entity::UpdateAnimation(std::vector<glm::mat4> boneTransforms)
+    {
+        if (isAnimated)
+        {
+            this->boneTransforms = boneTransforms;
+        }
+        else
+        {
+            throw std::runtime_error("Tried to update the animation on an object that does not support animations!");
+        }
+    }
 
     void Entity::UpdateCubeMap(Camera & cubeMapCamera)
     {

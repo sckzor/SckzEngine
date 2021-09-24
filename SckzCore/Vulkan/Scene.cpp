@@ -414,9 +414,9 @@ namespace sckz
         return targetSampleBits;
     }
 
-    Entity & Scene::CreateEntity(Model & model, bool isReflectRefractive)
+    Entity & Scene::CreateEntity(Model & model, bool isReflectRefractive, bool isAnimated)
     {
-        Entity & entity = model.CreateEntity(isReflectRefractive);
+        Entity & entity = model.CreateEntity(isReflectRefractive, isAnimated);
         CreateCommandBuffer();
         entity.LoadLights(lights);
         return entity;

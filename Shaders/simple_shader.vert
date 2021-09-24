@@ -30,22 +30,31 @@ layout(location = 1) out vec3 surfaceNormal;
 layout(location = 2) out vec3 toLightVector[MAX_LIGHTS];
 layout(location = 6) out vec3 toCameraVector;
 layout(location = 7) out vec3 camLocation;
-layout(location = 8) out vec4 reflectedVector;
+layout(location = 8) out vec3 reflectedVector;
 layout(location = 9) out vec3 refractedVector;
 
 void main()
 {
-    mat4 boneTransform = ubo.bones[boneIds[0]] * weights[0];
-    boneTransform += ubo.bones[boneIds[1]] * weights[1];
-    boneTransform += ubo.bones[boneIds[2]] * weights[2];
-    boneTransform += ubo.bones[boneIds[3]] * weights[3];
+    vec4 worldPosition;
 
-    vec4 worldPosition = ubo.model * (boneTransform * vec4(inPosition, 1.0));
+    if (boneIds[0] != -1)
+    {
+        mat4 boneTransform = ubo.bones[boneIds[0]] * weights[0];
+        boneTransform += ubo.bones[boneIds[1]] * weights[1];
+        boneTransform += ubo.bones[boneIds[2]] * weights[2];
+        boneTransform += ubo.bones[boneIds[3]] * weights[3];
+
+        worldPosition = ubo.model * boneTransform * vec4(inPosition, 1.0);
+        surfaceNormal = (ubo.model * boneTransform * vec4(inNormal, 1.0)).xyz;
+    }
+    else
+    {
+        worldPosition = ubo.model * vec4(inPosition, 1.0);
+        surfaceNormal = (ubo.model * vec4(inNormal, 1.0)).xyz;
+    }
 
     gl_Position  = ubo.proj * ubo.view * worldPosition;
     fragTexCoord = inTexCoord;
-
-    surfaceNormal = (ubo.model * vec4(inNormal, 1.0)).xyz;
 
     for (int i = 0; i < MAX_LIGHTS; i++)
     {
@@ -55,9 +64,7 @@ void main()
     // TODO: change this so that the camera position is uploaded in the UBO
     camLocation = (inverse(ubo.view) * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 
-    toCameraVector = camLocation - worldPosition.xyz;
-    // reflectedVector = reflect(normalize(toCameraVector), normalize(inNormal));
+    toCameraVector  = camLocation - worldPosition.xyz;
+    reflectedVector = reflect(normalize(toCameraVector), normalize(inNormal));
     refractedVector = refract(normalize(toCameraVector), normalize(inNormal), ubo.refractiveIndexRatio);
-
-    reflectedVector = ubo.proj * ubo.view * worldPosition;
 }

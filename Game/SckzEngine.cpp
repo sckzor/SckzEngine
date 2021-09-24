@@ -26,15 +26,15 @@ int main()
 
     sckz::Model & m1 = s1.CreateModel("Resources/model.dae", "Resources/modeltex.png", nullptr, nullptr, p1);
 
-    // sckz::Model & m3 = s1.CreateModel("Resources/room.obj", "Resources/RoomTextureAtlas.png", nullptr, nullptr, p1);
+    sckz::Model & m3 = s1.CreateModel("Resources/room.obj", "Resources/RoomTextureAtlas.png", nullptr, nullptr, p1);
     sckz::Light & l1 = s1.CreateLight(true);
 
     sckz::ParticleSystem & pa1 = s1.CreateParticleSystem(1000, "Resources/fireParticles.png", 4, 4, 15);
 
     sckz::Light & l2 = s1.CreateLight(true);
 
-    sckz::Entity & e1 = s1.CreateEntity(m1, false);
-    // sckz::Entity & e3 = s1.CreateEntity(m3, false);
+    sckz::Entity & e1 = s1.CreateEntity(m1, false, true);
+    sckz::Entity & e3 = s1.CreateEntity(m3, false, false);
     sckz::Camera & c1 = s1.CreateCamera(70, 0.1, 100);
 
     sckz::Timer & fullScreenTimer = vkan.CreateTimer();
@@ -98,10 +98,10 @@ int main()
     // gui.SetRotationPoint(100, 100);
 
     e1.SetShine(1, 10);
-    e1.SetRotation(0, 0, 0);
-    e1.SetLocation(0, 0, 0);
-    e1.SetScale(1, 1, 1);
-    e1.SetReflectRefractValues(1 / 1.33, 0.6);
+    e1.SetRotation(90, 0, 0);
+    e1.SetLocation(0, -5, 0);
+    e1.SetScale(0.25, 0.25, 0.25);
+    e1.SetReflectRefractValues(0, 0);
 
     l1.SetColor(0, 0.5, 1);
     l1.SetLocation(0, 0, 0);
@@ -115,15 +115,10 @@ int main()
     l2.SetDirection(-1, 0, 0);
     l2.SetCutoff(12.5, 17.5);
 
-    // e2.SetShine(1, 10);
-    // e2.SetRotation(90, 0, 0);
-    // e2.SetLocation(0, 0, 0);
-    // e2.SetScale(0.1, 0.1, 0.1);
-
-    // e3.SetShine(1, 30);
-    // e3.SetRotation(90, 0, 0);
-    // e3.SetLocation(0, 0, 0);
-    // e3.SetReflectRefractValues(1, 0);
+    e3.SetShine(1, 30);
+    e3.SetRotation(90, 0, 0);
+    e3.SetLocation(0, 0, 0);
+    e3.SetReflectRefractValues(1, 0);
 
     c1.SetLocation(0, 0, 0);
     c1.SetRotation(-90, 0, 0);

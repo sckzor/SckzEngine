@@ -649,6 +649,19 @@ namespace sckz
         }
     }
 
+    /////////////////////////////////////////////////////////////////////////////
+    //   _____                                                                 //
+    //  /     \                                                                //
+    // | O , O |  ***** ATTENTION SKELEGORG *****                              //
+    // |\_~~~_/|                                                               //
+    // | _) (_ |   STOP NAMING VARIABLES "boobs"!                              //
+    // |(. Y .)|       IT ISN'T THAT FUNNY,                                    //
+    // / |   | \      LITTERALLY HALF OF THE                                   //
+    // \(| * |)/       POPULATION HAVE THEM                                    //
+    //                                                                         //
+    // Also, yes I did make this ascii art all by myself, are you proud of me? //
+    /////////////////////////////////////////////////////////////////////////////
+
     void Vulkan::CreateSyncObjects()
     {
         imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);

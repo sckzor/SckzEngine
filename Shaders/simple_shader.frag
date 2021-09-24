@@ -30,7 +30,7 @@ layout(location = 1) in vec3 surfaceNormal;
 layout(location = 2) in vec3 toLightVector[MAX_LIGHTS];
 layout(location = 6) in vec3 toCameraVector;
 layout(location = 7) in vec3 camLocation;
-layout(location = 8) in vec4 reflectedVector;
+layout(location = 8) in vec3 reflectedVector;
 layout(location = 9) in vec3 refractedVector;
 
 layout(location = 0) out vec4 outColor;
@@ -106,16 +106,14 @@ void main()
         }
     }
 
-    outColor = reflectedVector;
-    // outColor = vec4(totalDiffuse, 1.0) * texture(texSampler, fragTexCoord) + vec4(totalSpecular, 1.0);
+    outColor = vec4(totalDiffuse, 1.0) * texture(texSampler, fragTexCoord) + vec4(totalSpecular, 1.0);
 
-    /*
-        ivec2 cubeSize = textureSize(cubeMap, 0);
-        if (ubo.reflectRefractFactor != 0)
-        {
-            vec4 reflectedColor = texture(cubeMap, reflectedVector);
-            vec4 refractedColor = texture(cubeMap, refractedVector);
-            vec4 cubeMapColor   = mix(reflectedColor, refractedColor, 0.5);
-            outColor            = mix(outColor, cubeMapColor, ubo.reflectRefractFactor);
-        }*/
+    ivec2 cubeSize = textureSize(cubeMap, 0);
+    if (ubo.reflectRefractFactor != 0)
+    {
+        vec4 reflectedColor = texture(cubeMap, reflectedVector);
+        vec4 refractedColor = texture(cubeMap, refractedVector);
+        vec4 cubeMapColor   = mix(reflectedColor, refractedColor, 0.5);
+        outColor            = mix(outColor, cubeMapColor, ubo.reflectRefractFactor);
+    }
 }
