@@ -22,7 +22,7 @@ Time behind schedule: 2 weeks
 
   - ~~April 30, '21 - FBOs / Swapchain~~
   - ~~May 31, '21 - Memory Manager / GUIs / Particles~~
-  - June 31, '21 - Animation / ~~More Lighting~~ / Shadows
+  - June 31, '21 - ~~Animation / More Lighting~~ / Shadows
 
 - September '21 - Have a prototype for the game functioning, continue adding to the engine
 
