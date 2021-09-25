@@ -125,4 +125,4 @@ those were caused by me and I need to fix them at some point.
 
 ## Image of the Engine in action
 
-![Screenshot](Screenshot.png)
+<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/J8YzdFBbZ1o?controls=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
