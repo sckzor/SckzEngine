@@ -123,6 +123,6 @@ Time behind schedule: 2 weeks
 I believe that all of the "memory leak" is caused by strage behavior of the Vulkan library... The errors though,
 those were caused by me and I need to fix them at some point.
 
-## Image of the Engine in action
+## Image (click for video) of the Engine in action
 
-<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/J8YzdFBbZ1o?controls=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+[![SckzEngine Demonstration Video](https://img.youtube.com/vi/J8YzdFBbZ1o/0.jpg)](https://www.youtube.com/watch?v=J8YzdFBbZ1o "SckzEngine Demonstration Video")
