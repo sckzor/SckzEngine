@@ -5,9 +5,6 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
-#define TINYOBJLOADER_IMPLEMENTATION
-#include "../Loaders/tiny_obj_loader.h"
-
 namespace sckz
 {
     void Model::CreateModel(const char *       colorFileName,
@@ -150,19 +147,9 @@ namespace sckz
         }
 
         // Load all meshes and whatnot
-
         aiMesh * mesh = scene->mMeshes[0];
 
-        aiMaterial * material = scene->mMaterials[mesh->mMaterialIndex];
-        aiColor4D    specularColor;
-        aiColor4D    diffuseColor;
-        aiColor4D    ambientColor;
-        float        shininess;
-
-        aiGetMaterialColor(material, AI_MATKEY_COLOR_SPECULAR, &specularColor);
-        aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &diffuseColor);
-        aiGetMaterialColor(material, AI_MATKEY_COLOR_AMBIENT, &ambientColor);
-        aiGetMaterialFloat(material, AI_MATKEY_SHININESS, &shininess);
+        std::cout << "[Start of object with " << scene->mNumMeshes << " meshes]" << std::endl;
 
         for (std::uint32_t vertIdx = 0u; vertIdx < mesh->mNumVertices; vertIdx++)
         {
@@ -178,6 +165,8 @@ namespace sckz
                 uv.x = 0;
                 uv.y = 0;
             }
+
+            std::cout << "Vertex number: " << vertIdx << " v " << vert.x << " " << vert.y << " " << vert.z << std::endl;
 
             vertices.push_back(Vertex { glm::vec3(vert.x, vert.y, vert.z),
                                         glm::vec3(norm.x, norm.y, norm.z),

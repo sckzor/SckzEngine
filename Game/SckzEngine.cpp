@@ -1,6 +1,20 @@
 #include "SckzEngine.hpp"
 
+int thread_main();
+
 int main()
+{
+    std::thread t = std::thread(thread_main);
+    t.detach();
+
+    while (true)
+    {
+        // std::cout << "Running on the main thread" << std::endl;
+        usleep(10000);
+    }
+}
+
+int thread_main()
 {
     sckz::InitRand();
 
@@ -26,7 +40,10 @@ int main()
 
     sckz::Model & m1 = s1.CreateModel("Resources/model.dae", "Resources/modeltex.png", nullptr, nullptr, p1);
 
-    sckz::Model & m3 = s1.CreateModel("Resources/room.obj", "Resources/RoomTextureAtlas.png", nullptr, nullptr, p1);
+    sckz::Model & m3 = s1.CreateModel("Resources/computer.obj", "Resources/computer_pallet.png", nullptr, nullptr, p1);
+
+    // sckz::Model & m3 = s1.CreateModel("Resources/room.obj", "Resources/80sRoomDiffuse.png", nullptr, nullptr, p1);
+
     sckz::Light & l1 = s1.CreateLight(true);
 
     sckz::ParticleSystem & pa1 = s1.CreateParticleSystem(1000, "Resources/fireParticles.png", 4, 4, 15);
@@ -116,8 +133,9 @@ int main()
     l2.SetCutoff(12.5, 17.5);
 
     e3.SetShine(1, 30);
-    e3.SetRotation(90, 0, 0);
+    e3.SetRotation(0, 0, 0);
     e3.SetLocation(0, 0, 0);
+    e3.SetScale(1, 1, 1);
     e3.SetReflectRefractValues(1, 0);
 
     c1.SetLocation(0, 0, 0);
