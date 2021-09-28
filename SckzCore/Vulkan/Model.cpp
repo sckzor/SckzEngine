@@ -147,9 +147,20 @@ namespace sckz
         }
 
         // Load all meshes and whatnot
-        aiMesh * mesh = scene->mMeshes[0];
+        aiMesh * mesh;
+        uint32_t maxVertices = 0;
 
-        std::cout << "[Start of object with " << scene->mNumMeshes << " meshes]" << std::endl;
+        // this is a hack, it chooese the mesh with the most vertices because assimp is being completely idiotic and
+        // splitting one mesh into multiple for reasons that are completely beyond me...
+
+        for (uint32_t i = 0; i < scene->mNumMeshes; i++)
+        {
+            if (scene->mMeshes[i]->mNumVertices > maxVertices)
+            {
+                maxVertices = scene->mMeshes[i]->mNumVertices;
+                mesh        = scene->mMeshes[i];
+            }
+        }
 
         for (std::uint32_t vertIdx = 0u; vertIdx < mesh->mNumVertices; vertIdx++)
         {
@@ -165,8 +176,6 @@ namespace sckz
                 uv.x = 0;
                 uv.y = 0;
             }
-
-            std::cout << "Vertex number: " << vertIdx << " v " << vert.x << " " << vert.y << " " << vert.z << std::endl;
 
             vertices.push_back(Vertex { glm::vec3(vert.x, vert.y, vert.z),
                                         glm::vec3(norm.x, norm.y, norm.z),

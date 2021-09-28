@@ -130,10 +130,10 @@ namespace sckz
         ComplexVertexUniformBufferObject   Vubo {};
         ComplexFragmentUniformBufferObject Fubo {};
         currentModel = glm::scale(glm::mat4(1.0f), scale);
+        currentModel = glm::translate(currentModel, location);
         currentModel = glm::rotate(currentModel, glm::radians(rotation.x), glm::vec3(1.0, 0.0, 0.0));
         currentModel = glm::rotate(currentModel, glm::radians(rotation.y), glm::vec3(0.0, 1.0, 0.0));
         currentModel = glm::rotate(currentModel, glm::radians(rotation.z), glm::vec3(0.0, 0.0, 1.0));
-        currentModel = glm::translate(currentModel, location);
 
         Vubo.model = currentModel;
 

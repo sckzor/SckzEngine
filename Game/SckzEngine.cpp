@@ -4,18 +4,7 @@ int thread_main();
 
 int main()
 {
-    std::thread t = std::thread(thread_main);
-    t.detach();
 
-    while (true)
-    {
-        // std::cout << "Running on the main thread" << std::endl;
-        usleep(10000);
-    }
-}
-
-int thread_main()
-{
     sckz::InitRand();
 
     sckz::Window win;
@@ -40,9 +29,11 @@ int thread_main()
 
     sckz::Model & m1 = s1.CreateModel("Resources/model.dae", "Resources/modeltex.png", nullptr, nullptr, p1);
 
+    sckz::Model & m2 = s1.CreateModel("Resources/room.obj", "Resources/RoomTextureAtlas.png", nullptr, nullptr, p1);
+
     sckz::Model & m3 = s1.CreateModel("Resources/computer.obj", "Resources/computer_pallet.png", nullptr, nullptr, p1);
 
-    // sckz::Model & m3 = s1.CreateModel("Resources/room.obj", "Resources/80sRoomDiffuse.png", nullptr, nullptr, p1);
+    sckz::Model & m4 = s1.CreateModel("Resources/keyboard.obj", "Resources/computer_pallet.png", nullptr, nullptr, p1);
 
     sckz::Light & l1 = s1.CreateLight(true);
 
@@ -51,7 +42,9 @@ int thread_main()
     sckz::Light & l2 = s1.CreateLight(true);
 
     sckz::Entity & e1 = s1.CreateEntity(m1, false, true);
+    sckz::Entity & e2 = s1.CreateEntity(m2, false, false);
     sckz::Entity & e3 = s1.CreateEntity(m3, false, false);
+    sckz::Entity & e4 = s1.CreateEntity(m4, false, false);
     sckz::Camera & c1 = s1.CreateCamera(70, 0.1, 100);
 
     sckz::Timer & fullScreenTimer = vkan.CreateTimer();
@@ -116,9 +109,27 @@ int thread_main()
 
     e1.SetShine(1, 10);
     e1.SetRotation(90, 0, 0);
-    e1.SetLocation(0, -5, 0);
+    e1.SetLocation(-7.5, 5, -9.2);
     e1.SetScale(0.25, 0.25, 0.25);
     e1.SetReflectRefractValues(0, 0);
+
+    e2.SetShine(1, 30);
+    e2.SetRotation(90, 0, 0);
+    e2.SetLocation(0, 0, 0);
+    e2.SetScale(1.5, 1.5, 1.5);
+    e2.SetReflectRefractValues(1, 0);
+
+    e3.SetShine(1, 30);
+    e3.SetRotation(90, 190, 0);
+    e3.SetLocation(-3.11449, 5.13227, -2.54566);
+    e3.SetScale(0.3, 0.3, 0.3);
+    e3.SetReflectRefractValues(1, 0);
+
+    e4.SetShine(1, 30);
+    e4.SetRotation(90, -15, 0);
+    e4.SetLocation(2.27801, 9.01747, -5.37887);
+    e4.SetScale(0.15, 0.15, 0.15);
+    e4.SetReflectRefractValues(1, 0);
 
     l1.SetColor(0, 0.5, 1);
     l1.SetLocation(0, 0, 0);
@@ -131,12 +142,6 @@ int thread_main()
     l2.SetAttenuation(1, 0.01, 0.002);
     l2.SetDirection(-1, 0, 0);
     l2.SetCutoff(12.5, 17.5);
-
-    e3.SetShine(1, 30);
-    e3.SetRotation(0, 0, 0);
-    e3.SetLocation(0, 0, 0);
-    e3.SetScale(1, 1, 1);
-    e3.SetReflectRefractValues(1, 0);
 
     c1.SetLocation(0, 0, 0);
     c1.SetRotation(-90, 0, 0);
@@ -216,16 +221,6 @@ int thread_main()
             vkan.SetFPS(30);
         }
 
-        if (win.QueryKey('l') && !isMenuOpen)
-        {
-            vkan.SetFPS(-1);
-        }
-
-        if (win.QueryKey('i') && !isMenuOpen)
-        {
-            musicBuffer.SetGain(musicBuffer.GetGain() - 0.0001);
-        }
-
         if (win.QueryKey('o') && !isMenuOpen)
         {
             musicBuffer.SetGain(musicBuffer.GetGain() + 0.0001);
@@ -273,14 +268,40 @@ int thread_main()
             l1.SetCutoff(l1.GetCutoff() + (vkan.GetDeltaT()), l1.GetOuterCutoff());
         }
 
-        if (win.QueryKey('6'))
+        if (win.QueryKey('\'')) // forward
         {
-            e1.SetLocation(e1.GetLocation().x, e1.GetLocation().y - (10 * vkan.GetDeltaT()), e1.GetLocation().z);
+            e4.SetLocation(e4.GetLocation().x, e4.GetLocation().y, e4.GetLocation().z - (2 * vkan.GetDeltaT()));
         }
 
-        if (win.QueryKey('7'))
+        if (win.QueryKey('[')) // back
         {
-            e1.SetLocation(e1.GetLocation().x, e1.GetLocation().y + (10 * vkan.GetDeltaT()), e1.GetLocation().z);
+            e4.SetLocation(e4.GetLocation().x, e4.GetLocation().y, e4.GetLocation().z + (2 * vkan.GetDeltaT()));
+        }
+
+        if (win.QueryKey('j')) // left
+        {
+            e4.SetLocation(e4.GetLocation().x - (2 * vkan.GetDeltaT()), e4.GetLocation().y, e4.GetLocation().z);
+        }
+
+        if (win.QueryKey('l')) // right
+        {
+            e4.SetLocation(e4.GetLocation().x + (2 * vkan.GetDeltaT()), e4.GetLocation().y, e4.GetLocation().z);
+        }
+
+        if (win.QueryKey('k'))
+        {
+            e4.SetLocation(e4.GetLocation().x, e4.GetLocation().y - (2 * vkan.GetDeltaT()), e4.GetLocation().z);
+        }
+
+        if (win.QueryKey('i'))
+        {
+            e4.SetLocation(e4.GetLocation().x, e4.GetLocation().y + (2 * vkan.GetDeltaT()), e4.GetLocation().z);
+        }
+
+        if (win.QueryKey('\\'))
+        {
+            std::cout << "Location: " << e4.GetLocation().x << " " << e4.GetLocation().y << " " << e4.GetLocation().z
+                      << std::endl;
         }
 
         if (fullScreenButton.IsPressed(0) && fullScreenTimer.GetCurrentTime() > 1)
