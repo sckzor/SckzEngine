@@ -649,33 +649,6 @@ namespace sckz
         }
     }
 
-    /////////////////////////////////////////////////////////////////////////////
-    //   _____                                                                 //
-    //  /     \                                                                //
-    // | O , O |  ***** ATTENTION SKELEGORG *****                              //
-    // |\_~~~_/|                                                               //
-    // | _) (_ |   STOP NAMING VARIABLES "boobs"!                              //
-    // |(. Y .)|       IT ISN'T THAT FUNNY,                                    //
-    // / |   | \      LITTERALLY HALF OF THE                                   //
-    // \(| * |)/       POPULATION HAVE THEM                                    //
-    //                                                                         //
-    // Also, yes I did make this ascii art all by myself, are you proud of me? //
-    /////////////////////////////////////////////////////////////////////////////
-
-    /////////////////////////////////////////////////////////////////////////////
-    //  For McElmo21             ___                                           //
-    // ____________             /o o\  \   /                     ____________  //
-    // \          |             \_o_/   \ /                      \          |  //
-    // | (x)  (x) / -   - ===|=  /|\     |   =|=== -       -     | (x)  (x) /  //
-    // /    ^     |          ||-/ | \  \ | /-||                  /    ^     |  //
-    // |  /\/\/\  \               |     \|/  Okay, SpingSlayer69 |  /\/\/\  \  //
-    // |__________|              / \   / o \     be that way,    |__________|  //
-    //   |      |               /   \  \___/ defend Skelegorg's    |      |    //
-    // xx|    xx|                                  humor...      xx|    xx|    //
-    //                                       ur name is dumb anyway            //
-    //                                                                         //
-    /////////////////////////////////////////////////////////////////////////////
-
     void Vulkan::CreateSyncObjects()
     {
         imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
