@@ -1,6 +1,6 @@
 # SckzEngine
 
-#### A Vulkan games engine by Sckzor
+#### A Vulkan graphics engine by Sckzor
 
 All code in this repository is copyright Charles Sands 2021. All rights reserved!
 
